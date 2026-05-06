@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paille en Queue — Portail Patient</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f8f9fc;--bg2:#fff;--bg3:#f1f4f9;--bg4:#e8edf5;
+  --border:#e2e8f0;--border2:#cbd5e1;
+  --text:#0f172a;--muted:#64748b;--dim:#94a3b8;
+  --accent:#3b82f6;--accent2:#2563eb;
+  --green:#16a34a;--green-bg:#f0fdf4;--green-border:#bbf7d0;
+  --amber:#d97706;--amber-bg:#fffbeb;
+  --red:#dc2626;--red-bg:#fef2f2;
+  --teal:#0d9488;--teal-bg:#f0fdfa;--teal-border:#99f6e4;
+  --purple:#7c3aed;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:14px;min-height:100vh}
+
+/* NAV */
+.nav{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 40px;display:flex;align-items:center;height:64px;position:sticky;top:0;z-index:50}
+.nav-logo{font-family:var(--font-head);font-weight:800;font-size:18px;color:var(--text);display:flex;align-items:center;gap:10px}
+.nav-logo-badge{width:32px;height:32px;background:linear-gradient(135deg,var(--teal),var(--accent));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.nav-links{display:flex;align-items:center;gap:4px;margin-left:40px}
+.nav-link{padding:6px 14px;border-radius:8px;font-size:13px;color:var(--muted);cursor:pointer;transition:all .15s}
+.nav-link:hover{background:var(--bg3);color:var(--text)}
+.nav-link.active{background:var(--bg3);color:var(--text);font-weight:500}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.nav-track-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;background:var(--teal);color:#fff;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.nav-track-btn:hover{background:#0f766e}
+.nav-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--teal));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff}
+
+/* SECTIONS */
+.section{display:none;padding:40px}
+.section.active{display:block}
+
+/* ── ACCUEIL ── */
+.hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:20px;padding:48px;margin-bottom:32px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-60px;right:-60px;width:300px;height:300px;background:radial-gradient(circle,rgba(20,184,166,.15),transparent 70%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-40px;left:40%;width:200px;height:200px;background:radial-gradient(circle,rgba(59,130,246,.1),transparent 70%);pointer-events:none}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.25);border-radius:20px;font-size:11px;color:#5eead4;font-family:var(--font-mono);margin-bottom:16px}
+.hero-dot{width:6px;height:6px;background:#5eead4;border-radius:50%;animation:blink .9s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.hero-title{font-family:var(--font-head);font-size:36px;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.1}
+.hero-sub{font-size:15px;color:#94a3b8;margin-bottom:28px;line-height:1.6;max-width:520px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+.btn-hero{padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:all .18s;display:flex;align-items:center;gap:7px;border:none}
+.btn-hero.primary{background:var(--teal);color:#fff}
+.btn-hero.primary:hover{background:#0f766e;transform:translateY(-1px)}
+.btn-hero.ghost{background:rgba(255,255,255,.08);color:#e2e8f0;border:1px solid rgba(255,255,255,.15)}
+.btn-hero.ghost:hover{background:rgba(255,255,255,.12)}
+
+/* QUICK CARDS */
+.quick-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px}
+.quick-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:20px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.quick-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+.quick-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:3px}
+.quick-card.teal::before{background:var(--teal)}
+.quick-card.blue::before{background:var(--accent)}
+.quick-card.green::before{background:var(--green)}
+.qc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+.qc-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:4px}
+.qc-sub{font-size:12px;color:var(--muted);line-height:1.5}
+.qc-badge{position:absolute;top:16px;right:16px;background:var(--red-bg);color:var(--red);font-size:10px;font-family:var(--font-mono);padding:2px 8px;border-radius:10px;border:1px solid #fecaca}
+
+/* NEXT TRANSPORT BANNER */
+.next-banner{background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:16px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
+.nb-left{display:flex;align-items:center;gap:14px}
+.nb-icon{width:48px;height:48px;background:rgba(13,148,136,.12);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.nb-title{font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px}
+.nb-sub{font-size:13px;color:var(--muted)}
+.nb-right{display:flex;align-items:center;gap:10px}
+.nb-eta{text-align:right}
+.nb-eta-label{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.nb-eta-value{font-size:20px;font-weight:700;color:var(--teal);font-family:var(--font-mono)}
+.track-btn{padding:10px 18px;background:var(--teal);color:#fff;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.track-btn:hover{background:#0f766e}
+
+/* ── SUIVI ── */
+.tracking-layout{display:grid;grid-template-columns:1fr 340px;gap:20px}
+.track-map{background:linear-gradient(135deg,#0f1f35,#0d2640);border-radius:16px;height:340px;position:relative;overflow:hidden}
+.track-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:30px 30px}
+.track-amb{position:absolute;left:32%;top:60%;transform:translate(-50%,-50%);animation:moveAmb 6s ease-in-out infinite alternate}
+@keyframes moveAmb{from{left:32%}to{left:54%}}
+.track-amb-dot{width:16px;height:16px;background:var(--teal);border-radius:50%;box-shadow:0 0 0 4px rgba(20,184,166,.25),0 0 20px rgba(20,184,166,.4)}
+.track-dest{position:absolute;right:22%;top:28%;transform:translate(50%,-50%)}
+.track-dest-dot{width:14px;height:14px;background:var(--green);border-radius:50%;box-shadow:0 0 0 6px rgba(22,163,74,.2)}
+.track-route{position:absolute;inset:0;pointer-events:none}
+.track-info-chip{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);background:rgba(15,23,42,.85);border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:8px 16px;display:flex;align-items:center;gap:12px;font-size:12px;color:#e2e8f0;backdrop-filter:blur(8px);white-space:nowrap}
+.track-info-chip span{color:#94a3b8}
+
+.track-side{display:flex;flex-direction:column;gap:12px}
+.track-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px}
+.tc-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono);margin-bottom:10px}
+.tc-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.tc-row:last-child{border-bottom:none}
+.tc-label{font-size:12px;color:var(--muted)}
+.tc-value{font-size:12px;font-weight:500;color:var(--text);font-family:var(--font-mono)}
+.tc-value.teal{color:var(--teal)}
+
+/* Timeline steps */
+.timeline{display:flex;flex-direction:column;gap:0}
+.tl-step{display:flex;gap:12px;padding:10px 0;position:relative}
+.tl-step::before{content:'';position:absolute;left:11px;top:28px;bottom:-10px;width:1px;background:var(--border)}
+.tl-step:last-child::before{display:none}
+.tl-dot{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;border:2px solid}
+.tl-dot.done{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.tl-dot.active{background:var(--teal-bg);border-color:var(--teal);color:var(--teal)}
+.tl-dot.pending{background:var(--bg3);border-color:var(--border2);color:var(--dim)}
+.tl-info{flex:1;padding-top:2px}
+.tl-label{font-size:13px;font-weight:500;color:var(--text)}
+.tl-time{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+
+/* ── RÉSERVATION ── */
+.form-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px}
+.form-title{font-family:var(--font-head);font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
+.form-sub{font-size:13px;color:var(--muted);margin-bottom:24px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.form-row.full{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:500;color:var(--text)}
+.form-input{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;transition:border-color .15s}
+.form-input:focus{border-color:var(--teal);background:var(--bg2)}
+.form-input::placeholder{color:var(--dim)}
+.form-select{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center}
+.transport-types{display:flex;gap:8px;margin-bottom:4px}
+.tt-btn{flex:1;padding:10px;border:1px solid var(--border2);border-radius:10px;background:var(--bg);text-align:center;cursor:pointer;transition:all .15s;font-size:12px;color:var(--muted)}
+.tt-btn:hover{border-color:var(--teal);color:var(--teal)}
+.tt-btn.sel{border-color:var(--teal);background:var(--teal-bg);color:var(--teal);font-weight:500}
+.tt-icon{font-size:20px;display:block;margin-bottom:3px}
+.upload-zone{border:2px dashed var(--border2);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all .15s;background:var(--bg)}
+.upload-zone:hover{border-color:var(--teal);background:var(--teal-bg)}
+.upload-icon{font-size:28px;margin-bottom:6px}
+.upload-label{font-size:13px;color:var(--muted)}
+.upload-label strong{color:var(--teal)}
+.form-submit{width:100%;padding:14px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-head);transition:all .18s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+.form-submit:hover{background:#0f766e;transform:translateY(-1px)}
+
+/* ── DOCUMENTS ── */
+.docs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:24px}
+.doc-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:18px;cursor:pointer;transition:all .15s}
+.doc-card:hover{border-color:var(--border2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.06)}
+.dc-icon{font-size:28px;margin-bottom:10px}
+.dc-name{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.dc-meta{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.dc-badge{display:inline-block;margin-top:8px;font-size:10px;padding:2px 8px;border-radius:10px}
+.dc-badge.pdf{background:#fef2f2;color:#991b1b;border:1px solid #fecaca}
+.dc-badge.signed{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+
+/* ── HISTORIQUE ── */
+.history-list{display:flex;flex-direction:column;gap:10px}
+.history-item{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:all .15s}
+.history-item:hover{border-color:var(--border2);background:var(--bg3)}
+.hi-date{text-align:center;flex-shrink:0;width:50px}
+.hi-day{font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--text);line-height:1}
+.hi-month{font-size:10px;color:var(--muted);text-transform:uppercase;font-family:var(--font-mono)}
+.hi-divider{width:1px;height:40px;background:var(--border);flex-shrink:0}
+.hi-info{flex:1}
+.hi-route{font-size:14px;font-weight:500;color:var(--text);margin-bottom:2px}
+.hi-meta{font-size:12px;color:var(--muted)}
+.hi-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.hi-amount{font-family:var(--font-mono);font-size:14px;font-weight:500;color:var(--text)}
+.hi-status{font-size:10px;padding:2px 8px;border-radius:10px;font-family:var(--font-mono)}
+.hi-status.paye{background:var(--green-bg);color:var(--green);border:1px solid var(--green-border)}
+.hi-status.attente{background:var(--amber-bg);color:var(--amber);border:1px solid #fde68a}
+.dl-btn{padding:6px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .12s}
+.dl-btn:hover{background:var(--bg4);color:var(--text)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:center;justify-content:center;z-index:200;opacity:0;pointer-events:none;transition:opacity .2s;backdrop-filter:blur(4px)}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px;width:460px;max-width:90vw;transform:translateY(8px);transition:transform .2s}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal-title{font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.modal-close{position:absolute;top:20px;right:20px;width:28px;height:28px;border-radius:8px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted)}
+.success-icon{width:56px;height:56px;background:var(--green-bg);border:1px solid var(--green-border);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 16px}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-badge">🚑</div>
+    Paille en Queue
+  </div>
+  <div class="nav-links">
+    <div class="nav-link active" onclick="showSection('accueil',this)">Accueil</div>
+    <div class="nav-link" onclick="showSection('suivi',this)">Suivi en direct</div>
+    <div class="nav-link" onclick="showSection('reservation',this)">Réservation</div>
+    <div class="nav-link" onclick="showSection('documents',this)">Documents</div>
+    <div class="nav-link" onclick="showSection('historique',this)">Historique</div>
+  </div>
+  <div class="nav-right">
+    <div class="nav-track-btn" onclick="showSection('suivi',document.querySelector('.nav-link:nth-child(2)'))">
+      📍 Suivre mon ambulance
+    </div>
+    <div class="nav-avatar">MA</div>
+  </div>
+</nav>
+
+<!-- ══ ACCUEIL ══ -->
+<div class="section active" id="sec-accueil">
+  <div class="hero">
+    <div class="hero-badge"><div class="hero-dot"></div>Portail patient sécurisé</div>
+    <div class="hero-title">Bonjour, Marie 👋</div>
+    <div class="hero-sub">Gérez vos transports sanitaires, suivez votre ambulance en temps réel et accédez à tous vos documents depuis cet espace personnel.</div>
+    <div class="hero-actions">
+      <button class="btn-hero primary" onclick="showSection('reservation',document.querySelectorAll('.nav-link')[2])">+ Réserver un transport</button>
+      <button class="btn-hero ghost" onclick="showSection('suivi',document.querySelectorAll('.nav-link')[1])">📍 Suivre mon ambulance</button>
+    </div>
+  </div>
+
+  <!-- Prochain transport -->
+  <div class="next-banner">
+    <div class="nb-left">
+      <div class="nb-icon">🚑</div>
+      <div>
+        <div class="nb-title">Prochain transport — Demain 09h00</div>
+        <div class="nb-sub">Domicile → Clinique Brézillet · AMB-07 · Dupont T.</div>
+      </div>
+    </div>
+    <div class="nb-right">
+      <div class="nb-eta">
+        <div class="nb-eta-label">Dans</div>
+        <div class="nb-eta-value">19h 00</div>
+      </div>
+      <button class="track-btn" onclick="showSection('suivi',document.querySelectorAll('.nav-link')[1])">Suivre →</button>
+    </div>
+  </div>
+
+  <div class="quick-grid">
+    <div class="quick-card teal" onclick="showSection('suivi',document.querySelectorAll('.nav-link')[1])">
+      <div class="qc-icon" style="background:var(--teal-bg);color:var(--teal)">📍</div>
+      <div class="qc-title">Suivi en direct</div>
+      <div class="qc-sub">Localisez votre ambulance en temps réel et recevez l'heure d'arrivée estimée.</div>
+    </div>
+    <div class="quick-card blue" onclick="showSection('reservation',document.querySelectorAll('.nav-link')[2])">
+      <div class="qc-icon" style="background:#eff6ff;color:var(--accent)">📅</div>
+      <div class="qc-title">Réserver un transport</div>
+      <div class="qc-sub">Planifiez votre prochain transport sanitaire en quelques étapes simples.</div>
+    </div>
+    <div class="quick-card green" onclick="showSection('documents',document.querySelectorAll('.nav-link')[3])">
+      <div class="qc-icon" style="background:var(--green-bg);color:var(--green)">📄</div>
+      <div class="qc-title">Mes documents</div>
+      <div class="qc-sub">Consultez et téléchargez vos factures, bons de transport et ordonnances.</div>
+      <div class="qc-badge">2 nouveaux</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SUIVI ══ -->
+<div class="section" id="sec-suivi">
+  <div style="margin-bottom:20px">
+    <div style="font-family:var(--font-head);font-size:22px;font-weight:800;margin-bottom:4px">Suivi en direct</div>
+    <div style="color:var(--muted);font-size:13px">Transport MIS-5610 · AMB-07 · Dupont Thomas</div>
+  </div>
+  <div class="tracking-layout">
+    <div>
+      <div class="track-map">
+        <div class="track-grid"></div>
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 680 340" preserveAspectRatio="xMidYMid slice">
+          <path d="M0 200 Q170 190 300 210 Q440 230 580 200 Q640 190 680 185" stroke="rgba(255,255,255,.06)" stroke-width="8" fill="none"/>
+          <path d="M0 140 Q100 150 200 145 Q300 140 400 155 Q500 165 600 160 Q650 158 680 155" stroke="rgba(255,255,255,.04)" stroke-width="5" fill="none"/>
+          <path d="M320 0 Q325 100 330 210 Q332 280 335 340" stroke="rgba(255,255,255,.06)" stroke-width="6" fill="none"/>
+          <path d="M180 0 Q185 100 190 210 Q192 280 195 340" stroke="rgba(255,255,255,.04)" stroke-width="4" fill="none"/>
+          <path d="M520 0 Q522 120 525 210 Q527 280 530 340" stroke="rgba(255,255,255,.04)" stroke-width="4" fill="none"/>
+          <!-- Route ambulance -->
+          <path d="M220 204 Q300 190 390 165 Q450 152 500 115" stroke="#14b8a6" stroke-width="3" fill="none" stroke-dasharray="8 4" opacity=".8"/>
+          <circle cx="220" cy="204" r="6" fill="#14b8a6" opacity=".6"/>
+          <circle cx="500" cy="115" r="8" fill="#16a34a"/>
+          <circle cx="500" cy="115" r="14" fill="none" stroke="#16a34a" stroke-width="1.5" opacity=".5"/>
+          <text x="516" y="112" fill="#6ee7b7" font-size="10" font-family="DM Mono,monospace">Destination</text>
+          <text x="170" y="222" fill="#5eead4" font-size="10" font-family="DM Mono,monospace">AMB-07</text>
+        </svg>
+        <div class="track-amb" style="left:34%;top:60%">
+          <div class="track-amb-dot"></div>
+        </div>
+        <div class="track-info-chip">
+          <span>ETA</span> <strong style="color:#5eead4" id="suivi-eta">14 min</strong>
+          &nbsp;·&nbsp;
+          <span>Distance</span> <strong>6,4 km</strong>
+          &nbsp;·&nbsp;
+          <span>Vitesse</span> <strong>42 km/h</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="track-side">
+      <div class="track-card">
+        <div class="tc-title">Informations transport</div>
+        <div class="tc-row"><span class="tc-label">Référence</span><span class="tc-value">MIS-5610</span></div>
+        <div class="tc-row"><span class="tc-label">Ambulance</span><span class="tc-value">AMB-07</span></div>
+        <div class="tc-row"><span class="tc-label">Ambulancier</span><span class="tc-value">Dupont T.</span></div>
+        <div class="tc-row"><span class="tc-label">Départ</span><span class="tc-value">CHU Nantes</span></div>
+        <div class="tc-row"><span class="tc-label">Arrivée</span><span class="tc-value teal">Clinique Brézillet</span></div>
+        <div class="tc-row"><span class="tc-label">ETA</span><span class="tc-value teal" id="track-eta">14 min</span></div>
+      </div>
+
+      <div class="track-card">
+        <div class="tc-title">Progression</div>
+        <div class="timeline">
+          <div class="tl-step">
+            <div class="tl-dot done">✓</div>
+            <div class="tl-info"><div class="tl-label">Prise en charge</div><div class="tl-time">14:02 · CHU Nantes</div></div>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot done">✓</div>
+            <div class="tl-info"><div class="tl-label">En route</div><div class="tl-time">14:18 · En cours</div></div>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot active">→</div>
+            <div class="tl-info"><div class="tl-label">Arrivée estimée</div><div class="tl-time" id="tl-eta">~14:36</div></div>
+          </div>
+          <div class="tl-step">
+            <div class="tl-dot pending"></div>
+            <div class="tl-info"><div class="tl-label">Dépôt à destination</div><div class="tl-time">—</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ RÉSERVATION ══ -->
+<div class="section" id="sec-reservation">
+  <div class="form-card">
+    <div class="form-title">Réserver un transport</div>
+    <div class="form-sub">Remplissez ce formulaire et notre équipe confirmera votre transport sous 2h.</div>
+
+    <div style="margin-bottom:16px">
+      <div class="form-label" style="margin-bottom:8px">Type de transport</div>
+      <div class="transport-types">
+        <div class="tt-btn sel" onclick="selectType(this)"><span class="tt-icon">🚑</span>Ambulance</div>
+        <div class="tt-btn" onclick="selectType(this)"><span class="tt-icon">🚗</span>VSL</div>
+        <div class="tt-btn" onclick="selectType(this)"><span class="tt-icon">♿</span>Adapté</div>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Date du transport</label>
+        <input type="date" class="form-input" value="2026-05-08">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Heure souhaitée</label>
+        <input type="time" class="form-input" value="09:00">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Adresse de départ</label>
+        <input type="text" class="form-input" placeholder="14 rue des Lilas, Nantes">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Destination</label>
+        <input type="text" class="form-input" placeholder="CHU Nantes — Cardiologie">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Motif du transport</label>
+        <select class="form-select form-input">
+          <option>Consultation médicale</option>
+          <option>Hospitalisation</option>
+          <option>Retour à domicile</option>
+          <option>Séance de dialyse</option>
+          <option>Chimiothérapie</option>
+          <option>Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Prescripteur</label>
+        <input type="text" class="form-input" placeholder="Dr. Dupont — CHU Nantes">
+      </div>
+    </div>
+
+    <div class="form-row full">
+      <div class="form-group">
+        <label class="form-label">Informations complémentaires</label>
+        <input type="text" class="form-input" placeholder="Fauteuil roulant, oxygène, brancardage…">
+      </div>
+    </div>
+
+    <div style="margin-bottom:16px">
+      <div class="form-label" style="margin-bottom:8px">Documents à joindre</div>
+      <div class="upload-zone" onclick="simulateUpload()">
+        <div class="upload-icon">📎</div>
+        <div class="upload-label"><strong>Cliquez pour importer</strong> ou glissez vos fichiers<br><span style="font-size:11px">Ordonnance, bon de transport · PDF, JPG · max 10 Mo</span></div>
+      </div>
+      <div id="upload-list" style="margin-top:8px;display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+
+    <button class="form-submit" onclick="submitReservation()">
+      ✓ Confirmer la réservation
+    </button>
+  </div>
+</div>
+
+<!-- ══ DOCUMENTS ══ -->
+<div class="section" id="sec-documents">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <div>
+      <div style="font-family:var(--font-head);font-size:22px;font-weight:800;margin-bottom:4px">Mes documents</div>
+      <div style="color:var(--muted);font-size:13px">8 documents · 2 nouveaux</div>
+    </div>
+    <button style="padding:8px 16px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;font-size:13px;color:var(--muted);cursor:pointer">Tous télécharger</button>
+  </div>
+  <div class="docs-grid">
+    <div class="doc-card" onclick="downloadDoc('Facture FAC-8818')">
+      <div class="dc-icon">🧾</div>
+      <div class="dc-name">Facture FAC-8818</div>
+      <div class="dc-meta">05/05/2026 · 162,00 €</div>
+      <div class="dc-badge pdf">PDF</div>
+    </div>
+    <div class="doc-card" onclick="downloadDoc('Bon de transport MIS-5503')">
+      <div class="dc-icon">📋</div>
+      <div class="dc-name">Bon transport MIS-5503</div>
+      <div class="dc-meta">06/05/2026 · CHU → EHPAD</div>
+      <div class="dc-badge signed">Signé ✓</div>
+    </div>
+    <div class="doc-card" onclick="downloadDoc('Facture FAC-8801')">
+      <div class="dc-icon">🧾</div>
+      <div class="dc-name">Facture FAC-8801</div>
+      <div class="dc-meta">28/04/2026 · 98,00 €</div>
+      <div class="dc-badge pdf">PDF</div>
+    </div>
+    <div class="doc-card" onclick="downloadDoc('Attestation transport')">
+      <div class="dc-icon">📄</div>
+      <div class="dc-name">Attestation transport</div>
+      <div class="dc-meta">20/04/2026 · CPAM 44</div>
+      <div class="dc-badge pdf">PDF</div>
+    </div>
+    <div class="doc-card" onclick="downloadDoc('Ordonnance scan')">
+      <div class="dc-icon">💊</div>
+      <div class="dc-name">Ordonnance scannée</div>
+      <div class="dc-meta">15/04/2026 · Dr. Martin</div>
+      <div class="dc-badge pdf">PDF</div>
+    </div>
+    <div class="doc-card" onclick="downloadDoc('Facture FAC-8790')">
+      <div class="dc-icon">🧾</div>
+      <div class="dc-name">Facture FAC-8790</div>
+      <div class="dc-meta">10/04/2026 · 76,50 €</div>
+      <div class="dc-badge pdf">PDF</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HISTORIQUE ══ -->
+<div class="section" id="sec-historique">
+  <div style="margin-bottom:20px">
+    <div style="font-family:var(--font-head);font-size:22px;font-weight:800;margin-bottom:4px">Historique des transports</div>
+    <div style="color:var(--muted);font-size:13px">14 transports · Depuis janvier 2026</div>
+  </div>
+  <div class="history-list">
+    <div class="history-item">
+      <div class="hi-date"><div class="hi-day">06</div><div class="hi-month">Mai</div></div>
+      <div class="hi-divider"></div>
+      <div class="hi-info">
+        <div class="hi-route">CHU Nantes → EHPAD Les Pins</div>
+        <div class="hi-meta">AMB-07 · Dupont T. · 8,2 km · 47 min</div>
+      </div>
+      <div class="hi-right">
+        <div class="hi-amount">162,00 €</div>
+        <div class="hi-status paye">Payé ✓</div>
+        <button class="dl-btn" onclick="downloadDoc('Facture 06/05')">📄 Facture</button>
+      </div>
+    </div>
+    <div class="history-item">
+      <div class="hi-date"><div class="hi-day">28</div><div class="hi-month">Avr</div></div>
+      <div class="hi-divider"></div>
+      <div class="hi-info">
+        <div class="hi-route">Domicile → Clinique Brézillet</div>
+        <div class="hi-meta">AMB-12 · Lambert G. · 5,4 km · 31 min</div>
+      </div>
+      <div class="hi-right">
+        <div class="hi-amount">98,00 €</div>
+        <div class="hi-status paye">Payé ✓</div>
+        <button class="dl-btn" onclick="downloadDoc('Facture 28/04')">📄 Facture</button>
+      </div>
+    </div>
+    <div class="history-item">
+      <div class="hi-date"><div class="hi-day">15</div><div class="hi-month">Avr</div></div>
+      <div class="hi-divider"></div>
+      <div class="hi-info">
+        <div class="hi-route">EHPAD Val Fleuri → CHU · Cardiologie</div>
+        <div class="hi-meta">AMB-03 · Faure M. · 12,1 km · 1h02</div>
+      </div>
+      <div class="hi-right">
+        <div class="hi-amount">214,00 €</div>
+        <div class="hi-status attente">En cours</div>
+        <button class="dl-btn">⏳ Attente</button>
+      </div>
+    </div>
+    <div class="history-item">
+      <div class="hi-date"><div class="hi-day">10</div><div class="hi-month">Avr</div></div>
+      <div class="hi-divider"></div>
+      <div class="hi-info">
+        <div class="hi-route">Domicile → Centre de dialyse</div>
+        <div class="hi-meta">AMB-07 · Dupont T. · 3,8 km · 22 min</div>
+      </div>
+      <div class="hi-right">
+        <div class="hi-amount">76,50 €</div>
+        <div class="hi-status paye">Payé ✓</div>
+        <button class="dl-btn" onclick="downloadDoc('Facture 10/04')">📄 Facture</button>
+      </div>
+    </div>
+    <div class="history-item">
+      <div class="hi-date"><div class="hi-day">02</div><div class="hi-month">Avr</div></div>
+      <div class="hi-divider"></div>
+      <div class="hi-info">
+        <div class="hi-route">CHU Nantes → Domicile</div>
+        <div class="hi-meta">AMB-19 · Renard C. · 9,6 km · 55 min</div>
+      </div>
+      <div class="hi-right">
+        <div class="hi-amount">148,50 €</div>
+        <div class="hi-status paye">Payé ✓</div>
+        <button class="dl-btn" onclick="downloadDoc('Facture 02/04')">📄 Facture</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" style="position:relative;text-align:center">
+    <div class="modal-close" onclick="document.getElementById('modal').classList.remove('show')">✕</div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+function showSection(id,navEl){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('sec-'+id).classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(l=>l.classList.remove('active'));
+  if(navEl)navEl.classList.add('active');
+}
+
+function selectType(el){
+  document.querySelectorAll('.tt-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function simulateUpload(){
+  const list=document.getElementById('upload-list');
+  const files=['Ordonnance_Dr_Martin.pdf','Bon_transport_CPAM.pdf'];
+  files.forEach(f=>{
+    if(list.querySelector('[data-file="'+f+'"]'))return;
+    const item=document.createElement('div');
+    item.setAttribute('data-file',f);
+    item.style.cssText='display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--teal-bg);border:1px solid var(--teal-border);border-radius:8px;font-size:12px;color:var(--teal)';
+    item.innerHTML='<span>📄</span><span style="flex:1">'+f+'</span><span style="color:var(--green)">✓</span>';
+    list.appendChild(item);
+  });
+}
+
+function submitReservation(){
+  const modal=document.getElementById('modal');
+  document.getElementById('modal-body').innerHTML=`
+    <div class="success-icon">✓</div>
+    <div style="font-family:var(--font-head);font-size:20px;font-weight:700;margin-bottom:6px">Réservation confirmée !</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.6">Votre transport a été enregistré.<br>Réf. <strong style="font-family:var(--font-mono);color:var(--teal)">MIS-5611</strong> · Confirmation SMS envoyée.</div>
+    <button onclick="document.getElementById('modal').classList.remove('show')" style="padding:12px 32px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-head)">Fermer</button>
+  `;
+  modal.classList.add('show');
+}
+
+function downloadDoc(name){
+  const modal=document.getElementById('modal');
+  document.getElementById('modal-body').innerHTML=`
+    <div style="font-size:32px;margin-bottom:12px">📄</div>
+    <div style="font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:6px">${name}</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Votre document est prêt au téléchargement.</div>
+    <button onclick="document.getElementById('modal').classList.remove('show')" style="padding:12px 32px;background:var(--teal);color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font-head)">⬇ Télécharger</button>
+  `;
+  modal.classList.add('show');
+}
+
+function closeModal(e){if(e.target===document.getElementById('modal'))document.getElementById('modal').classList.remove('show')}
+
+// ETA countdown
+let eta=14;
+setInterval(()=>{
+  if(eta>0)eta--;
+  const s=document.getElementById('suivi-eta');
+  const t=document.getElementById('track-eta');
+  if(s)s.textContent=eta+' min';
+  if(t)t.textContent=eta+' min';
+},30000);
+</script>
+</body>
+</html>

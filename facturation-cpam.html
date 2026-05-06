@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paille en Queue — Facturation & CPAM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0d1017;--bg3:#111622;--bg4:#161e30;
+  --border:#1e2535;--border2:#2a3348;
+  --text:#e8ecf5;--muted:#6b7a99;--dim:#3a4560;
+  --accent:#3b82f6;--accent2:#60a5fa;
+  --green:#22c55e;--green2:#16a34a;
+  --amber:#f59e0b;--red:#ef4444;
+  --teal:#14b8a6;--purple:#a855f7;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:13px;min-height:100vh;display:flex;flex-direction:column}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:20px;flex-shrink:0}
+.logo{font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--text);display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;background:var(--teal);border-radius:50%}
+.topbar-divider{width:1px;height:24px;background:var(--border2)}
+.topbar-module{font-family:var(--font-head);font-size:14px;font-weight:600;color:var(--teal)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.clock{font-family:var(--font-mono);font-size:15px;color:var(--muted)}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff}
+.notif-btn{position:relative;width:32px;height:32px;border-radius:8px;border:1px solid var(--border2);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted)}
+.notif-badge{position:absolute;top:4px;right:4px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--bg2)}
+
+/* LAYOUT */
+.main{display:flex;flex:1;overflow:hidden}
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:12px 0;flex-shrink:0}
+.nav-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;padding:8px 20px 4px;font-family:var(--font-mono)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 12px 8px 20px;cursor:pointer;transition:all .15s;color:var(--muted);font-size:13px;margin:1px 8px;border-radius:8px}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(20,184,166,.1);color:var(--teal);border:1px solid rgba(20,184,166,.2)}
+.nav-icon{width:15px;height:15px;flex-shrink:0}
+.nav-badge{margin-left:auto;font-size:10px;font-family:var(--font-mono);background:rgba(239,68,68,.2);color:var(--red);padding:2px 6px;border-radius:10px}
+.nav-badge.amber{background:rgba(245,158,11,.15);color:var(--amber)}
+.nav-badge.teal{background:rgba(20,184,166,.15);color:var(--teal)}
+
+.content{flex:1;overflow-y:auto;padding:24px}
+.content::-webkit-scrollbar{width:4px}
+.content::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* PAGE HEADER */
+.page-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px}
+.page-title{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--text);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted)}
+.header-actions{display:flex;gap:8px}
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.btn-primary{background:var(--teal);color:#07090f;border:none}
+.btn-primary:hover{background:#0d9488}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border2)}
+.btn-ghost:hover{background:var(--bg3);color:var(--text)}
+
+/* KPI CARDS */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+.kpi.teal::after{background:var(--teal)}
+.kpi.green::after{background:var(--green)}
+.kpi.amber::after{background:var(--amber)}
+.kpi.red::after{background:var(--red)}
+.kpi.purple::after{background:var(--purple)}
+.kpi-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px;font-family:var(--font-mono)}
+.kpi-value{font-family:var(--font-mono);font-size:24px;font-weight:500;line-height:1;margin-bottom:4px}
+.kpi-value.teal{color:var(--teal)}
+.kpi-value.green{color:var(--green)}
+.kpi-value.amber{color:var(--amber)}
+.kpi-value.red{color:var(--red)}
+.kpi-value.purple{color:var(--purple)}
+.kpi-delta{font-size:11px;font-family:var(--font-mono)}
+.kpi-delta.up{color:var(--green)}
+.kpi-delta.down{color:var(--red)}
+.kpi-delta.neutral{color:var(--muted)}
+
+/* PIPELINE */
+.pipeline-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.pipeline-wrap{display:flex;align-items:stretch;gap:0;margin-bottom:28px;overflow-x:auto;padding-bottom:4px}
+.pipeline-stage{flex:1;min-width:130px;background:var(--bg2);border:1px solid var(--border);border-right:none;padding:14px 12px;position:relative;transition:background .15s;cursor:default}
+.pipeline-stage:first-child{border-radius:10px 0 0 10px}
+.pipeline-stage:last-child{border-radius:0 10px 10px 0;border-right:1px solid var(--border)}
+.pipeline-stage:hover{background:var(--bg3)}
+.pipeline-stage::after{content:'›';position:absolute;right:-12px;top:50%;transform:translateY(-50%);font-size:20px;color:var(--dim);z-index:2;font-weight:300}
+.pipeline-stage:last-child::after{display:none}
+.ps-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:8px;font-size:14px}
+.ps-label{font-size:11px;font-weight:500;color:var(--text);margin-bottom:3px}
+.ps-count{font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--text);line-height:1;margin-bottom:2px}
+.ps-amount{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+.ps-bar{height:3px;border-radius:2px;margin-top:8px;background:var(--border2);overflow:hidden}
+.ps-bar-fill{height:100%;border-radius:2px;transition:width .8s ease}
+
+/* TWO COLUMNS */
+.two-col{display:grid;grid-template-columns:1fr 380px;gap:16px;margin-bottom:24px}
+
+/* TABLE */
+.table-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.table-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.table-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text)}
+.table-actions{display:flex;gap:8px;align-items:center}
+.search-input{background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 10px;color:var(--text);font-size:12px;font-family:var(--font-body);width:180px;outline:none}
+.search-input:focus{border-color:var(--teal)}
+.search-input::placeholder{color:var(--dim)}
+.filter-btn{padding:5px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;color:var(--muted);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px}
+table{width:100%;border-collapse:collapse}
+th{padding:8px 18px;text-align:left;font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono);font-weight:400;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:11px 18px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+.id-cell{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.patient-cell{font-weight:500}
+.amount-cell{font-family:var(--font-mono);font-size:13px;font-weight:500;text-align:right}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:500;font-family:var(--font-mono);white-space:nowrap}
+.badge-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.badge.transmis{background:rgba(20,184,166,.12);color:var(--teal);border:1px solid rgba(20,184,166,.2)}
+.badge.valide{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.badge.rejet{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.badge.attente{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+.badge.en-cours{background:rgba(59,130,246,.12);color:var(--accent2);border:1px solid rgba(59,130,246,.2)}
+.badge.paye{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.3)}
+.action-btn{padding:4px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--muted);transition:all .12s}
+.action-btn:hover{background:var(--bg3);color:var(--text)}
+.action-btn.primary{border-color:rgba(20,184,166,.3);color:var(--teal)}
+.action-btn.primary:hover{background:rgba(20,184,166,.1)}
+
+/* RIGHT: REJETS + CPAM STATUS */
+.side-panels{display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.panel-hdr{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.panel-hdr-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text)}
+.panel-body{padding:12px}
+
+/* REJET ITEM */
+.rejet-item{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:8px;border:1px solid var(--border);background:var(--bg3);margin-bottom:8px;cursor:pointer;transition:all .15s}
+.rejet-item:hover{border-color:rgba(239,68,68,.3);background:#140c0c}
+.rejet-item:last-child{margin-bottom:0}
+.rejet-icon{width:32px;height:32px;border-radius:8px;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:14px}
+.rejet-info{flex:1}
+.rejet-id{font-family:var(--font-mono);font-size:10px;color:var(--muted);margin-bottom:2px}
+.rejet-patient{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.rejet-reason{font-size:11px;color:var(--red);margin-bottom:3px}
+.rejet-amount{font-family:var(--font-mono);font-size:12px;color:var(--text)}
+.rejet-action{padding:4px 10px;border-radius:6px;font-size:11px;border:1px solid rgba(239,68,68,.25);color:var(--red);background:transparent;cursor:pointer;white-space:nowrap;align-self:center;transition:all .12s}
+.rejet-action:hover{background:rgba(239,68,68,.1)}
+
+/* CPAM TELÉTRANSMISSION */
+.cpam-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.cpam-row:last-child{border-bottom:none}
+.cpam-label{font-size:12px;color:var(--muted)}
+.cpam-value{font-family:var(--font-mono);font-size:13px;font-weight:500}
+.cpam-bar-wrap{margin-top:10px}
+.cpam-bar-label{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:4px;font-family:var(--font-mono)}
+.cpam-bar{height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.cpam-bar-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--accent2));border-radius:3px;transition:width 1.2s ease}
+
+/* WORKFLOW TIMELINE */
+.workflow-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px}
+.workflow-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:18px}
+.workflow-steps{display:flex;align-items:flex-start;gap:0;position:relative}
+.workflow-steps::before{content:'';position:absolute;top:18px;left:18px;right:18px;height:1px;background:var(--border2);z-index:0}
+.wf-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+.wf-node{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:8px;border:2px solid transparent;transition:all .2s;cursor:default}
+.wf-node.done{background:rgba(34,197,94,.15);border-color:var(--green);color:var(--green)}
+.wf-node.active{background:rgba(20,184,166,.15);border-color:var(--teal);color:var(--teal);box-shadow:0 0 12px rgba(20,184,166,.3)}
+.wf-node.pending{background:var(--bg3);border-color:var(--border2);color:var(--dim)}
+.wf-node.error{background:rgba(239,68,68,.12);border-color:var(--red);color:var(--red)}
+.wf-label{font-size:10px;color:var(--muted);text-align:center;line-height:1.4;max-width:80px}
+.wf-label.active{color:var(--teal);font-weight:500}
+.wf-label.done{color:var(--text)}
+.wf-connector{position:absolute;top:18px;left:calc(50% + 18px);right:calc(-50% + 18px);height:1px;z-index:0}
+
+/* ANALYTICS ROW */
+.analytics-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.analytics-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px}
+.ac-title{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-mono);margin-bottom:12px}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.bar-label{font-size:11px;color:var(--muted);width:60px;flex-shrink:0;text-align:right}
+.bar-track{flex:1;height:6px;background:var(--border2);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;transition:width 1s ease}
+.bar-val{font-size:11px;font-family:var(--font-mono);color:var(--text);width:36px;text-align:right;flex-shrink:0}
+
+/* Donut */
+.donut-wrap{display:flex;align-items:center;gap:14px}
+.donut-legend{display:flex;flex-direction:column;gap:6px;flex:1}
+.donut-legend-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.donut-legend-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+
+/* Trend mini */
+.trend-line{display:flex;align-items:flex-end;gap:3px;height:40px;margin-top:8px}
+.trend-bar{flex:1;border-radius:2px 2px 0 0;transition:height .6s ease;min-height:3px;background:var(--teal);opacity:.7}
+.trend-bar.highlight{opacity:1;background:var(--teal)}
+.trend-labels{display:flex;justify-content:space-between;margin-top:4px}
+.trend-label{font-size:9px;color:var(--dim);font-family:var(--font-mono)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:24px;width:480px;max-width:90vw;transform:translateY(10px);transition:transform .2s}
+.modal-overlay.show .modal{transform:translateY(0)}
+.modal-title{font-family:var(--font-head);font-size:18px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:20px}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px}
+.detail-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.detail-row:last-child{border-bottom:none}
+.detail-label{font-size:12px;color:var(--muted)}
+.detail-value{font-size:12px;color:var(--text);font-weight:500;font-family:var(--font-mono)}
+.modal-actions{display:flex;gap:8px;margin-top:20px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo"><div class="logo-dot"></div>Paille en Queue</div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-module">Facturation & CPAM</div>
+  <div class="topbar-right">
+    <div class="notif-btn">
+      🔔
+      <div class="notif-badge"></div>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="clock" id="clock">--:--</div>
+    <div class="avatar">JM</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-label">Facturation</div>
+    <div class="nav-item active">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+      Vue d'ensemble
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M5 6h6M5 9h4"/></svg>
+      Dossiers en cours
+      <span class="nav-badge teal">127</span>
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1L10 6H15L11 9.5L12.5 15L8 12L3.5 15L5 9.5L1 6H6Z"/></svg>
+      Télétransmission
+      <span class="nav-badge">3</span>
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+      Rejets CPAM
+      <span class="nav-badge">8</span>
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 11l4-4 3 3 5-6"/></svg>
+      Analytique
+    </div>
+    <div class="nav-label" style="margin-top:8px">Paramètres</div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="12" height="9" rx="1.5"/><path d="M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1"/></svg>
+      Mutuelles
+    </div>
+    <div class="nav-item">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+      Configuration
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+      <div>
+        <div class="page-title">Facturation & CPAM</div>
+        <div class="page-sub">Mois en cours · Mai 2026 · <span style="color:var(--teal)">Synchronisation CPAM active</span></div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" onclick="exportData()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6.5 1v8M3 6l3.5 3.5L10 6"/><path d="M1 10v1a1 1 0 001 1h9a1 1 0 001-1v-1"/></svg>
+          Exporter
+        </button>
+        <button class="btn btn-primary" onclick="openNewDossier()">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="5"/><path d="M6.5 4v5M4 6.5h5"/></svg>
+          Nouveau dossier
+        </button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi teal">
+        <div class="kpi-label">CA ce mois</div>
+        <div class="kpi-value teal" id="kpi-ca">87 420 €</div>
+        <div class="kpi-delta up">+12% vs avril</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">Encaissé</div>
+        <div class="kpi-value green">61 840 €</div>
+        <div class="kpi-delta neutral">71% du CA</div>
+      </div>
+      <div class="kpi amber">
+        <div class="kpi-label">En attente CPAM</div>
+        <div class="kpi-value amber">18 920 €</div>
+        <div class="kpi-delta neutral">127 dossiers</div>
+      </div>
+      <div class="kpi red">
+        <div class="kpi-label">Rejets à traiter</div>
+        <div class="kpi-value red">4 280 €</div>
+        <div class="kpi-delta down">8 dossiers</div>
+      </div>
+      <div class="kpi purple">
+        <div class="kpi-label">Taux acceptation</div>
+        <div class="kpi-value purple">94,2%</div>
+        <div class="kpi-delta up">+1.3% vs avril</div>
+      </div>
+    </div>
+
+    <!-- PIPELINE AUTOMATION -->
+    <div class="pipeline-title">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="var(--teal)" stroke-width="1.5"><path d="M1 7h12M8 3l4 4-4 4"/></svg>
+      Pipeline de traitement automatisé
+    </div>
+    <div class="pipeline-wrap">
+      <div class="pipeline-stage">
+        <div class="ps-icon" style="background:rgba(59,130,246,.12);color:var(--accent2)">✓</div>
+        <div class="ps-label">Mission terminée</div>
+        <div class="ps-count" style="color:var(--accent2)">47</div>
+        <div class="ps-amount">Ce jour</div>
+        <div class="ps-bar"><div class="ps-bar-fill" style="width:100%;background:var(--accent2)"></div></div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="ps-icon" style="background:rgba(168,85,247,.12);color:var(--purple)">⊛</div>
+        <div class="ps-label">Validation docs</div>
+        <div class="ps-count" style="color:var(--purple)">38</div>
+        <div class="ps-amount">Auto · 9 manuel</div>
+        <div class="ps-bar"><div class="ps-bar-fill" style="width:81%;background:var(--purple)"></div></div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="ps-icon" style="background:rgba(245,158,11,.12);color:var(--amber)">⊡</div>
+        <div class="ps-label">Contrôle conf.</div>
+        <div class="ps-count" style="color:var(--amber)">31</div>
+        <div class="ps-amount">NGAP vérifié</div>
+        <div class="ps-bar"><div class="ps-bar-fill" style="width:66%;background:var(--amber)"></div></div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="ps-icon" style="background:rgba(20,184,166,.12);color:var(--teal)">⊞</div>
+        <div class="ps-label">Génération facture</div>
+        <div class="ps-count" style="color:var(--teal)">28</div>
+        <div class="ps-amount">PDF + SESAM</div>
+        <div class="ps-bar"><div class="ps-bar-fill" style="width:60%;background:var(--teal)"></div></div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="ps-icon" style="background:rgba(20,184,166,.15);color:var(--teal)">⇡</div>
+        <div class="ps-label">Télétransmission</div>
+        <div class="ps-count" style="color:var(--teal)">22</div>
+        <div class="ps-amount">CPAM envoyé</div>
+        <div class="ps-bar"><div class="ps-bar-fill" style="width:47%;background:var(--teal)"></div></div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="ps-icon" style="background:rgba(34,197,94,.12);color:var(--green)">€</div>
+        <div class="ps-label">Suivi paiement</div>
+        <div class="ps-count" style="color:var(--green)">19</div>
+        <div class="ps-amount">Réponse CPAM</div>
+        <div class="ps-bar"><div class="ps-bar-fill" style="width:40%;background:var(--green)"></div></div>
+      </div>
+      <div class="pipeline-stage">
+        <div class="ps-icon" style="background:rgba(239,68,68,.1);color:var(--red)">↻</div>
+        <div class="ps-label">Relance auto</div>
+        <div class="ps-count" style="color:var(--red)">8</div>
+        <div class="ps-amount">En traitement</div>
+        <div class="ps-bar"><div class="ps-bar-fill" style="width:17%;background:var(--red)"></div></div>
+      </div>
+    </div>
+
+    <!-- TABLE + SIDE PANELS -->
+    <div class="two-col">
+
+      <!-- TABLE -->
+      <div class="table-wrap">
+        <div class="table-header">
+          <div class="table-title">Dossiers récents</div>
+          <div class="table-actions">
+            <input class="search-input" type="text" placeholder="Rechercher patient, ID...">
+            <div class="filter-btn">
+              <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 2h9M3 5.5h5M5 9h1"/></svg>
+              Filtrer
+            </div>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Dossier</th>
+              <th>Patient</th>
+              <th>Date</th>
+              <th>Organisme</th>
+              <th>Statut</th>
+              <th style="text-align:right">Montant</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td><span class="id-cell">FAC-8821</span></td>
+              <td><span class="patient-cell">Dubois, Michel</span></td>
+              <td style="color:var(--muted)">06/05/2026</td>
+              <td style="color:var(--muted);font-size:11px">CPAM 44</td>
+              <td><span class="badge transmis"><span class="badge-dot" style="background:var(--teal)"></span>Transmis</span></td>
+              <td><span class="amount-cell" style="color:var(--teal)">148,50 €</span></td>
+              <td><button class="action-btn primary" onclick="openModal('FAC-8821','Dubois Michel','148.50','Transmis CPAM','CPAM 44')">Voir</button></td>
+            </tr>
+            <tr>
+              <td><span class="id-cell">FAC-8820</span></td>
+              <td><span class="patient-cell">Martin, Suzanne</span></td>
+              <td style="color:var(--muted)">06/05/2026</td>
+              <td style="color:var(--muted);font-size:11px">MGEN</td>
+              <td><span class="badge valide"><span class="badge-dot" style="background:var(--green)"></span>Validé</span></td>
+              <td><span class="amount-cell" style="color:var(--green)">96,00 €</span></td>
+              <td><button class="action-btn" onclick="openModal('FAC-8820','Martin Suzanne','96.00','Validé','MGEN')">Voir</button></td>
+            </tr>
+            <tr>
+              <td><span class="id-cell">FAC-8819</span></td>
+              <td><span class="patient-cell">Leroy, André</span></td>
+              <td style="color:var(--muted)">05/05/2026</td>
+              <td style="color:var(--muted);font-size:11px">CPAM 44</td>
+              <td><span class="badge rejet"><span class="badge-dot" style="background:var(--red)"></span>Rejeté</span></td>
+              <td><span class="amount-cell" style="color:var(--red)">214,00 €</span></td>
+              <td><button class="action-btn" style="border-color:rgba(239,68,68,.3);color:var(--red)" onclick="openModal('FAC-8819','Leroy André','214.00','Rejeté — prescription manquante','CPAM 44')">Corriger</button></td>
+            </tr>
+            <tr>
+              <td><span class="id-cell">FAC-8818</span></td>
+              <td><span class="patient-cell">Bernard, Claire</span></td>
+              <td style="color:var(--muted)">05/05/2026</td>
+              <td style="color:var(--muted);font-size:11px">Harmonie</td>
+              <td><span class="badge paye"><span class="badge-dot" style="background:var(--green)"></span>Payé</span></td>
+              <td><span class="amount-cell" style="color:var(--green)">162,00 €</span></td>
+              <td><button class="action-btn" onclick="openModal('FAC-8818','Bernard Claire','162.00','Payé','Harmonie Mutuelle')">Voir</button></td>
+            </tr>
+            <tr>
+              <td><span class="id-cell">FAC-8817</span></td>
+              <td><span class="patient-cell">Petit, François</span></td>
+              <td style="color:var(--muted)">05/05/2026</td>
+              <td style="color:var(--muted);font-size:11px">CPAM 44</td>
+              <td><span class="badge en-cours"><span class="badge-dot" style="background:var(--accent2)"></span>En cours</span></td>
+              <td><span class="amount-cell" style="color:var(--muted)">88,50 €</span></td>
+              <td><button class="action-btn" onclick="openModal('FAC-8817','Petit François','88.50','En cours de traitement','CPAM 44')">Voir</button></td>
+            </tr>
+            <tr>
+              <td><span class="id-cell">FAC-8816</span></td>
+              <td><span class="patient-cell">Rousseau, Hélène</span></td>
+              <td style="color:var(--muted)">04/05/2026</td>
+              <td style="color:var(--muted);font-size:11px">MNT</td>
+              <td><span class="badge rejet"><span class="badge-dot" style="background:var(--red)"></span>Rejeté</span></td>
+              <td><span class="amount-cell" style="color:var(--red)">176,00 €</span></td>
+              <td><button class="action-btn" style="border-color:rgba(239,68,68,.3);color:var(--red)" onclick="openModal('FAC-8816','Rousseau Hélène','176.00','Rejeté — code acte incorrect','MNT')">Corriger</button></td>
+            </tr>
+            <tr>
+              <td><span class="id-cell">FAC-8815</span></td>
+              <td><span class="patient-cell">Moreau, Jean-Luc</span></td>
+              <td style="color:var(--muted)">04/05/2026</td>
+              <td style="color:var(--muted);font-size:11px">CPAM 44</td>
+              <td><span class="badge valide"><span class="badge-dot" style="background:var(--green)"></span>Validé</span></td>
+              <td><span class="amount-cell" style="color:var(--green)">124,00 €</span></td>
+              <td><button class="action-btn" onclick="openModal('FAC-8815','Moreau Jean-Luc','124.00','Validé','CPAM 44')">Voir</button></td>
+            </tr>
+            <tr>
+              <td><span class="id-cell">FAC-8814</span></td>
+              <td><span class="patient-cell">Simon, Marie</span></td>
+              <td style="color:var(--muted)">04/05/2026</td>
+              <td style="color:var(--muted);font-size:11px">CPAM 44</td>
+              <td><span class="badge attente"><span class="badge-dot" style="background:var(--amber)"></span>Attente</span></td>
+              <td><span class="amount-cell" style="color:var(--muted)">98,00 €</span></td>
+              <td><button class="action-btn" onclick="openModal('FAC-8814','Simon Marie','98.00','En attente validation','CPAM 44')">Voir</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SIDE PANELS -->
+      <div class="side-panels">
+
+        <!-- CPAM STATUS -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div class="panel-hdr-title">Télétransmission CPAM</div>
+            <span class="badge transmis" style="font-size:10px">En ligne</span>
+          </div>
+          <div class="panel-body">
+            <div class="cpam-row">
+              <span class="cpam-label">Lot en cours</span>
+              <span class="cpam-value" style="color:var(--teal)">#LOT-2026-05-06</span>
+            </div>
+            <div class="cpam-row">
+              <span class="cpam-label">Feuilles de soins</span>
+              <span class="cpam-value">22 / 28</span>
+            </div>
+            <div class="cpam-row">
+              <span class="cpam-label">Montant lot</span>
+              <span class="cpam-value" style="color:var(--teal)">3 284,50 €</span>
+            </div>
+            <div class="cpam-row">
+              <span class="cpam-label">Délai retour estimé</span>
+              <span class="cpam-value">8–12 jours</span>
+            </div>
+            <div class="cpam-bar-wrap">
+              <div class="cpam-bar-label">
+                <span>Progression</span>
+                <span style="color:var(--teal)">79%</span>
+              </div>
+              <div class="cpam-bar"><div class="cpam-bar-fill" id="cpam-progress" style="width:79%"></div></div>
+            </div>
+            <button class="btn btn-primary" style="width:100%;margin-top:12px;justify-content:center" onclick="transmit()">
+              Envoyer le lot complet
+            </button>
+          </div>
+        </div>
+
+        <!-- REJETS -->
+        <div class="panel">
+          <div class="panel-hdr">
+            <div class="panel-hdr-title">Rejets à traiter</div>
+            <span class="badge rejet">8 dossiers</span>
+          </div>
+          <div class="panel-body">
+            <div class="rejet-item" onclick="openModal('FAC-8819','Leroy André','214.00','Rejeté — prescription manquante','CPAM 44')">
+              <div class="rejet-icon">⚠</div>
+              <div class="rejet-info">
+                <div class="rejet-id">FAC-8819 · CPAM 44</div>
+                <div class="rejet-patient">Leroy, André</div>
+                <div class="rejet-reason">Prescription médicale manquante</div>
+                <div class="rejet-amount">214,00 €</div>
+              </div>
+              <button class="rejet-action">Corriger</button>
+            </div>
+            <div class="rejet-item" onclick="openModal('FAC-8816','Rousseau Hélène','176.00','Rejeté — code acte incorrect','MNT')">
+              <div class="rejet-icon">⚠</div>
+              <div class="rejet-info">
+                <div class="rejet-id">FAC-8816 · MNT</div>
+                <div class="rejet-patient">Rousseau, Hélène</div>
+                <div class="rejet-reason">Code acte NGAP incorrect</div>
+                <div class="rejet-amount">176,00 €</div>
+              </div>
+              <button class="rejet-action">Corriger</button>
+            </div>
+            <div class="rejet-item">
+              <div class="rejet-icon">⚠</div>
+              <div class="rejet-info">
+                <div class="rejet-id">FAC-8802 · CPAM 44</div>
+                <div class="rejet-patient">Girard, Paul</div>
+                <div class="rejet-reason">N° sécurité sociale invalide</div>
+                <div class="rejet-amount">98,00 €</div>
+              </div>
+              <button class="rejet-action">Corriger</button>
+            </div>
+            <div style="text-align:center;margin-top:10px">
+              <button class="btn btn-ghost" style="font-size:11px;padding:6px 14px">Voir tous les rejets (8)</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ANALYTICS ROW -->
+    <div class="analytics-row">
+      <!-- Par organisme -->
+      <div class="analytics-card">
+        <div class="ac-title">Répartition par organisme</div>
+        <div class="bar-row">
+          <span class="bar-label">CPAM 44</span>
+          <div class="bar-track"><div class="bar-fill" style="width:68%;background:var(--teal)"></div></div>
+          <span class="bar-val">68%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">MGEN</span>
+          <div class="bar-track"><div class="bar-fill" style="width:12%;background:var(--accent2)"></div></div>
+          <span class="bar-val">12%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Harmonie</span>
+          <div class="bar-track"><div class="bar-fill" style="width:9%;background:var(--purple)"></div></div>
+          <span class="bar-val">9%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">MNT</span>
+          <div class="bar-track"><div class="bar-fill" style="width:7%;background:var(--amber)"></div></div>
+          <span class="bar-val">7%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Autres</span>
+          <div class="bar-track"><div class="bar-fill" style="width:4%;background:var(--dim)"></div></div>
+          <span class="bar-val">4%</span>
+        </div>
+      </div>
+
+      <!-- Statuts dossiers -->
+      <div class="analytics-card">
+        <div class="ac-title">Statuts dossiers (mai)</div>
+        <div class="donut-wrap">
+          <svg width="80" height="80" viewBox="0 0 80 80">
+            <!-- Donut segments approximated as arcs -->
+            <circle cx="40" cy="40" r="30" fill="none" stroke="#1e2535" stroke-width="10"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="var(--green)" stroke-width="10"
+              stroke-dasharray="113 75" stroke-dashoffset="-20" style="transform-origin:center;transform:rotate(-90deg)"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="var(--teal)" stroke-width="10"
+              stroke-dasharray="45 143" stroke-dashoffset="-133" style="transform-origin:center;transform:rotate(-90deg)"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="var(--amber)" stroke-width="10"
+              stroke-dasharray="20 168" stroke-dashoffset="-178" style="transform-origin:center;transform:rotate(-90deg)"/>
+            <circle cx="40" cy="40" r="30" fill="none" stroke="var(--red)" stroke-width="10"
+              stroke-dasharray="10 178" stroke-dashoffset="-198" style="transform-origin:center;transform:rotate(-90deg)"/>
+            <text x="40" y="37" text-anchor="middle" font-size="11" fill="var(--text)" font-family="DM Mono,monospace" font-weight="500">127</text>
+            <text x="40" y="49" text-anchor="middle" font-size="8" fill="var(--muted)" font-family="DM Mono,monospace">dossiers</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="donut-legend-row"><div class="donut-legend-dot" style="background:var(--green)"></div>Payé — 60%</div>
+            <div class="donut-legend-row"><div class="donut-legend-dot" style="background:var(--teal)"></div>Transmis — 24%</div>
+            <div class="donut-legend-row"><div class="donut-legend-dot" style="background:var(--amber)"></div>Attente — 10%</div>
+            <div class="donut-legend-row"><div class="donut-legend-dot" style="background:var(--red)"></div>Rejeté — 6%</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tendance CA mensuel -->
+      <div class="analytics-card">
+        <div class="ac-title">CA mensuel (€)</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-bottom:12px">
+          <span style="font-family:var(--font-mono);font-size:20px;font-weight:500;color:var(--teal)">87 420</span>
+          <span style="font-size:11px;color:var(--green)">↑ +12%</span>
+        </div>
+        <div class="trend-line" id="trend-bars"></div>
+        <div class="trend-labels">
+          <span class="trend-label">Oct</span>
+          <span class="trend-label">Nov</span>
+          <span class="trend-label">Déc</span>
+          <span class="trend-label">Jan</span>
+          <span class="trend-label">Fév</span>
+          <span class="trend-label">Mar</span>
+          <span class="trend-label">Avr</span>
+          <span class="trend-label">Mai</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnOverlay(event)">
+  <div class="modal" style="position:relative">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <div class="modal-title" id="modal-title">Dossier FAC-8821</div>
+    <div class="modal-sub" id="modal-sub">Détail et actions disponibles</div>
+    <div id="modal-content"></div>
+    <div class="modal-actions" id="modal-actions"></div>
+  </div>
+</div>
+
+<script>
+// Clock
+function tick(){
+  const n=new Date();
+  document.getElementById('clock').textContent=
+    String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+}
+tick(); setInterval(tick,10000);
+
+// Trend bars
+const vals=[71200,68400,59800,74100,66300,79800,77900,87420];
+const maxV=Math.max(...vals);
+const cont=document.getElementById('trend-bars');
+vals.forEach((v,i)=>{
+  const b=document.createElement('div');
+  b.className='trend-bar'+(i===vals.length-1?' highlight':'');
+  b.style.height=(v/maxV*100)+'%';
+  cont.appendChild(b);
+});
+
+// CPAM progress animation
+setTimeout(()=>{
+  document.getElementById('cpam-progress').style.width='79%';
+},300);
+
+// Modal
+function openModal(id,patient,amount,status,org){
+  document.getElementById('modal-title').textContent='Dossier '+id;
+  document.getElementById('modal-sub').textContent=patient+' · '+org;
+  const isRejet=status.includes('Rejeté');
+  document.getElementById('modal-content').innerHTML=`
+    <div class="detail-row"><span class="detail-label">Référence</span><span class="detail-value">${id}</span></div>
+    <div class="detail-row"><span class="detail-label">Patient</span><span class="detail-value">${patient}</span></div>
+    <div class="detail-row"><span class="detail-label">Organisme</span><span class="detail-value">${org}</span></div>
+    <div class="detail-row"><span class="detail-label">Montant</span><span class="detail-value" style="color:${isRejet?'var(--red)':'var(--teal)'}">${parseFloat(amount).toFixed(2)} €</span></div>
+    <div class="detail-row"><span class="detail-label">Statut</span><span class="detail-value" style="color:${isRejet?'var(--red)':status.includes('Validé')||status.includes('Payé')?'var(--green)':'var(--teal)'}">${status}</span></div>
+    <div class="detail-row"><span class="detail-label">Date</span><span class="detail-value">06/05/2026</span></div>
+    <div class="detail-row"><span class="detail-label">Ambulance</span><span class="detail-value">AMB-12</span></div>
+    <div class="detail-row"><span class="detail-label">Code NGAP</span><span class="detail-value">AMB + MCI</span></div>
+  `;
+  document.getElementById('modal-actions').innerHTML = isRejet
+    ? `<button class="btn btn-primary" style="flex:1;justify-content:center" onclick="closeModal()">Corriger & retransmettre</button>
+       <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>`
+    : `<button class="btn btn-primary" style="flex:1;justify-content:center" onclick="closeModal()">Télécharger PDF</button>
+       <button class="btn btn-ghost" onclick="closeModal()">Fermer</button>`;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('show')}
+function closeModalOnOverlay(e){if(e.target===document.getElementById('modal-overlay'))closeModal()}
+function openNewDossier(){
+  document.getElementById('modal-title').textContent='Nouveau dossier';
+  document.getElementById('modal-sub').textContent='Création manuelle d\'un dossier de facturation';
+  document.getElementById('modal-content').innerHTML=`
+    <div class="detail-row"><span class="detail-label">Patient</span><input style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;outline:none;width:200px" placeholder="Nom, Prénom"></div>
+    <div class="detail-row"><span class="detail-label">Organisme</span><input style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;outline:none;width:200px" placeholder="CPAM, Mutuelle..."></div>
+    <div class="detail-row"><span class="detail-label">Mission</span><input style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;outline:none;width:200px" placeholder="MIS-XXXX"></div>
+    <div class="detail-row"><span class="detail-label">Montant</span><input style="background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:4px 8px;color:var(--text);font-size:12px;outline:none;width:200px" placeholder="0,00 €"></div>
+  `;
+  document.getElementById('modal-actions').innerHTML=`
+    <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="closeModal()">Créer le dossier</button>
+    <button class="btn btn-ghost" onclick="closeModal()">Annuler</button>
+  `;
+  document.getElementById('modal-overlay').classList.add('show');
+}
+function transmit(){
+  const btn=event.target;
+  btn.textContent='Envoi en cours...';
+  btn.disabled=true;
+  setTimeout(()=>{
+    btn.textContent='✓ Lot envoyé à la CPAM';
+    btn.style.background='var(--green)';
+  },1800);
+}
+function exportData(){
+  alert('Export CSV en cours de génération...');
+}
+
+// Nav
+document.querySelectorAll('.nav-item').forEach(i=>{
+  i.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    i.classList.add('active');
+  });
+});
+
+// KPI live flicker
+setInterval(()=>{
+  const el=document.getElementById('kpi-ca');
+  const base=87420;
+  const v=base+Math.floor((Math.random()-.5)*200);
+  el.textContent=v.toLocaleString('fr-FR')+' €';
+},12000);
+</script>
+</body>
+</html>

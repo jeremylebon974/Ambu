@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paille en Queue — Plateforme SaaS</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0d1017;--bg3:#111622;
+  --border:#1e2535;--border2:#2a3348;
+  --text:#e8ecf5;--muted:#6b7a99;--dim:#3a4560;
+  --accent:#3b82f6;--green:#22c55e;--amber:#f59e0b;
+  --red:#ef4444;--teal:#14b8a6;--purple:#a855f7;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;display:flex;flex-direction:column}
+
+.topbar{height:56px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 32px;gap:16px}
+.logo{font-family:var(--font-head);font-weight:800;font-size:16px;color:var(--text);display:flex;align-items:center;gap:10px}
+.logo-dot{width:10px;height:10px;background:var(--teal);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(20,184,166,.5)}50%{box-shadow:0 0 0 8px rgba(20,184,166,0)}}
+.logo-sub{font-size:12px;color:var(--muted);font-family:var(--font-mono);margin-left:4px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.version-pill{padding:4px 10px;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.2);border-radius:20px;font-size:10px;color:var(--teal);font-family:var(--font-mono)}
+.status-pill{display:flex;align-items:center;gap:5px;padding:4px 10px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:20px;font-size:10px;color:var(--green);font-family:var(--font-mono)}
+.sdot{width:5px;height:5px;background:var(--green);border-radius:50%;animation:blink .9s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.hero{padding:60px 32px 40px;text-align:center;position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,rgba(20,184,166,.07) 0%,transparent 70%);pointer-events:none}
+.hero-label{font-size:11px;color:var(--teal);text-transform:uppercase;letter-spacing:.12em;font-family:var(--font-mono);margin-bottom:14px}
+.hero-title{font-family:var(--font-head);font-size:42px;font-weight:800;color:var(--text);margin-bottom:12px;line-height:1.1}
+.hero-title span{color:var(--teal)}
+.hero-sub{font-size:15px;color:var(--muted);max-width:520px;margin:0 auto 28px;line-height:1.7}
+.hero-stack{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:8px}
+.hs-pill{padding:4px 12px;border-radius:20px;font-size:11px;font-family:var(--font-mono);border:1px solid var(--border2);color:var(--muted);background:var(--bg2)}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:0 32px 32px;max-width:1100px;margin:0 auto;width:100%}
+
+.module-card{background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:24px;position:relative;overflow:hidden;transition:all .2s;cursor:pointer;text-decoration:none;display:block;color:inherit}
+.module-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,.3)}
+.module-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:3px 3px 0 0}
+.module-card.teal::before{background:var(--teal)}
+.module-card.blue::before{background:var(--accent)}
+.module-card.purple::before{background:var(--purple)}
+.module-card.green::before{background:var(--green)}
+.module-card.amber::before{background:var(--amber)}
+.module-card.pink::before{background:#ec4899}
+.mc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.mc-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.mc-badge{font-size:9px;padding:3px 8px;border-radius:10px;font-family:var(--font-mono);font-weight:500}
+.mc-badge.ready{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.mc-badge.new{background:rgba(168,85,247,.12);color:var(--purple);border:1px solid rgba(168,85,247,.2)}
+.mc-title{font-family:var(--font-head);font-size:17px;font-weight:700;color:var(--text);margin-bottom:5px}
+.mc-desc{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px}
+.mc-features{display:flex;flex-direction:column;gap:4px;margin-bottom:16px}
+.mc-feat{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.mc-feat::before{content:'·';color:var(--dim);font-size:16px;line-height:0;position:relative;top:1px}
+.mc-footer{display:flex;align-items:center;justify-content:space-between}
+.mc-file{font-size:10px;font-family:var(--font-mono);color:var(--dim)}
+.mc-arrow{font-size:18px;color:var(--dim);transition:all .2s}
+.module-card:hover .mc-arrow{color:var(--text);transform:translateX(3px)}
+
+/* ARCHITECTURE CARD — full width */
+.arch-card{grid-column:1/-1;background:linear-gradient(135deg,#0d1628,#111e35);border:1px solid rgba(168,85,247,.2);border-radius:18px;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;text-decoration:none;color:inherit;transition:all .2s}
+.arch-card:hover{border-color:rgba(168,85,247,.4);transform:translateY(-2px)}
+.arch-left{display:flex;align-items:center;gap:16px}
+.arch-icon{width:52px;height:52px;background:rgba(168,85,247,.12);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;border:1px solid rgba(168,85,247,.2)}
+.arch-title{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text);margin-bottom:3px}
+.arch-sub{font-size:13px;color:var(--muted)}
+.arch-right{display:flex;align-items:center;gap:10px}
+.arch-pill{padding:5px 12px;background:rgba(168,85,247,.12);border:1px solid rgba(168,85,247,.25);border-radius:20px;font-size:11px;color:var(--purple);font-family:var(--font-mono)}
+
+/* FOOTER */
+.footer{padding:24px 32px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;margin-top:auto}
+.footer-left{font-size:11px;color:var(--dim);font-family:var(--font-mono)}
+.footer-right{display:flex;gap:6px}
+.footer-tech{padding:3px 8px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;font-size:10px;font-family:var(--font-mono);color:var(--dim)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Groupe Ambulance Paille en Queue
+    <span class="logo-sub">/ Plateforme SaaS</span>
+  </div>
+  <div class="topbar-right">
+    <div class="version-pill">v1.0 — Prototype</div>
+    <div class="status-pill"><div class="sdot"></div>5 modules · V1 complet</div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-label">Prototype haute-fidélité</div>
+  <div class="hero-title">Infrastructure centrale<br><span>Transport Sanitaire</span></div>
+  <div class="hero-sub">Plateforme SaaS modulaire — dispatch temps réel, facturation automatisée, PDA terrain, portail patient et pipeline événementiel CPAM.</div>
+  <div class="hero-stack">
+    <span class="hs-pill">Next.js 14</span>
+    <span class="hs-pill">NestJS</span>
+    <span class="hs-pill">Flutter</span>
+    <span class="hs-pill">PostgreSQL</span>
+    <span class="hs-pill">Redis</span>
+    <span class="hs-pill">BullMQ</span>
+    <span class="hs-pill">n8n</span>
+    <span class="hs-pill">Docker</span>
+    <span class="hs-pill">Kubernetes</span>
+    <span class="hs-pill">HDS</span>
+  </div>
+</div>
+
+<div class="grid">
+
+  <!-- DASHBOARD -->
+  <a class="module-card teal" href="dashboard-dispatch.html">
+    <div class="mc-top">
+      <div class="mc-icon" style="background:rgba(20,184,166,.12);color:var(--teal)">🗺</div>
+      <span class="mc-badge ready">Prototype ✓</span>
+    </div>
+    <div class="mc-title">Dashboard & Dispatch</div>
+    <div class="mc-desc">Carte temps réel, géolocalisation fleet, dispatch intelligent et gestion des urgences.</div>
+    <div class="mc-features">
+      <div class="mc-feat">Carte live 50 ambulances</div>
+      <div class="mc-feat">Assignation automatique missions</div>
+      <div class="mc-feat">Alertes & urgences temps réel</div>
+      <div class="mc-feat">KPIs opérationnels live</div>
+    </div>
+    <div class="mc-footer">
+      <span class="mc-file">dashboard-dispatch.html</span>
+      <span class="mc-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- FACTURATION -->
+  <a class="module-card blue" href="facturation-cpam.html">
+    <div class="mc-top">
+      <div class="mc-icon" style="background:rgba(59,130,246,.12);color:var(--accent)">🧾</div>
+      <span class="mc-badge ready">Prototype ✓</span>
+    </div>
+    <div class="mc-title">Facturation & CPAM</div>
+    <div class="mc-desc">Pipeline automatisé de la mission à la télétransmission CPAM, gestion des rejets.</div>
+    <div class="mc-features">
+      <div class="mc-feat">Pipeline 7 étapes automatisé</div>
+      <div class="mc-feat">Télétransmission SESAM-Vitale</div>
+      <div class="mc-feat">Gestion rejets & corrections</div>
+      <div class="mc-feat">Analytics CA & organismes</div>
+    </div>
+    <div class="mc-footer">
+      <span class="mc-file">facturation-cpam.html</span>
+      <span class="mc-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- PDA -->
+  <a class="module-card purple" href="pda-terrain.html">
+    <div class="mc-top">
+      <div class="mc-icon" style="background:rgba(168,85,247,.12);color:var(--purple)">📱</div>
+      <span class="mc-badge ready">Prototype ✓</span>
+    </div>
+    <div class="mc-title">PDA Terrain</div>
+    <div class="mc-desc">Interface mobile ambulancier — missions, navigation, signature et scan de documents.</div>
+    <div class="mc-features">
+      <div class="mc-feat">5 écrans interactifs</div>
+      <div class="mc-feat">Signature électronique tactile</div>
+      <div class="mc-feat">Scanner OCR documents</div>
+      <div class="mc-feat">Signalement incident terrain</div>
+    </div>
+    <div class="mc-footer">
+      <span class="mc-file">pda-terrain.html</span>
+      <span class="mc-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- PORTAIL PATIENT -->
+  <a class="module-card green" href="portail-patient.html">
+    <div class="mc-top">
+      <div class="mc-icon" style="background:rgba(34,197,94,.1);color:var(--green)">👤</div>
+      <span class="mc-badge ready">Prototype ✓</span>
+    </div>
+    <div class="mc-title">Portail Patient</div>
+    <div class="mc-desc">Espace patient sécurisé — réservation, suivi GPS, documents et historique complet.</div>
+    <div class="mc-features">
+      <div class="mc-feat">Réservation transport en ligne</div>
+      <div class="mc-feat">Suivi ambulance temps réel</div>
+      <div class="mc-feat">Téléchargement factures & docs</div>
+      <div class="mc-feat">Historique complet transports</div>
+    </div>
+    <div class="mc-footer">
+      <span class="mc-file">portail-patient.html</span>
+      <span class="mc-arrow">→</span>
+    </div>
+  </a>
+
+  <!-- ARCHITECTURE -->
+  <a class="module-card amber" href="event-driven-architecture.html" style="grid-column:span 2">
+    <div class="mc-top">
+      <div class="mc-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">⚡</div>
+      <span class="mc-badge new">Event-Driven</span>
+    </div>
+    <div class="mc-title">Pipeline Événementiel Automatisé</div>
+    <div class="mc-desc">Architecture EDA complète — de la validation terrain à la comptabilité, sans aucune intervention humaine. Simulation interactive en temps réel avec scénario anomalie.</div>
+    <div class="mc-features">
+      <div class="mc-feat">Event Bus BullMQ / Redis</div>
+      <div class="mc-feat">4 workers NestJS asynchrones</div>
+      <div class="mc-feat">9 contrôles conformité automatiques</div>
+      <div class="mc-feat">4 workflows n8n · Blocage si anomalie</div>
+    </div>
+    <div class="mc-footer">
+      <span class="mc-file">event-driven-architecture.html</span>
+      <span class="mc-arrow">→</span>
+    </div>
+  </a>
+
+</div>
+
+<div class="footer">
+  <div class="footer-left">Groupe Ambulance Paille en Queue · Prototype V1 · Mai 2026 · Tous droits réservés</div>
+  <div class="footer-right">
+    <span class="footer-tech">HDS</span>
+    <span class="footer-tech">RGPD</span>
+    <span class="footer-tech">CPAM</span>
+    <span class="footer-tech">SESAM-Vitale</span>
+  </div>
+</div>
+
+</body>
+</html>

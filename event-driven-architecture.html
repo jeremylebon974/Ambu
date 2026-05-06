@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paille en Queue — Event-Driven Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0d1017;--bg3:#111622;--bg4:#161e30;
+  --border:#1e2535;--border2:#2a3348;
+  --text:#e8ecf5;--muted:#6b7a99;--dim:#3a4560;
+  --accent:#3b82f6;--accent2:#60a5fa;
+  --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+  --teal:#14b8a6;--purple:#a855f7;--pink:#ec4899;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:13px;min-height:100vh}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:16px;position:sticky;top:0;z-index:100}
+.logo{font-family:var(--font-head);font-weight:800;font-size:15px;color:var(--text);display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;background:var(--purple);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(168,85,247,.5)}50%{box-shadow:0 0 0 6px rgba(168,85,247,0)}}
+.topbar-module{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--purple)}
+.topbar-divider{width:1px;height:24px;background:var(--border2)}
+.sim-btn{display:flex;align-items:center;gap:6px;padding:7px 16px;background:rgba(168,85,247,.15);border:1px solid rgba(168,85,247,.3);border-radius:8px;color:var(--purple);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--font-mono)}
+.sim-btn:hover{background:rgba(168,85,247,.25)}
+.sim-btn.running{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:var(--green)}
+.reset-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:transparent;border:1px solid var(--border2);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:var(--font-mono)}
+.reset-btn:hover{background:var(--bg3);color:var(--text)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:8px}
+
+/* MAIN LAYOUT */
+.layout{display:grid;grid-template-columns:1fr 320px;gap:0;height:calc(100vh - 52px);overflow:hidden}
+
+/* LEFT: PIPELINE */
+.pipeline-panel{overflow-y:auto;padding:28px 28px 40px}
+.pipeline-panel::-webkit-scrollbar{width:4px}
+.pipeline-panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* RIGHT: LOG */
+.log-panel{background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.log-header{padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
+.log-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text)}
+.log-count{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
+.log-scroll{flex:1;overflow-y:auto;padding:10px 14px;font-family:var(--font-mono);font-size:11px}
+.log-scroll::-webkit-scrollbar{width:3px}
+.log-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.log-entry{padding:6px 0;border-bottom:1px solid rgba(30,37,53,.5);display:flex;gap:8px;align-items:flex-start;opacity:0;transition:opacity .3s}
+.log-entry.visible{opacity:1}
+.log-time{color:var(--dim);flex-shrink:0;font-size:10px;padding-top:1px}
+.log-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.log-text{color:var(--text);line-height:1.4}
+.log-text span{color:var(--muted)}
+
+/* PAGE TITLE */
+.page-title-wrap{margin-bottom:28px}
+.page-title{font-family:var(--font-head);font-size:24px;font-weight:800;color:var(--text);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* LAYER SECTIONS */
+.layer-wrap{margin-bottom:20px;position:relative}
+.layer-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.09em;font-family:var(--font-mono);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.layer-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* CARDS */
+.nodes-row{display:flex;gap:10px;flex-wrap:wrap}
+.node-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px 16px;flex:1;min-width:140px;position:relative;transition:all .3s;cursor:pointer}
+.node-card.active{box-shadow:0 0 0 1px var(--node-color,var(--accent)),0 0 20px rgba(59,130,246,.15)}
+.node-card.done{opacity:.7}
+.node-card.error-state{box-shadow:0 0 0 1px var(--red),0 0 20px rgba(239,68,68,.12)}
+.node-card:hover{border-color:var(--border2);background:var(--bg3)}
+.node-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:9px;flex-shrink:0}
+.node-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px;line-height:1.3}
+.node-desc{font-size:10px;color:var(--muted);line-height:1.4}
+.node-status{position:absolute;top:10px;right:10px;width:8px;height:8px;border-radius:50%;background:var(--dim);transition:all .3s}
+.node-status.active{background:var(--node-color,var(--accent));box-shadow:0 0 6px var(--node-color,var(--accent))}
+.node-status.done{background:var(--green)}
+.node-status.error{background:var(--red)}
+.node-pulse{animation:nodePulse .8s ease-in-out infinite}
+@keyframes nodePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.6;transform:scale(1.3)}}
+
+/* EVENT BUS VISUAL */
+.event-bus{background:linear-gradient(135deg,#0d1628,#111e35);border:1px solid rgba(59,130,246,.25);border-radius:16px;padding:18px 20px;margin:12px 0;position:relative;overflow:hidden}
+.event-bus::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent,transparent 20px,rgba(59,130,246,.03) 20px,rgba(59,130,246,.03) 21px);pointer-events:none}
+.eb-label{font-size:10px;color:var(--accent2);text-transform:uppercase;letter-spacing:.09em;font-family:var(--font-mono);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.eb-label::before{content:'';width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 1.5s infinite}
+.eb-events{display:flex;gap:8px;flex-wrap:wrap}
+.eb-event{padding:4px 12px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2);border-radius:20px;font-size:10px;font-family:var(--font-mono);color:var(--accent2);white-space:nowrap;transition:all .3s}
+.eb-event.fired{background:rgba(59,130,246,.25);border-color:rgba(59,130,246,.5);color:#fff;animation:eventFire .4s ease}
+@keyframes eventFire{0%{transform:scale(.95);background:rgba(59,130,246,.5)}100%{transform:scale(1)}}
+
+/* QUEUE VISUAL */
+.queue-row{display:flex;gap:10px;margin:12px 0}
+.queue-block{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px}
+.queue-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono);margin-bottom:6px}
+.queue-items{display:flex;flex-direction:column;gap:4px}
+.queue-item{height:6px;border-radius:3px;background:var(--border2);transition:all .4s;position:relative;overflow:hidden}
+.queue-item.processing{background:var(--node-color,var(--accent))}
+.queue-item.done{background:var(--green);opacity:.5}
+.queue-item::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,.3) 50%,transparent 100%);transform:translateX(-100%)}
+.queue-item.processing::after{animation:shimmer 1s infinite}
+@keyframes shimmer{to{transform:translateX(200%)}}
+
+/* CONTROLS CHECK */
+.checks-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:4px}
+.check-item{display:flex;align-items:center;gap:6px;padding:7px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:11px;color:var(--muted);transition:all .3s}
+.check-item.ok{border-color:rgba(34,197,94,.25);background:rgba(34,197,94,.05);color:var(--green)}
+.check-item.fail{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.06);color:var(--red)}
+.check-item.pending{border-color:rgba(245,158,11,.25);background:rgba(245,158,11,.05);color:var(--amber)}
+.check-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+
+/* ANOMALY ALERT */
+.anomaly-box{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:12px;padding:14px 16px;margin-top:10px;display:none}
+.anomaly-box.show{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+.anomaly-title{font-size:12px;font-weight:600;color:var(--red);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.anomaly-items{display:flex;flex-direction:column;gap:4px}
+.anomaly-item{font-size:11px;color:#fca5a5;display:flex;align-items:center;gap:6px;font-family:var(--font-mono)}
+
+/* OUTPUT CARDS */
+.outputs-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.output-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px;text-align:center;transition:all .3s}
+.output-card.ready{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04)}
+.output-card.blocked{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04);opacity:.7}
+.oc-icon{font-size:22px;margin-bottom:6px}
+.oc-label{font-size:11px;font-weight:500;color:var(--text);margin-bottom:2px}
+.oc-status{font-size:10px;font-family:var(--font-mono)}
+.oc-status.ready{color:var(--green)}
+.oc-status.blocked{color:var(--red)}
+.oc-status.waiting{color:var(--amber)}
+.oc-status.idle{color:var(--dim)}
+
+/* FLOW ARROWS */
+.flow-arrow{text-align:center;padding:6px 0;color:var(--dim);font-size:18px;line-height:1;position:relative}
+.flow-arrow::after{content:attr(data-label);position:absolute;left:50%;transform:translateX(-50%);font-size:9px;font-family:var(--font-mono);color:var(--dim);bottom:-2px;white-space:nowrap}
+.flow-arrow.active-flow{color:var(--accent);animation:arrowPulse .6s ease infinite}
+@keyframes arrowPulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* METRIC ROW */
+.metric-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.metric-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.mc-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono);margin-bottom:5px}
+.mc-value{font-family:var(--font-mono);font-size:20px;font-weight:500;line-height:1;margin-bottom:2px}
+.mc-sub{font-size:10px;color:var(--muted)}
+
+/* TECH STACK ROW */
+.tech-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.tech-pill{padding:4px 10px;border-radius:20px;font-size:10px;font-family:var(--font-mono);border:1px solid}
+.tp-blue{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.2);color:var(--accent2)}
+.tp-teal{background:rgba(20,184,166,.08);border-color:rgba(20,184,166,.2);color:var(--teal)}
+.tp-amber{background:rgba(245,158,11,.08);border-color:rgba(245,158,11,.2);color:var(--amber)}
+.tp-purple{background:rgba(168,85,247,.08);border-color:rgba(168,85,247,.2);color:var(--purple)}
+.tp-gray{background:rgba(107,122,153,.08);border-color:rgba(107,122,153,.2);color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo"><div class="logo-dot"></div>Paille en Queue</div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-module">Event-Driven Architecture</div>
+  <div class="topbar-right">
+    <button class="reset-btn" onclick="resetSim()">↺ Reset</button>
+    <button class="sim-btn" id="sim-btn" onclick="startSimulation()">▶ Simuler une mission</button>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- ═══ LEFT: PIPELINE ═══ -->
+<div class="pipeline-panel">
+
+  <div class="page-title-wrap">
+    <div class="page-title">Pipeline événementiel automatisé</div>
+    <div class="page-sub">Dès la validation terrain, un événement système déclenche l'intégralité de la chaîne administrative sans intervention humaine. Cliquez sur <strong style="color:var(--purple)">▶ Simuler une mission</strong> pour voir le pipeline s'exécuter en temps réel.</div>
+  </div>
+
+  <!-- MÉTRIQUES -->
+  <div class="metric-row">
+    <div class="metric-card">
+      <div class="mc-label">Missions traitées</div>
+      <div class="mc-value" style="color:var(--teal)" id="m-missions">0</div>
+      <div class="mc-sub">Aujourd'hui</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Taux auto.</div>
+      <div class="mc-value" style="color:var(--green)" id="m-auto">—</div>
+      <div class="mc-sub">Sans intervention</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Anomalies</div>
+      <div class="mc-value" style="color:var(--amber)" id="m-anomalies">0</div>
+      <div class="mc-sub">À corriger</div>
+    </div>
+    <div class="metric-card">
+      <div class="mc-label">Temps moyen</div>
+      <div class="mc-value" style="color:var(--purple)" id="m-temps">—</div>
+      <div class="mc-sub">Pipeline complet</div>
+    </div>
+  </div>
+
+  <!-- ── LAYER 1: TERRAIN ── -->
+  <div class="layer-wrap">
+    <div class="layer-label">1 — Terrain (PDA Flutter)</div>
+    <div class="nodes-row">
+      <div class="node-card" id="node-pda" style="--node-color:var(--accent)">
+        <div class="node-status" id="ns-pda"></div>
+        <div class="node-icon" style="background:rgba(59,130,246,.12);color:var(--accent2)">📱</div>
+        <div class="node-name">PDA Terrain</div>
+        <div class="node-desc">Validation statuts · Signature · Scan docs · GPS track</div>
+      </div>
+      <div class="node-card" id="node-gps" style="--node-color:var(--teal)">
+        <div class="node-status" id="ns-gps"></div>
+        <div class="node-icon" style="background:rgba(20,184,166,.12);color:var(--teal)">📍</div>
+        <div class="node-name">Géolocalisation</div>
+        <div class="node-desc">Trajet réel · Kilométrage · Horodatage GPS</div>
+      </div>
+      <div class="node-card" id="node-sig" style="--node-color:var(--purple)">
+        <div class="node-status" id="ns-sig"></div>
+        <div class="node-icon" style="background:rgba(168,85,247,.12);color:var(--purple)">✍</div>
+        <div class="node-name">Signature + Docs</div>
+        <div class="node-desc">Signature patient · Scan vitale · Ordonnance</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow" id="arrow-1" data-label="MISSION_VALIDATED event émis">↓</div>
+
+  <!-- ── EVENT BUS ── -->
+  <div class="layer-wrap">
+    <div class="layer-label">2 — Event Bus (BullMQ / Redis)</div>
+    <div class="event-bus">
+      <div class="eb-label">Event Bus — Événements système</div>
+      <div class="eb-events">
+        <div class="eb-event" id="ev-1">MISSION_VALIDATED</div>
+        <div class="eb-event" id="ev-2">DOCS_UPLOADED</div>
+        <div class="eb-event" id="ev-3">GPS_TRACK_COMPLETE</div>
+        <div class="eb-event" id="ev-4">DOSSIER_CREATED</div>
+        <div class="eb-event" id="ev-5">COMPLIANCE_CHECKED</div>
+        <div class="eb-event" id="ev-6">INVOICE_READY</div>
+        <div class="eb-event" id="ev-7">CPAM_QUEUED</div>
+        <div class="eb-event" id="ev-8">PAYMENT_TRACKED</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow" id="arrow-2" data-label="Workers consomment les queues">↓</div>
+
+  <!-- ── LAYER 3: WORKERS ── -->
+  <div class="layer-wrap">
+    <div class="layer-label">3 — Workers backend (NestJS async)</div>
+    <div class="nodes-row">
+      <div class="node-card" id="node-sync" style="--node-color:var(--accent)">
+        <div class="node-status" id="ns-sync"></div>
+        <div class="node-icon" style="background:rgba(59,130,246,.12);color:var(--accent2)">⚡</div>
+        <div class="node-name">Sync Worker</div>
+        <div class="node-desc">Centralise données mission, équipage, patient, GPS</div>
+      </div>
+      <div class="node-card" id="node-dossier" style="--node-color:var(--teal)">
+        <div class="node-status" id="ns-dossier"></div>
+        <div class="node-icon" style="background:rgba(20,184,166,.12);color:var(--teal)">📁</div>
+        <div class="node-name">Dossier Worker</div>
+        <div class="node-desc">Crée dossier admin · Associe documents · Classe fichiers</div>
+      </div>
+      <div class="node-card" id="node-compliance" style="--node-color:var(--amber)">
+        <div class="node-status" id="ns-compliance"></div>
+        <div class="node-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">🔍</div>
+        <div class="node-name">Compliance Worker</div>
+        <div class="node-desc">Vérifie conformité · Contrôle NGAP · Droits CPAM</div>
+      </div>
+      <div class="node-card" id="node-invoice" style="--node-color:var(--purple)">
+        <div class="node-status" id="ns-invoice"></div>
+        <div class="node-icon" style="background:rgba(168,85,247,.12);color:var(--purple)">🧾</div>
+        <div class="node-name">Invoice Worker</div>
+        <div class="node-desc">Génère pré-facture · Calcule montants · NGAP codes</div>
+      </div>
+    </div>
+
+    <!-- QUEUES -->
+    <div class="queue-row">
+      <div class="queue-block">
+        <div class="queue-label">sync-queue</div>
+        <div class="queue-items" id="q-sync">
+          <div class="queue-item"></div>
+          <div class="queue-item"></div>
+          <div class="queue-item"></div>
+        </div>
+      </div>
+      <div class="queue-block">
+        <div class="queue-label">dossier-queue</div>
+        <div class="queue-items" id="q-dossier">
+          <div class="queue-item"></div>
+          <div class="queue-item"></div>
+          <div class="queue-item"></div>
+        </div>
+      </div>
+      <div class="queue-block">
+        <div class="queue-label">compliance-queue</div>
+        <div class="queue-items" id="q-compliance">
+          <div class="queue-item"></div>
+          <div class="queue-item"></div>
+          <div class="queue-item"></div>
+        </div>
+      </div>
+      <div class="queue-block">
+        <div class="queue-label">invoice-queue</div>
+        <div class="queue-items" id="q-invoice">
+          <div class="queue-item"></div>
+          <div class="queue-item"></div>
+          <div class="queue-item"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow" id="arrow-3" data-label="Contrôles automatiques">↓</div>
+
+  <!-- ── LAYER 4: CONTRÔLES ── -->
+  <div class="layer-wrap">
+    <div class="layer-label">4 — Contrôles automatiques de conformité</div>
+    <div class="checks-grid" id="checks-grid">
+      <div class="check-item" id="chk-ordonnance"><div class="check-dot"></div>Ordonnance présente</div>
+      <div class="check-item" id="chk-signature"><div class="check-dot"></div>Signature patient</div>
+      <div class="check-item" id="chk-trajet"><div class="check-dot"></div>Cohérence trajet</div>
+      <div class="check-item" id="chk-horaires"><div class="check-dot"></div>Horaires cohérents</div>
+      <div class="check-item" id="chk-droits"><div class="check-dot"></div>Droits patient CPAM</div>
+      <div class="check-item" id="chk-mutuelle"><div class="check-dot"></div>Mutuelle à jour</div>
+      <div class="check-item" id="chk-secu"><div class="check-dot"></div>N° Sécurité sociale</div>
+      <div class="check-item" id="chk-ngap"><div class="check-dot"></div>Code NGAP conforme</div>
+      <div class="check-item" id="chk-docs"><div class="check-dot"></div>Documents complets</div>
+    </div>
+
+    <!-- ANOMALY BOX -->
+    <div class="anomaly-box" id="anomaly-box">
+      <div class="anomaly-title">⚠ Anomalies détectées — Pipeline suspendu</div>
+      <div class="anomaly-items" id="anomaly-list"></div>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow" id="arrow-4" data-label="n8n workflows déclenchés">↓</div>
+
+  <!-- ── LAYER 5: n8n AUTOMATION ── -->
+  <div class="layer-wrap">
+    <div class="layer-label">5 — Automatisation n8n (workflows)</div>
+    <div class="nodes-row">
+      <div class="node-card" id="node-n8n1" style="--node-color:var(--teal)">
+        <div class="node-status" id="ns-n8n1"></div>
+        <div class="node-icon" style="background:rgba(20,184,166,.12);color:var(--teal)">⚙</div>
+        <div class="node-name">Prépare facturation</div>
+        <div class="node-desc">Calcule montants · Applique tarifs CPAM 2026</div>
+      </div>
+      <div class="node-card" id="node-n8n2" style="--node-color:var(--accent)">
+        <div class="node-status" id="ns-n8n2"></div>
+        <div class="node-icon" style="background:rgba(59,130,246,.12);color:var(--accent2)">📤</div>
+        <div class="node-name">Prépare CPAM</div>
+        <div class="node-desc">Génère fichier SESAM · Prépare lot télétransmission</div>
+      </div>
+      <div class="node-card" id="node-n8n3" style="--node-color:var(--purple)">
+        <div class="node-status" id="ns-n8n3"></div>
+        <div class="node-icon" style="background:rgba(168,85,247,.12);color:var(--purple)">📊</div>
+        <div class="node-name">Écriture comptable</div>
+        <div class="node-desc">Journal comptable · Rapprochement · Export Sage</div>
+      </div>
+      <div class="node-card" id="node-n8n4" style="--node-color:var(--green)">
+        <div class="node-status" id="ns-n8n4"></div>
+        <div class="node-icon" style="background:rgba(34,197,94,.1);color:var(--green)">🔔</div>
+        <div class="node-name">Notifications</div>
+        <div class="node-desc">Alertes admin · SMS patient · Dashboard updates</div>
+      </div>
+    </div>
+    <div class="tech-row">
+      <span class="tech-pill tp-amber">n8n workflows</span>
+      <span class="tech-pill tp-teal">BullMQ</span>
+      <span class="tech-pill tp-blue">Redis Queue</span>
+      <span class="tech-pill tp-gray">RabbitMQ fallback</span>
+      <span class="tech-pill tp-purple">Async workers</span>
+      <span class="tech-pill tp-gray">Dead letter queue</span>
+    </div>
+  </div>
+
+  <!-- ARROW -->
+  <div class="flow-arrow" id="arrow-5" data-label="Sorties pipeline">↓</div>
+
+  <!-- ── LAYER 6: OUTPUTS ── -->
+  <div class="layer-wrap">
+    <div class="layer-label">6 — Sorties automatisées</div>
+    <div class="outputs-row">
+      <div class="output-card" id="out-dossier">
+        <div class="oc-icon">📋</div>
+        <div class="oc-label">Dossier admin</div>
+        <div class="oc-status idle" id="ocs-dossier">En attente</div>
+      </div>
+      <div class="output-card" id="out-facture">
+        <div class="oc-icon">🧾</div>
+        <div class="oc-label">Pré-facture</div>
+        <div class="oc-status idle" id="ocs-facture">En attente</div>
+      </div>
+      <div class="output-card" id="out-cpam">
+        <div class="oc-icon">📤</div>
+        <div class="oc-label">Lot CPAM</div>
+        <div class="oc-status idle" id="ocs-cpam">En attente</div>
+      </div>
+      <div class="output-card" id="out-compta">
+        <div class="oc-icon">📊</div>
+        <div class="oc-label">Écriture comptable</div>
+        <div class="oc-status idle" id="ocs-compta">En attente</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- pipeline-panel -->
+
+<!-- ═══ RIGHT: LOG ═══ -->
+<div class="log-panel">
+  <div class="log-header">
+    <div class="log-title">Journal système</div>
+    <div class="log-count" id="log-count">0 événements</div>
+  </div>
+  <div class="log-scroll" id="log-scroll">
+    <div style="text-align:center;color:var(--dim);font-size:11px;padding:20px 0">
+      En attente de simulation…<br>Cliquez sur ▶ Simuler une mission
+    </div>
+  </div>
+</div>
+
+</div><!-- layout -->
+
+<script>
+let simRunning=false;
+let logCount=0;
+let missionCount=0;
+let anomalyCount=0;
+let simTimeout=[];
+
+const SCENARIO_CLEAN=0; // 0=propre, 1=anomalie
+
+function log(text,color='var(--muted)',dot=null){
+  const scroll=document.getElementById('log-scroll');
+  if(logCount===0)scroll.innerHTML='';
+  logCount++;
+  document.getElementById('log-count').textContent=logCount+' événement'+(logCount>1?'s':'');
+  const now=new Date();
+  const t=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0')+':'+String(now.getSeconds()).padStart(2,'0');
+  const entry=document.createElement('div');
+  entry.className='log-entry';
+  const dotColor=dot||color;
+  entry.innerHTML=`<span class="log-time">${t}</span><div class="log-dot" style="background:${dotColor}"></div><div class="log-text" style="color:${color}">${text}</div>`;
+  scroll.appendChild(entry);
+  setTimeout(()=>entry.classList.add('visible'),10);
+  scroll.scrollTop=scroll.scrollHeight;
+}
+
+function setNode(id,state){
+  const el=document.getElementById('node-'+id);
+  const ns=document.getElementById('ns-'+id);
+  if(!el||!ns)return;
+  el.classList.remove('active','done','error-state');
+  ns.classList.remove('active','done','error','node-pulse');
+  if(state==='active'){el.classList.add('active');ns.classList.add('active','node-pulse')}
+  else if(state==='done'){el.classList.add('done');ns.classList.add('done')}
+  else if(state==='error'){el.classList.add('error-state');ns.classList.add('error')}
+}
+
+function fireEvent(id){
+  const el=document.getElementById('ev-'+id);
+  if(!el)return;
+  el.classList.add('fired');
+  setTimeout(()=>el.classList.remove('fired'),1200);
+}
+
+function setQueue(id,step){
+  const items=document.querySelectorAll('#q-'+id+' .queue-item');
+  items.forEach((it,i)=>{
+    it.classList.remove('processing','done');
+    if(i<step)it.classList.add('done');
+    else if(i===step)it.classList.add('processing');
+  });
+}
+
+function setCheck(id,state){
+  const el=document.getElementById('chk-'+id);
+  if(!el)return;
+  el.classList.remove('ok','fail','pending');
+  el.classList.add(state);
+}
+
+function setArrow(id,active){
+  const el=document.getElementById('arrow-'+id);
+  if(!el)return;
+  el.classList.toggle('active-flow',active);
+}
+
+function setOutput(id,state,label){
+  const card=document.getElementById('out-'+id);
+  const status=document.getElementById('ocs-'+id);
+  if(!card||!status)return;
+  card.classList.remove('ready','blocked');
+  status.classList.remove('ready','blocked','waiting','idle');
+  if(state==='ready'){card.classList.add('ready');status.classList.add('ready');status.textContent=label||'Généré ✓'}
+  else if(state==='blocked'){card.classList.add('blocked');status.classList.add('blocked');status.textContent=label||'Bloqué ✗'}
+  else if(state==='waiting'){status.classList.add('waiting');status.textContent=label||'En cours…'}
+}
+
+function after(ms,fn){
+  const t=setTimeout(fn,ms);
+  simTimeout.push(t);
+  return t;
+}
+
+function startSimulation(){
+  if(simRunning)return;
+  simRunning=true;
+  const btn=document.getElementById('sim-btn');
+  btn.classList.add('running');
+  btn.textContent='⏳ Pipeline en cours…';
+
+  const hasAnomaly=Math.random()>.5;
+  const startMs=Date.now();
+
+  // === STEP 1 — TERRAIN ===
+  log('▶ Mission MIS-5503 validée par équipage AMB-07','var(--accent2)');
+  setNode('pda','active');
+  after(400,()=>{
+    setNode('gps','active');
+    log('📍 Trajet GPS finalisé — 8,2 km · 00:47:12','var(--teal)');
+    fireEvent(1);
+  });
+  after(800,()=>{
+    setNode('sig','active');
+    log('✍ Signature patient reçue — chiffrée AES-256','var(--purple)');
+    fireEvent(2); fireEvent(3);
+    setArrow(1,true);
+  });
+
+  // === STEP 2 — EVENT BUS ===
+  after(1200,()=>{
+    setNode('pda','done'); setNode('gps','done'); setNode('sig','done');
+    log('⚡ Événement MISSION_VALIDATED émis sur Event Bus','var(--accent)');
+    setArrow(1,false); setArrow(2,true);
+  });
+
+  // === STEP 3 — WORKERS ===
+  after(1600,()=>{
+    setNode('sync','active');
+    setQueue('sync',0);
+    log('⚙ SyncWorker démarré — centralisation données','var(--accent2)');
+  });
+  after(2200,()=>{
+    setQueue('sync',1);
+    log('   → Données mission · équipage · patient · GPS agrégées','var(--muted)');
+  });
+  after(2800,()=>{
+    setQueue('sync',2);
+    setNode('sync','done');
+    setNode('dossier','active');
+    setQueue('dossier',0);
+    log('✓ SyncWorker terminé — données centralisées en BDD','var(--green)');
+    log('⚙ DossierWorker démarré — création dossier administratif','var(--teal)');
+    fireEvent(4);
+  });
+  after(3400,()=>{
+    setQueue('dossier',1);
+    log('   → Dossier FAC-8831 créé · documents associés · fichiers classés','var(--muted)');
+  });
+  after(3900,()=>{
+    setQueue('dossier',2);
+    setNode('dossier','done');
+    setNode('compliance','active');
+    setQueue('compliance',0);
+    log('✓ DossierWorker terminé — FAC-8831 prêt','var(--green)');
+    log('⚙ ComplianceWorker démarré — contrôles de conformité','var(--amber)');
+    setArrow(2,false); setArrow(3,true);
+  });
+
+  // === STEP 4 — CHECKS ===
+  const checks=['ordonnance','signature','trajet','horaires','droits','mutuelle','secu','ngap','docs'];
+  const checkDelay=[4200,4400,4600,4700,4900,5100,5300,5500,5700];
+  const failCheck=hasAnomaly?'ordonnance':null;
+
+  checks.forEach((c,i)=>{
+    after(checkDelay[i],()=>{
+      const state=(c===failCheck)?'fail':'ok';
+      setCheck(c,state);
+      setQueue('compliance',Math.floor(i/3));
+      if(state==='ok')log(`   ✓ ${c.charAt(0).toUpperCase()+c.slice(1)} — conforme`,'var(--muted)');
+      else log(`   ✗ ${c.charAt(0).toUpperCase()+c.slice(1)} — MANQUANT`,'var(--red)');
+    });
+  });
+
+  after(6000,()=>{
+    setQueue('compliance',2);
+    setArrow(3,false);
+
+    if(hasAnomaly){
+      setNode('compliance','error');
+      anomalyCount++;
+      document.getElementById('m-anomalies').textContent=anomalyCount;
+      const box=document.getElementById('anomaly-box');
+      const list=document.getElementById('anomaly-list');
+      box.classList.add('show');
+      list.innerHTML=`
+        <div class="anomaly-item"><span>⚠</span>Ordonnance médicale manquante — télétransmission bloquée</div>
+        <div class="anomaly-item"><span>→</span>Ticket de correction créé · Admin notifiée · Dashboard alerté</div>
+      `;
+      log('⚠ ANOMALIE — Ordonnance manquante sur FAC-8831','var(--red)');
+      log('   → Ticket TKT-0041 créé · Alerte envoyée à l\'administration','var(--amber)');
+      log('   → Télétransmission CPAM suspendue jusqu\'à correction','var(--red)');
+      fireEvent(5);
+      setOutput('dossier','waiting','En correction');
+      setOutput('facture','blocked','Bloquée');
+      setOutput('cpam','blocked','Suspendue');
+      setOutput('compta','waiting','En attente');
+      finishSim(startMs,false);
+    } else {
+      setNode('compliance','done');
+      log('✓ ComplianceWorker — dossier 100% conforme','var(--green)');
+      fireEvent(5);
+      setArrow(4,true);
+
+      // WORKERS INVOICE + n8n
+      after(6400,()=>{
+        setNode('invoice','active');
+        setQueue('invoice',0);
+        log('⚙ InvoiceWorker démarré — calcul montants','var(--purple)');
+      });
+      after(7000,()=>{
+        setQueue('invoice',1);
+        log('   → AMB 27,30 € + MCI 18,00 € + IFI 4,00 € + KM 8,2×0,62=72,64 €','var(--muted)');
+      });
+      after(7600,()=>{
+        setQueue('invoice',2);
+        setNode('invoice','done');
+        setNode('n8n1','active');
+        log('✓ Pré-facture générée — 121,94 € TTC','var(--green)');
+        fireEvent(6);
+        setArrow(4,false); setArrow(5,true);
+      });
+      after(8100,()=>{
+        setNode('n8n1','done');
+        setNode('n8n2','active');
+        log('✓ n8n:facturation — tarifs CPAM 2026 appliqués','var(--teal)');
+        setOutput('dossier','ready','Créé ✓');
+        setOutput('facture','ready','Générée ✓');
+      });
+      after(8700,()=>{
+        setNode('n8n2','done');
+        setNode('n8n3','active');
+        log('✓ n8n:cpam — fichier SESAM préparé · lot #LOT-2026-05-06 complété','var(--accent2)');
+        fireEvent(7);
+        setOutput('cpam','ready','Dans le lot ✓');
+      });
+      after(9300,()=>{
+        setNode('n8n3','done');
+        setNode('n8n4','active');
+        log('✓ n8n:comptabilité — écriture journal · rapprochement effectué','var(--purple)');
+        fireEvent(8);
+        setOutput('compta','ready','Écrit ✓');
+      });
+      after(9900,()=>{
+        setNode('n8n4','done');
+        setArrow(5,false);
+        log('✓ n8n:notifications — admin informée · dashboard mis à jour','var(--green)');
+        log('━━ Pipeline FAC-8831 terminé avec succès ━━','var(--green)');
+        finishSim(startMs,true);
+      });
+    }
+  });
+}
+
+function finishSim(startMs,success){
+  missionCount++;
+  document.getElementById('m-missions').textContent=missionCount;
+  const elapsed=((Date.now()-startMs)/1000).toFixed(1);
+  document.getElementById('m-temps').textContent=elapsed+'s';
+  document.getElementById('m-auto').textContent=success?'100%':'—';
+
+  const btn=document.getElementById('sim-btn');
+  btn.classList.remove('running');
+  btn.textContent=success?'▶ Simuler à nouveau':'▶ Simuler (propre)';
+  simRunning=false;
+}
+
+function resetSim(){
+  simTimeout.forEach(clearTimeout);
+  simTimeout=[];
+  simRunning=false;
+
+  // Reset nodes
+  ['pda','gps','sig','sync','dossier','compliance','invoice','n8n1','n8n2','n8n3','n8n4'].forEach(id=>setNode(id,''));
+  // Reset queues
+  ['sync','dossier','compliance','invoice'].forEach(id=>{
+    document.querySelectorAll('#q-'+id+' .queue-item').forEach(it=>it.classList.remove('processing','done'));
+  });
+  // Reset events
+  for(let i=1;i<=8;i++){const el=document.getElementById('ev-'+i);if(el)el.classList.remove('fired');}
+  // Reset checks
+  ['ordonnance','signature','trajet','horaires','droits','mutuelle','secu','ngap','docs'].forEach(id=>{
+    const el=document.getElementById('chk-'+id);
+    if(el)el.classList.remove('ok','fail','pending');
+  });
+  // Reset anomaly
+  const box=document.getElementById('anomaly-box');
+  box.classList.remove('show');
+  // Reset outputs
+  ['dossier','facture','cpam','compta'].forEach(id=>{
+    const card=document.getElementById('out-'+id);
+    const status=document.getElementById('ocs-'+id);
+    if(card)card.classList.remove('ready','blocked');
+    if(status){status.classList.remove('ready','blocked','waiting');status.classList.add('idle');status.textContent='En attente';}
+  });
+  // Reset arrows
+  for(let i=1;i<=5;i++)setArrow(i,false);
+  // Reset log
+  const scroll=document.getElementById('log-scroll');
+  scroll.innerHTML='<div style="text-align:center;color:var(--dim);font-size:11px;padding:20px 0">En attente de simulation…<br>Cliquez sur ▶ Simuler une mission</div>';
+  logCount=0;
+  document.getElementById('log-count').textContent='0 événements';
+  // Reset btn
+  const btn=document.getElementById('sim-btn');
+  btn.classList.remove('running');
+  btn.textContent='▶ Simuler une mission';
+}
+</script>
+</body>
+</html>
