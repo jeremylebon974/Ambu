@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paille en Queue — Dispatch Central</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;
+  --bg2:#0d1017;
+  --bg3:#111622;
+  --border:#1e2535;
+  --border2:#2a3348;
+  --text:#e8ecf5;
+  --muted:#6b7a99;
+  --dim:#3a4560;
+  --accent:#3b82f6;
+  --accent2:#60a5fa;
+  --green:#22c55e;
+  --green2:#16a34a;
+  --amber:#f59e0b;
+  --red:#ef4444;
+  --red2:#dc2626;
+  --teal:#14b8a6;
+  --purple:#a855f7;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:13px;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* TOPBAR */
+.topbar{height:52px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:20px;flex-shrink:0;z-index:10}
+.logo{font-family:var(--font-head);font-weight:800;font-size:15px;letter-spacing:.02em;color:var(--text);display:flex;align-items:center;gap:8px}
+.logo-dot{width:8px;height:8px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(59,130,246,.5)}50%{box-shadow:0 0 0 6px rgba(59,130,246,0)}}
+.topbar-divider{width:1px;height:24px;background:var(--border2)}
+.topbar-stat{display:flex;flex-direction:column;gap:1px}
+.topbar-stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono)}
+.topbar-stat-value{font-size:14px;font-weight:500;font-family:var(--font-mono)}
+.topbar-stat-value.green{color:var(--green)}
+.topbar-stat-value.amber{color:var(--amber)}
+.topbar-stat-value.red{color:var(--red)}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.clock{font-family:var(--font-mono);font-size:18px;font-weight:500;color:var(--text);letter-spacing:.05em}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff}
+.status-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;font-family:var(--font-mono);display:flex;align-items:center;gap:5px}
+.status-pill.live{background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink .9s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* MAIN LAYOUT */
+.main{display:flex;flex:1;overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:12px 0;flex-shrink:0}
+.nav-section{padding:0 12px;margin-bottom:4px}
+.nav-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;padding:8px 8px 4px;font-family:var(--font-mono)}
+.nav-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:all .15s;color:var(--muted);font-size:13px;font-weight:400;margin:1px 0}
+.nav-item:hover{background:var(--bg3);color:var(--text)}
+.nav-item.active{background:rgba(59,130,246,.12);color:var(--accent2);border:1px solid rgba(59,130,246,.2)}
+.nav-icon{width:16px;height:16px;opacity:.8}
+.nav-badge{margin-left:auto;font-size:10px;font-family:var(--font-mono);background:var(--red2);color:#fff;padding:2px 6px;border-radius:10px}
+.nav-badge.amber{background:rgba(245,158,11,.2);color:var(--amber)}
+
+/* CENTER PANEL */
+.center{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.panel-header{padding:14px 20px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;flex-shrink:0}
+.panel-title{font-family:var(--font-head);font-size:15px;font-weight:700;color:var(--text)}
+.panel-sub{font-size:12px;color:var(--muted)}
+.tabs{display:flex;gap:2px;margin-left:auto}
+.tab{padding:5px 14px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--muted);transition:all .15s}
+.tab.active{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.tab:hover:not(.active){color:var(--text)}
+
+/* MAP AREA */
+.map-zone{flex:1;position:relative;background:var(--bg);overflow:hidden}
+.map-canvas{width:100%;height:100%;position:relative}
+/* Simulated map grid */
+.map-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.3}
+.map-roads{position:absolute;inset:0}
+/* Roads SVG overlay */
+.map-label{position:absolute;font-size:10px;color:var(--dim);font-family:var(--font-mono);pointer-events:none}
+/* Ambulance markers */
+.amb{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:5}
+.amb-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--bg);position:relative;transition:transform .2s}
+.amb:hover .amb-dot{transform:scale(1.4)}
+.amb-dot.green{background:var(--green);box-shadow:0 0 10px rgba(34,197,94,.6)}
+.amb-dot.amber{background:var(--amber);box-shadow:0 0 10px rgba(245,158,11,.5)}
+.amb-dot.red{background:var(--red);box-shadow:0 0 10px rgba(239,68,68,.6)}
+.amb-dot.gray{background:var(--dim)}
+.amb-ring{position:absolute;inset:-6px;border-radius:50%;border:1px solid currentColor;animation:ring 2s infinite;opacity:0}
+.amb-dot.green .amb-ring{border-color:var(--green)}
+@keyframes ring{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.8);opacity:0}}
+.amb-tooltip{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:6px 10px;white-space:nowrap;font-size:11px;pointer-events:none;opacity:0;transition:opacity .15s;z-index:10}
+.amb:hover .amb-tooltip{opacity:1}
+.amb-id{font-family:var(--font-mono);font-weight:500;color:var(--text)}
+.amb-status{font-size:10px;color:var(--muted)}
+/* Mission route */
+.route-line{position:absolute;pointer-events:none;z-index:2}
+
+/* MAP OVERLAY UI */
+.map-controls{position:absolute;top:12px;right:12px;display:flex;flex-direction:column;gap:6px;z-index:6}
+.map-btn{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border2);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:16px;transition:all .15s}
+.map-btn:hover{border-color:var(--border2);color:var(--text);background:var(--bg3)}
+
+.map-legend{position:absolute;bottom:12px;left:12px;background:rgba(13,16,23,.85);border:1px solid var(--border);border-radius:10px;padding:10px 14px;backdrop-filter:blur(8px);z-index:6}
+.legend-row{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);margin:3px 0}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+.alert-banner{position:absolute;top:12px;left:12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:8px 14px;backdrop-filter:blur(8px);z-index:6;display:flex;align-items:center;gap:8px;max-width:260px;animation:slideIn .3s ease}
+@keyframes slideIn{from{transform:translateY(-10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.alert-icon{width:20px;height:20px;background:rgba(239,68,68,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.alert-text{font-size:11px;color:#fca5a5;line-height:1.4}
+.alert-time{font-size:10px;font-family:var(--font-mono);color:var(--muted);margin-top:2px}
+
+/* RIGHT PANEL */
+.right-panel{width:280px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0}
+.rp-header{padding:14px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.rp-title{font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--text)}
+.rp-count{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
+.rp-scroll{flex:1;overflow-y:auto;padding:8px}
+.rp-scroll::-webkit-scrollbar{width:3px}
+.rp-scroll::-webkit-scrollbar-track{background:transparent}
+.rp-scroll::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* MISSION CARDS */
+.mission-card{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.mission-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.mission-card.urgence::before{background:var(--red)}
+.mission-card.en-cours::before{background:var(--green)}
+.mission-card.attente::before{background:var(--amber)}
+.mission-card.planifie::before{background:var(--accent)}
+.mission-card:hover{border-color:var(--border2);background:#141b2d;transform:translateX(2px)}
+.mc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.mc-id{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.mc-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500;font-family:var(--font-mono)}
+.mc-badge.urgence{background:rgba(239,68,68,.15);color:var(--red)}
+.mc-badge.en-cours{background:rgba(34,197,94,.12);color:var(--green)}
+.mc-badge.attente{background:rgba(245,158,11,.12);color:var(--amber)}
+.mc-badge.planifie{background:rgba(59,130,246,.12);color:var(--accent2)}
+.mc-patient{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.mc-route{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-bottom:5px}
+.mc-route-arrow{color:var(--dim);font-size:10px}
+.mc-footer{display:flex;align-items:center;justify-content:space-between}
+.mc-amb{font-size:11px;font-family:var(--font-mono);color:var(--accent2)}
+.mc-eta{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
+.mc-eta.late{color:var(--red)}
+
+/* BOTTOM METRICS */
+.bottom-metrics{height:80px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:0;flex-shrink:0}
+.metric{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-right:1px solid var(--border);padding:0 8px}
+.metric:last-child{border-right:none}
+.metric-value{font-family:var(--font-mono);font-size:22px;font-weight:500;line-height:1;margin-bottom:3px}
+.metric-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;text-align:center}
+.metric-delta{font-size:10px;font-family:var(--font-mono);margin-top:1px}
+.metric-delta.up{color:var(--green)}
+.metric-delta.down{color:var(--red)}
+.metric-delta.neutral{color:var(--muted)}
+
+/* ASSIGN BUTTON */
+.assign-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:rgba(59,130,246,.15);border:1px solid rgba(59,130,246,.3);border-radius:8px;color:var(--accent2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;margin:8px;flex-shrink:0}
+.assign-btn:hover{background:rgba(59,130,246,.25);border-color:rgba(59,130,246,.5)}
+
+/* SECTION DIVIDER */
+.rp-section-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;padding:6px 4px 3px;font-family:var(--font-mono)}
+
+/* SQUAD STATUS */
+.squad-row{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background .15s;margin-bottom:2px}
+.squad-row:hover{background:var(--bg3)}
+.squad-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:11px;font-weight:500;flex-shrink:0}
+.squad-av.green{background:rgba(34,197,94,.15);color:var(--green)}
+.squad-av.amber{background:rgba(245,158,11,.12);color:var(--amber)}
+.squad-av.red{background:rgba(239,68,68,.12);color:var(--red)}
+.squad-av.gray{background:rgba(58,69,96,.3);color:var(--dim)}
+.squad-info{flex:1;min-width:0}
+.squad-name{font-size:12px;color:var(--text);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.squad-mission{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+.squad-time{font-size:10px;font-family:var(--font-mono);color:var(--muted);flex-shrink:0}
+
+/* Notification dot */
+.notif-dot{width:6px;height:6px;background:var(--red);border-radius:50%;position:absolute;top:6px;right:6px}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    Paille en Queue
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="status-pill live"><div class="dot-live"></div>Dispatch actif</div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-stat">
+    <span class="topbar-stat-label">Disponibles</span>
+    <span class="topbar-stat-value green" id="stat-dispo">12</span>
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-stat">
+    <span class="topbar-stat-label">En mission</span>
+    <span class="topbar-stat-value amber" id="stat-mission">31</span>
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-stat">
+    <span class="topbar-stat-label">Urgences</span>
+    <span class="topbar-stat-value red" id="stat-urgence">3</span>
+  </div>
+  <div class="topbar-divider"></div>
+  <div class="topbar-stat">
+    <span class="topbar-stat-label">Retards</span>
+    <span class="topbar-stat-value amber" id="stat-retard">2</span>
+  </div>
+  <div class="topbar-right">
+    <div class="clock" id="clock">--:--:--</div>
+    <div class="topbar-divider"></div>
+    <div class="avatar">JM</div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="nav-section">
+      <div class="nav-label">Principal</div>
+      <div class="nav-item active">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" style="position:relative">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="7" r="3"/><path d="M8 10v5M5 14h6"/><path d="M1 7h2M13 7h2M2.5 2.5l1.5 1.5M12 2.5l-1.5 1.5"/></svg>
+        Dispatch
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1L10 6H15L11 9.5L12.5 15L8 12L3.5 15L5 9.5L1 6H6Z"/></svg>
+        Missions
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="10" rx="2"/><path d="M5 7h6M5 10h4"/></svg>
+        Patients
+      </div>
+    </div>
+    <div class="nav-section">
+      <div class="nav-label">Gestion</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z"/><path d="M5 6h6M5 9h4"/></svg>
+        Facturation
+        <span class="nav-badge amber">7</span>
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="5" height="8" rx="1"/><rect x="9" y="4" width="5" height="8" rx="1"/><path d="M7 8h2"/></svg>
+        Flotte
+      </div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+        Analytique
+      </div>
+    </div>
+    <div class="nav-section" style="margin-top:auto">
+      <div class="nav-label">Système</div>
+      <div class="nav-item">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.1 3.1l1.4 1.4M11.5 11.5l1.4 1.4M3.1 12.9l1.4-1.4M11.5 4.5l1.4-1.4"/></svg>
+        Paramètres
+      </div>
+    </div>
+  </div>
+
+  <!-- CENTER: MAP -->
+  <div class="center">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Carte temps réel</div>
+        <div class="panel-sub" id="map-subtitle">Région Sud — 50 véhicules actifs</div>
+      </div>
+      <div class="tabs">
+        <div class="tab active">Carte</div>
+        <div class="tab">Tableau</div>
+        <div class="tab">Timeline</div>
+      </div>
+    </div>
+
+    <div class="map-zone">
+      <div class="map-canvas">
+        <div class="map-grid"></div>
+
+        <!-- SVG roads layer -->
+        <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+          <!-- Main roads -->
+          <path d="M0 250 Q200 240 400 260 Q600 280 800 250" stroke="#1e2535" stroke-width="6" fill="none"/>
+          <path d="M0 180 Q100 200 200 190 Q300 180 400 200 Q500 220 600 210 Q700 200 800 190" stroke="#1a2030" stroke-width="4" fill="none"/>
+          <path d="M380 0 Q390 120 400 260 Q410 380 420 500" stroke="#1e2535" stroke-width="6" fill="none"/>
+          <path d="M200 0 Q210 150 220 300 Q230 400 240 500" stroke="#1a2030" stroke-width="4" fill="none"/>
+          <path d="M600 0 Q605 150 610 300 Q615 400 620 500" stroke="#1a2030" stroke-width="4" fill="none"/>
+          <path d="M0 380 Q400 360 800 380" stroke="#1a2030" stroke-width="3" fill="none"/>
+          <!-- Diagonal roads -->
+          <path d="M0 0 Q200 150 400 260" stroke="#171f2e" stroke-width="3" fill="none"/>
+          <path d="M800 0 Q600 150 400 260" stroke="#171f2e" stroke-width="3" fill="none"/>
+          <!-- Mission route highlight -->
+          <path d="M200 320 Q280 270 380 260 Q450 255 520 210" stroke="#3b82f6" stroke-width="2.5" fill="none" stroke-dasharray="8 4" opacity="0.7"/>
+          <path d="M420 260 Q480 300 560 340" stroke="#22c55e" stroke-width="2" fill="none" stroke-dasharray="6 4" opacity="0.6"/>
+          <!-- City blocks -->
+          <rect x="300" y="160" width="60" height="40" fill="#0d1017" stroke="#1a2030" stroke-width="1" rx="2"/>
+          <rect x="420" y="170" width="70" height="35" fill="#0d1017" stroke="#1a2030" stroke-width="1" rx="2"/>
+          <rect x="150" y="300" width="50" height="40" fill="#0d1017" stroke="#1a2030" stroke-width="1" rx="2"/>
+          <rect x="530" y="280" width="55" height="45" fill="#0d1017" stroke="#1a2030" stroke-width="1" rx="2"/>
+          <!-- Zone labels -->
+          <text x="305" y="187" fill="#2a3348" font-size="8" font-family="DM Mono,monospace">CENTRE</text>
+          <text x="425" y="193" fill="#2a3348" font-size="8" font-family="DM Mono,monospace">ST-PIERRE</text>
+          <text x="155" y="325" fill="#2a3348" font-size="8" font-family="DM Mono,monospace">NORD</text>
+          <text x="535" y="305" fill="#2a3348" font-size="8" font-family="DM Mono,monospace">EST</text>
+        </svg>
+
+        <!-- Ambulances -->
+        <div class="amb" style="left:25%;top:64%">
+          <div class="amb-dot green"><div class="amb-ring"></div></div>
+          <div class="amb-tooltip"><div class="amb-id">AMB-07</div><div class="amb-status">Disponible · Secteur Nord</div></div>
+        </div>
+        <div class="amb" style="left:48%;top:52%">
+          <div class="amb-dot amber"></div>
+          <div class="amb-tooltip"><div class="amb-id">AMB-12</div><div class="amb-status">En mission · CHU → Domicile</div></div>
+        </div>
+        <div class="amb" style="left:65%;top:42%">
+          <div class="amb-dot green"><div class="amb-ring"></div></div>
+          <div class="amb-tooltip"><div class="amb-id">AMB-03</div><div class="amb-status">Disponible · Secteur Est</div></div>
+        </div>
+        <div class="amb" style="left:72%;top:68%">
+          <div class="amb-dot red"></div>
+          <div class="amb-tooltip"><div class="amb-id">AMB-19</div><div class="amb-status">⚠ Urgence · ETA 4 min</div></div>
+        </div>
+        <div class="amb" style="left:35%;top:38%">
+          <div class="amb-dot amber"></div>
+          <div class="amb-tooltip"><div class="amb-id">AMB-05</div><div class="amb-status">Retour base · 8 min</div></div>
+        </div>
+        <div class="amb" style="left:55%;top:75%">
+          <div class="amb-dot gray"></div>
+          <div class="amb-tooltip"><div class="amb-id">AMB-22</div><div class="amb-status">Pause · Reprise 14h30</div></div>
+        </div>
+        <div class="amb" style="left:18%;top:45%">
+          <div class="amb-dot green"><div class="amb-ring"></div></div>
+          <div class="amb-tooltip"><div class="amb-id">AMB-01</div><div class="amb-status">Disponible · Secteur Ouest</div></div>
+        </div>
+        <div class="amb" style="left:82%;top:30%">
+          <div class="amb-dot amber"></div>
+          <div class="amb-tooltip"><div class="amb-id">AMB-31</div><div class="amb-status">En mission · Clinique → EHPAD</div></div>
+        </div>
+
+        <!-- Alert -->
+        <div class="alert-banner">
+          <div class="alert-icon">⚠</div>
+          <div>
+            <div class="alert-text">AMB-19 retard estimé +12 min — Mission URG-4821</div>
+            <div class="alert-time">14:23:07 · Réassignation suggérée : AMB-03</div>
+          </div>
+        </div>
+
+        <!-- Map controls -->
+        <div class="map-controls">
+          <div class="map-btn" title="Zoom +">+</div>
+          <div class="map-btn" title="Zoom −">−</div>
+          <div class="map-btn" title="Recentrer" style="font-size:12px">⊕</div>
+          <div class="map-btn" title="Couches" style="font-size:12px">⊞</div>
+        </div>
+
+        <!-- Legend -->
+        <div class="map-legend">
+          <div class="legend-row"><div class="legend-dot" style="background:var(--green)"></div>Disponible</div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--amber)"></div>En mission</div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--red)"></div>Urgence</div>
+          <div class="legend-row"><div class="legend-dot" style="background:var(--dim)"></div>Indisponible</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM METRICS -->
+    <div class="bottom-metrics">
+      <div class="metric">
+        <div class="metric-value" style="color:var(--green)">12</div>
+        <div class="metric-label">Disponibles</div>
+        <div class="metric-delta up">+2 vs hier</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="color:var(--amber)">31</div>
+        <div class="metric-label">En mission</div>
+        <div class="metric-delta neutral">= hier</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="color:var(--red)">3</div>
+        <div class="metric-label">Urgences</div>
+        <div class="metric-delta down">+1 vs hier</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="color:var(--teal)">94%</div>
+        <div class="metric-label">Taux ponctualité</div>
+        <div class="metric-delta up">+2%</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="color:var(--purple)">18<span style="font-size:13px;color:var(--muted)">min</span></div>
+        <div class="metric-label">Temps moy. mission</div>
+        <div class="metric-delta up">−3 min</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" style="color:var(--accent2)">127</div>
+        <div class="metric-label">Missions aujourd'hui</div>
+        <div class="metric-delta up">+14 vs hier</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL: MISSIONS + ÉQUIPAGES -->
+  <div class="right-panel">
+    <div class="rp-header">
+      <div class="rp-title">Missions actives</div>
+      <div class="rp-count" id="rp-count">34 missions</div>
+    </div>
+
+    <div class="assign-btn">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="5"/><path d="M7 4v6M4 7h6"/></svg>
+      Nouvelle mission
+    </div>
+
+    <div class="rp-scroll">
+      <div class="rp-section-label">Urgences</div>
+
+      <div class="mission-card urgence">
+        <div class="mc-top">
+          <span class="mc-id">URG-4821</span>
+          <span class="mc-badge urgence">URGENCE</span>
+        </div>
+        <div class="mc-patient">Dubois, Michel</div>
+        <div class="mc-route">
+          <span>SAMU 44</span>
+          <span class="mc-route-arrow">→</span>
+          <span>CHU Nantes</span>
+        </div>
+        <div class="mc-footer">
+          <span class="mc-amb">AMB-19</span>
+          <span class="mc-eta late">+12 min retard</span>
+        </div>
+      </div>
+
+      <div class="mission-card urgence">
+        <div class="mc-top">
+          <span class="mc-id">URG-4819</span>
+          <span class="mc-badge urgence">URGENCE</span>
+        </div>
+        <div class="mc-patient">Martin, Suzanne</div>
+        <div class="mc-route">
+          <span>Domicile</span>
+          <span class="mc-route-arrow">→</span>
+          <span>Clinique Brézillet</span>
+        </div>
+        <div class="mc-footer">
+          <span class="mc-amb">AMB-07</span>
+          <span class="mc-eta">ETA 8 min</span>
+        </div>
+      </div>
+
+      <div class="rp-section-label" style="margin-top:6px">En cours</div>
+
+      <div class="mission-card en-cours">
+        <div class="mc-top">
+          <span class="mc-id">MIS-5503</span>
+          <span class="mc-badge en-cours">En cours</span>
+        </div>
+        <div class="mc-patient">Leroy, André</div>
+        <div class="mc-route">
+          <span>CHU Nantes</span>
+          <span class="mc-route-arrow">→</span>
+          <span>EHPAD Les Pins</span>
+        </div>
+        <div class="mc-footer">
+          <span class="mc-amb">AMB-12</span>
+          <span class="mc-eta">ETA 14 min</span>
+        </div>
+      </div>
+
+      <div class="mission-card en-cours">
+        <div class="mc-top">
+          <span class="mc-id">MIS-5501</span>
+          <span class="mc-badge en-cours">En cours</span>
+        </div>
+        <div class="mc-patient">Bernard, Claire</div>
+        <div class="mc-route">
+          <span>Clinique Brézillet</span>
+          <span class="mc-route-arrow">→</span>
+          <span>Domicile</span>
+        </div>
+        <div class="mc-footer">
+          <span class="mc-amb">AMB-31</span>
+          <span class="mc-eta">ETA 22 min</span>
+        </div>
+      </div>
+
+      <div class="mission-card en-cours">
+        <div class="mc-top">
+          <span class="mc-id">MIS-5498</span>
+          <span class="mc-badge en-cours">En cours</span>
+        </div>
+        <div class="mc-patient">Petit, François</div>
+        <div class="mc-route">
+          <span>Domicile</span>
+          <span class="mc-route-arrow">→</span>
+          <span>Centre Dialyse</span>
+        </div>
+        <div class="mc-footer">
+          <span class="mc-amb">AMB-05</span>
+          <span class="mc-eta">ETA 6 min</span>
+        </div>
+      </div>
+
+      <div class="rp-section-label" style="margin-top:6px">En attente d'assignation</div>
+
+      <div class="mission-card attente">
+        <div class="mc-top">
+          <span class="mc-id">MIS-5507</span>
+          <span class="mc-badge attente">Attente</span>
+        </div>
+        <div class="mc-patient">Rousseau, Hélène</div>
+        <div class="mc-route">
+          <span>EHPAD Val Fleuri</span>
+          <span class="mc-route-arrow">→</span>
+          <span>CHU — Cardiologie</span>
+        </div>
+        <div class="mc-footer">
+          <span class="mc-amb" style="color:var(--amber)">Non assigné</span>
+          <span class="mc-eta">Départ 15h00</span>
+        </div>
+      </div>
+
+      <div class="mission-card attente">
+        <div class="mc-top">
+          <span class="mc-id">MIS-5508</span>
+          <span class="mc-badge attente">Attente</span>
+        </div>
+        <div class="mc-patient">Moreau, Jean-Luc</div>
+        <div class="mc-route">
+          <span>Domicile</span>
+          <span class="mc-route-arrow">→</span>
+          <span>Clinique — Radio</span>
+        </div>
+        <div class="mc-footer">
+          <span class="mc-amb" style="color:var(--amber)">Non assigné</span>
+          <span class="mc-eta">Départ 15h30</span>
+        </div>
+      </div>
+
+      <div class="rp-section-label" style="margin-top:6px">Équipages disponibles</div>
+
+      <div class="squad-row">
+        <div class="squad-av green">07</div>
+        <div class="squad-info">
+          <div class="squad-name">Dupont / Garnier</div>
+          <div class="squad-mission">Disponible · Secteur Nord</div>
+        </div>
+        <div class="squad-time" style="color:var(--green)">Libre</div>
+      </div>
+      <div class="squad-row">
+        <div class="squad-av green">03</div>
+        <div class="squad-info">
+          <div class="squad-name">Lambert / Faure</div>
+          <div class="squad-mission">Disponible · Secteur Est</div>
+        </div>
+        <div class="squad-time" style="color:var(--green)">Libre</div>
+      </div>
+      <div class="squad-row">
+        <div class="squad-av green">01</div>
+        <div class="squad-info">
+          <div class="squad-name">Renard / Morin</div>
+          <div class="squad-mission">Disponible · Secteur Ouest</div>
+        </div>
+        <div class="squad-time" style="color:var(--green)">Libre</div>
+      </div>
+      <div class="squad-row">
+        <div class="squad-av amber">05</div>
+        <div class="squad-info">
+          <div class="squad-name">Girard / Colin</div>
+          <div class="squad-mission">Retour base</div>
+        </div>
+        <div class="squad-time">8 min</div>
+      </div>
+      <div class="squad-row">
+        <div class="squad-av gray">22</div>
+        <div class="squad-info">
+          <div class="squad-name">Blanc / Thomas</div>
+          <div class="squad-mission">Pause réglementaire</div>
+        </div>
+        <div class="squad-time">14h30</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Clock
+function updateClock(){
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  const s = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById('clock').textContent = h+':'+m+':'+s;
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+// Simulate live updates
+const statMission = document.getElementById('stat-mission');
+const statDispo = document.getElementById('stat-dispo');
+let missionCount = 31;
+setInterval(()=>{
+  const delta = Math.random() > .7 ? (Math.random() > .5 ? 1 : -1) : 0;
+  missionCount = Math.max(25, Math.min(38, missionCount + delta));
+  statMission.textContent = missionCount;
+}, 8000);
+
+// Tab switching
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+
+// Nav items
+document.querySelectorAll('.nav-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+
+// Mission card hover highlight
+document.querySelectorAll('.mission-card').forEach(card=>{
+  card.addEventListener('click',()=>{
+    document.querySelectorAll('.mission-card').forEach(c=>c.style.background='');
+    card.style.background='#1a2540';
+  });
+});
+
+// Animate ambulances subtly
+const ambs = document.querySelectorAll('.amb');
+ambs.forEach((amb,i)=>{
+  const baseLeft = parseFloat(amb.style.left);
+  const baseTop = parseFloat(amb.style.top);
+  const dot = amb.querySelector('.amb-dot');
+  if(dot.classList.contains('amber')||dot.classList.contains('green')&&i%2===0){
+    let t=0;
+    setInterval(()=>{
+      t += 0.02;
+      const dx = Math.sin(t + i) * 0.3;
+      const dy = Math.cos(t * .7 + i) * 0.2;
+      amb.style.left = (baseLeft + dx) + '%';
+      amb.style.top = (baseTop + dy) + '%';
+    }, 80);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paille en Queue — PDA Terrain</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07090f;--bg2:#0d1017;--bg3:#111622;--bg4:#161e30;
+  --border:#1e2535;--border2:#2a3348;
+  --text:#e8ecf5;--muted:#6b7a99;--dim:#3a4560;
+  --accent:#3b82f6;--accent2:#60a5fa;
+  --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+  --teal:#14b8a6;--purple:#a855f7;
+  --font-head:'Syne',sans-serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'DM Mono',monospace;
+}
+body{background:#0f1117;color:var(--text);font-family:var(--font-body);font-size:13px;min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding:40px 24px}
+
+/* SCENE */
+.scene{display:flex;gap:48px;align-items:flex-start;max-width:1100px;width:100%}
+
+/* PHONE FRAME */
+.phone-wrap{flex-shrink:0;position:relative}
+.phone-frame{width:375px;background:#0a0c12;border-radius:48px;border:2px solid #1e2535;overflow:hidden;position:relative;box-shadow:0 40px 80px rgba(0,0,0,.6),0 0 0 1px #2a3348}
+.phone-notch{height:44px;background:#0a0c12;display:flex;align-items:center;justify-content:space-between;padding:12px 24px 0;position:relative;z-index:10}
+.notch-time{font-family:var(--font-mono);font-size:14px;font-weight:500;color:var(--text)}
+.notch-icons{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text)}
+.phone-screen{height:780px;overflow:hidden;position:relative}
+
+/* STATUS BAR (connexion + batterie) */
+.status-bar{background:var(--bg2);padding:8px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0}
+.status-left{display:flex;align-items:center;gap:8px}
+.conn-pill{display:flex;align-items:center;gap:4px;padding:3px 8px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);border-radius:20px;font-size:10px;color:var(--green);font-family:var(--font-mono)}
+.conn-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink .9s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.status-amb{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
+.battery{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+
+/* SCREENS */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .3s;background:var(--bg)}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+.screen.slide-left{transform:translateX(-100%);opacity:0;pointer-events:none}
+
+/* ── SCREEN: HOME ── */
+.home-header{padding:20px 18px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.home-greeting{font-size:12px;color:var(--muted);margin-bottom:2px}
+.home-name{font-family:var(--font-head);font-size:20px;font-weight:800;color:var(--text);margin-bottom:10px}
+.home-shift{display:flex;align-items:center;justify-content:space-between}
+.shift-pill{display:flex;align-items:center;gap:5px;padding:5px 12px;background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.2);border-radius:20px;font-size:11px;color:var(--teal);font-family:var(--font-mono)}
+.shift-clock{font-family:var(--font-mono);font-size:13px;color:var(--muted)}
+
+.home-body{flex:1;overflow-y:auto;padding:16px 14px}
+.home-body::-webkit-scrollbar{display:none}
+
+/* Mission card active */
+.active-mission{background:linear-gradient(135deg,#0d1a2e,#111e35);border:1px solid rgba(59,130,246,.3);border-radius:18px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;cursor:pointer}
+.active-mission::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--teal))}
+.am-status{display:flex;align-items:center;gap:6px;margin-bottom:10px}
+.am-badge{font-size:10px;padding:3px 8px;border-radius:10px;font-family:var(--font-mono);font-weight:500}
+.am-badge.en-route{background:rgba(59,130,246,.15);color:var(--accent2);border:1px solid rgba(59,130,246,.25)}
+.am-badge.urgence{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.25);animation:pulse-border 1.5s infinite}
+@keyframes pulse-border{0%,100%{border-color:rgba(239,68,68,.25)}50%{border-color:rgba(239,68,68,.7)}}
+.am-id{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.am-patient{font-family:var(--font-head);font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px}
+.am-route{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px;margin-bottom:14px}
+.am-route-arrow{color:var(--accent2)}
+.am-eta-row{display:flex;gap:10px}
+.am-eta-box{flex:1;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center}
+.am-eta-label{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono);margin-bottom:3px}
+.am-eta-value{font-family:var(--font-mono);font-size:18px;font-weight:500}
+
+/* Nav actions */
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.action-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;display:flex;flex-direction:column;align-items:flex-start;gap:8px;cursor:pointer;transition:all .18s;position:relative;overflow:hidden}
+.action-card:hover,.action-card:active{background:var(--bg3);border-color:var(--border2);transform:scale(.98)}
+.action-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.action-label{font-size:13px;font-weight:500;color:var(--text);line-height:1.2}
+.action-sub{font-size:10px;color:var(--muted);font-family:var(--font-mono)}
+.action-badge{position:absolute;top:10px;right:10px;background:var(--red);color:#fff;font-size:9px;font-family:var(--font-mono);padding:2px 6px;border-radius:10px}
+
+/* Next missions mini */
+.section-label{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;font-family:var(--font-mono);margin-bottom:8px}
+.mini-mission{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.mini-mission:hover{background:var(--bg3);border-color:var(--border2)}
+.mini-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.mini-info{flex:1}
+.mini-patient{font-size:13px;font-weight:500;color:var(--text)}
+.mini-time{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+.mini-eta{font-size:11px;font-family:var(--font-mono);color:var(--muted)}
+
+/* ── SCREEN: MISSION DETAIL ── */
+.mission-screen{display:flex;flex-direction:column}
+.ms-header{padding:16px 18px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.ms-back{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);margin-bottom:10px;cursor:pointer}
+.ms-title{font-family:var(--font-head);font-size:18px;font-weight:800;color:var(--text);margin-bottom:3px}
+.ms-sub{font-size:11px;color:var(--muted);font-family:var(--font-mono)}
+
+.ms-body{flex:1;overflow-y:auto;padding:14px}
+.ms-body::-webkit-scrollbar{display:none}
+
+/* Map mini */
+.map-mini{height:140px;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;position:relative;margin-bottom:14px}
+.map-mini-grid{position:absolute;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:20px 20px;opacity:.4}
+.map-mini-route{position:absolute;inset:0}
+.map-car{position:absolute;left:30%;top:55%;transform:translate(-50%,-50%);width:12px;height:12px;background:var(--accent);border-radius:50%;box-shadow:0 0 8px var(--accent);animation:moveCar 4s ease-in-out infinite alternate}
+@keyframes moveCar{from{left:30%}to{left:50%}}
+.map-dest{position:absolute;right:22%;top:28%;transform:translate(50%,-50%);width:12px;height:12px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green)}
+.map-eta-chip{position:absolute;bottom:10px;right:10px;background:rgba(13,16,23,.9);border:1px solid var(--border2);border-radius:8px;padding:5px 10px;font-family:var(--font-mono);font-size:11px;color:var(--teal)}
+
+/* Patient info */
+.info-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:14px;margin-bottom:10px}
+.info-card-title{font-size:10px;color:var(--dim);text-transform:uppercase;letter-spacing:.07em;font-family:var(--font-mono);margin-bottom:10px}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:11px;color:var(--muted)}
+.info-value{font-size:12px;font-weight:500;color:var(--text);font-family:var(--font-mono)}
+.info-value.alert{color:var(--red)}
+
+/* Status buttons */
+.status-steps{margin-bottom:14px}
+.step-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg2);margin-bottom:6px;cursor:pointer;transition:all .18s}
+.step-row.done{background:rgba(34,197,94,.05);border-color:rgba(34,197,94,.2)}
+.step-row.active{background:rgba(59,130,246,.08);border-color:rgba(59,130,246,.3);box-shadow:0 0 0 1px rgba(59,130,246,.1)}
+.step-row:hover:not(.done){background:var(--bg3)}
+.step-check{width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .2s}
+.step-row.done .step-check{background:var(--green);border-color:var(--green);color:#000}
+.step-row.active .step-check{border-color:var(--accent);color:var(--accent)}
+.step-info{flex:1}
+.step-label{font-size:13px;font-weight:500;color:var(--text)}
+.step-time{font-size:10px;font-family:var(--font-mono);color:var(--muted)}
+.step-caret{color:var(--dim);font-size:12px}
+
+/* Action buttons big */
+.big-btn{width:100%;padding:14px;border-radius:14px;font-size:14px;font-weight:600;font-family:var(--font-head);cursor:pointer;border:none;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .18s;margin-bottom:8px}
+.big-btn.primary{background:var(--accent);color:#fff}
+.big-btn.primary:hover{background:#2563eb;transform:scale(.99)}
+.big-btn.success{background:var(--green);color:#000}
+.big-btn.ghost{background:var(--bg2);color:var(--muted);border:1px solid var(--border2)}
+.big-btn.danger{background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.25)}
+
+/* ── SCREEN: SIGNATURE ── */
+.sig-screen{}
+.sig-header{padding:16px 18px 14px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0}
+.sig-canvas-wrap{flex:1;display:flex;flex-direction:column;align-items:center;padding:20px 18px;gap:14px}
+.sig-label{font-size:12px;color:var(--muted);text-align:center;line-height:1.5}
+canvas#sigCanvas{background:var(--bg2);border:1px solid var(--border2);border-radius:14px;touch-action:none;cursor:crosshair;width:100%}
+.sig-actions{display:flex;gap:8px;width:100%;padding:0 18px 20px}
+
+/* ── SCREEN: SCAN ── */
+.scan-screen{}
+.scan-viewfinder{flex:1;display:flex;align-items:center;justify-content:center;position:relative;background:#000;overflow:hidden}
+.scan-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.scan-frame{position:relative;z-index:2;width:240px;height:160px}
+.scan-corner{position:absolute;width:24px;height:24px;border-color:var(--teal);border-style:solid}
+.scan-corner.tl{top:0;left:0;border-width:3px 0 0 3px;border-radius:4px 0 0 0}
+.scan-corner.tr{top:0;right:0;border-width:3px 3px 0 0;border-radius:0 4px 0 0}
+.scan-corner.bl{bottom:0;left:0;border-width:0 0 3px 3px;border-radius:0 0 0 4px}
+.scan-corner.br{bottom:0;right:0;border-width:0 3px 3px 0;border-radius:0 0 4px 0}
+.scan-line{position:absolute;left:4px;right:4px;height:2px;background:linear-gradient(90deg,transparent,var(--teal),transparent);top:50%;animation:scanAnim 2s ease-in-out infinite}
+@keyframes scanAnim{0%,100%{top:10%}50%{top:88%}}
+.scan-hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);font-size:12px;color:rgba(255,255,255,.5);white-space:nowrap;z-index:2;font-family:var(--font-mono)}
+.scan-controls{padding:16px 18px;background:var(--bg2);border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0}
+
+/* ── INCIDENT SCREEN ── */
+.incident-body{flex:1;overflow-y:auto;padding:14px}
+.incident-body::-webkit-scrollbar{display:none}
+.inc-field{margin-bottom:12px}
+.inc-label{font-size:11px;color:var(--muted);margin-bottom:5px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:.06em}
+.inc-select{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;appearance:none}
+.inc-select:focus{border-color:var(--teal)}
+.inc-textarea{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;color:var(--text);font-size:13px;font-family:var(--font-body);outline:none;resize:none;min-height:90px;line-height:1.5}
+.inc-textarea:focus{border-color:var(--teal)}
+.severity-row{display:flex;gap:6px}
+.sev-btn{flex:1;padding:8px;border-radius:8px;border:1px solid var(--border2);background:var(--bg2);color:var(--muted);font-size:12px;text-align:center;cursor:pointer;transition:all .15s;font-family:var(--font-mono)}
+.sev-btn.sel-low{background:rgba(34,197,94,.12);border-color:rgba(34,197,94,.3);color:var(--green)}
+.sev-btn.sel-med{background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3);color:var(--amber)}
+.sev-btn.sel-high{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3);color:var(--red)}
+
+/* BOTTOM NAV */
+.bottom-nav{height:64px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 10px;flex-shrink:0}
+.bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all .15s;padding:6px 14px;border-radius:12px;position:relative}
+.bn-item.active{background:rgba(59,130,246,.1)}
+.bn-icon{font-size:20px;opacity:.5;transition:all .15s}
+.bn-item.active .bn-icon{opacity:1}
+.bn-label{font-size:9px;color:var(--muted);font-family:var(--font-mono)}
+.bn-item.active .bn-label{color:var(--accent2)}
+.bn-dot{position:absolute;top:4px;right:10px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--bg2)}
+
+/* EXPLAINER PANEL */
+.explainer{flex:1;min-width:0}
+.exp-title{font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--text);margin-bottom:6px}
+.exp-sub{font-size:14px;color:var(--muted);margin-bottom:32px;line-height:1.6}
+.exp-section{margin-bottom:28px}
+.exp-section-title{font-family:var(--font-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.exp-section-title::before{content:'';width:3px;height:16px;background:var(--teal);border-radius:2px;display:block}
+.exp-item{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:#0d1017;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;cursor:pointer;transition:all .15s}
+.exp-item:hover{background:#111622;border-color:var(--border2)}
+.exp-item.active-item{border-color:rgba(59,130,246,.35);background:#0d1628}
+.exp-item-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.exp-item-body{flex:1}
+.exp-item-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px}
+.exp-item-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.exp-stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.stack-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-family:var(--font-mono);background:var(--bg3);border:1px solid var(--border2);color:var(--muted)}
+.stack-pill.teal{background:rgba(20,184,166,.1);border-color:rgba(20,184,166,.25);color:var(--teal)}
+</style>
+</head>
+<body>
+
+<div class="scene">
+
+  <!-- PHONE -->
+  <div class="phone-wrap">
+    <div class="phone-frame">
+      <!-- Notch -->
+      <div class="phone-notch">
+        <div class="notch-time" id="phone-clock">14:23</div>
+        <div class="notch-icons">
+          <span>▲▲▲</span>
+          <span>WiFi</span>
+          <span>🔋82%</span>
+        </div>
+      </div>
+
+      <div class="phone-screen" id="phone-screen">
+
+        <!-- STATUS BAR -->
+        <div class="status-bar">
+          <div class="status-left">
+            <div class="conn-pill"><div class="conn-dot"></div>Sync</div>
+            <span class="status-amb">AMB-07 · Dupont T.</span>
+          </div>
+          <div class="battery">GPS ✓</div>
+        </div>
+
+        <!-- ═══ SCREEN: HOME ═══ -->
+        <div class="screen" id="screen-home">
+          <div class="home-header">
+            <div class="home-greeting">Bonjour,</div>
+            <div class="home-name">Thomas Dupont</div>
+            <div class="home-shift">
+              <div class="shift-pill">
+                <div class="conn-dot"></div>
+                Service · 06:00–18:00
+              </div>
+              <div class="shift-clock" id="shift-clock">14:23</div>
+            </div>
+          </div>
+
+          <div class="home-body">
+            <!-- Mission active -->
+            <div class="active-mission" onclick="goTo('screen-mission')">
+              <div class="am-status">
+                <span class="am-badge en-route">En route</span>
+                <span class="am-id">MIS-5503</span>
+              </div>
+              <div class="am-patient">Leroy, André</div>
+              <div class="am-route">
+                <span>CHU Nantes</span>
+                <span class="am-route-arrow">→</span>
+                <span>EHPAD Les Pins</span>
+              </div>
+              <div class="am-eta-row">
+                <div class="am-eta-box">
+                  <div class="am-eta-label">ETA</div>
+                  <div class="am-eta-value" style="color:var(--teal)" id="eta-counter">14 min</div>
+                </div>
+                <div class="am-eta-box">
+                  <div class="am-eta-label">Distance</div>
+                  <div class="am-eta-value" style="color:var(--text)">8,2 km</div>
+                </div>
+                <div class="am-eta-box">
+                  <div class="am-eta-label">Priorité</div>
+                  <div class="am-eta-value" style="color:var(--amber)">P2</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Actions rapides -->
+            <div class="action-grid">
+              <div class="action-card" onclick="goTo('screen-signature')">
+                <div class="action-icon" style="background:rgba(59,130,246,.12);color:var(--accent2)">✍</div>
+                <div class="action-label">Signature patient</div>
+                <div class="action-sub">En attente</div>
+              </div>
+              <div class="action-card" onclick="goTo('screen-scan')">
+                <div class="action-icon" style="background:rgba(20,184,166,.12);color:var(--teal)">⬛</div>
+                <div class="action-label">Scanner doc.</div>
+                <div class="action-sub">Carte vitale / ordo</div>
+              </div>
+              <div class="action-card" onclick="goTo('screen-incident')">
+                <div class="action-icon" style="background:rgba(239,68,68,.1);color:var(--red)">⚠</div>
+                <div class="action-label">Incident terrain</div>
+                <div class="action-sub">Signaler</div>
+                <div class="action-badge">!</div>
+              </div>
+              <div class="action-card" onclick="goTo('screen-mission')">
+                <div class="action-icon" style="background:rgba(168,85,247,.12);color:var(--purple)">📋</div>
+                <div class="action-label">Détail mission</div>
+                <div class="action-sub">Patient + statuts</div>
+              </div>
+            </div>
+
+            <!-- Prochaines missions -->
+            <div class="section-label">Prochaines missions</div>
+            <div class="mini-mission" onclick="goTo('screen-mission')">
+              <div class="mini-dot" style="background:var(--amber)"></div>
+              <div class="mini-info">
+                <div class="mini-patient">Rousseau, Hélène</div>
+                <div class="mini-time">EHPAD Val Fleuri → CHU · 15h00</div>
+              </div>
+              <div class="mini-eta">+38 min</div>
+            </div>
+            <div class="mini-mission">
+              <div class="mini-dot" style="background:var(--accent)"></div>
+              <div class="mini-info">
+                <div class="mini-patient">Garnier, Paul</div>
+                <div class="mini-time">Domicile → Clinique · 16h30</div>
+              </div>
+              <div class="mini-eta">+2h07</div>
+            </div>
+          </div>
+
+          <!-- BOTTOM NAV -->
+          <div class="bottom-nav">
+            <div class="bn-item active" onclick="goTo('screen-home')">
+              <div class="bn-icon">🏠</div>
+              <div class="bn-label">Accueil</div>
+            </div>
+            <div class="bn-item" onclick="goTo('screen-mission')">
+              <div class="bn-icon">🗺</div>
+              <div class="bn-label">Mission</div>
+              <div class="bn-dot"></div>
+            </div>
+            <div class="bn-item" onclick="goTo('screen-scan')">
+              <div class="bn-icon">📷</div>
+              <div class="bn-label">Scanner</div>
+            </div>
+            <div class="bn-item" onclick="goTo('screen-incident')">
+              <div class="bn-icon">⚠️</div>
+              <div class="bn-label">Incident</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ SCREEN: MISSION DETAIL ═══ -->
+        <div class="screen hidden" id="screen-mission">
+          <div class="ms-header">
+            <div class="ms-back" onclick="goBack()">← Retour</div>
+            <div class="ms-title">MIS-5503</div>
+            <div class="ms-sub">Leroy, André · EHPAD Les Pins</div>
+          </div>
+          <div class="ms-body">
+            <!-- Map mini -->
+            <div class="map-mini">
+              <div class="map-mini-grid"></div>
+              <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 375 140" preserveAspectRatio="xMidYMid slice">
+                <path d="M80 80 Q160 60 230 50 Q280 45 320 35" stroke="var(--accent)" stroke-width="2.5" fill="none" stroke-dasharray="6 3" opacity=".7"/>
+                <circle cx="80" cy="80" r="5" fill="var(--accent)" opacity=".8"/>
+                <circle cx="320" cy="35" r="6" fill="var(--green)"/>
+                <circle cx="320" cy="35" r="12" fill="none" stroke="var(--green)" stroke-width="1" opacity=".4"/>
+              </svg>
+              <div class="map-car"></div>
+              <div class="map-eta-chip">14 min · 8,2 km</div>
+            </div>
+
+            <!-- Patient info -->
+            <div class="info-card">
+              <div class="info-card-title">Patient</div>
+              <div class="info-row"><span class="info-label">Nom</span><span class="info-value">Leroy, André</span></div>
+              <div class="info-row"><span class="info-label">DDN</span><span class="info-value">14/03/1942</span></div>
+              <div class="info-row"><span class="info-label">N° Sécu</span><span class="info-value">1 42 03 75 082 024</span></div>
+              <div class="info-row"><span class="info-label">Mutuelle</span><span class="info-value">CPAM 44</span></div>
+              <div class="info-row"><span class="info-label">Allergie</span><span class="info-value alert">Pénicilline</span></div>
+              <div class="info-row"><span class="info-label">Motif</span><span class="info-value">Retour hospit.</span></div>
+            </div>
+
+            <!-- Étapes statut -->
+            <div class="section-label" style="margin-bottom:8px">Statuts mission</div>
+            <div class="status-steps">
+              <div class="step-row done">
+                <div class="step-check">✓</div>
+                <div class="step-info">
+                  <div class="step-label">Mission reçue</div>
+                  <div class="step-time">13:45 · Auto</div>
+                </div>
+              </div>
+              <div class="step-row done">
+                <div class="step-check">✓</div>
+                <div class="step-info">
+                  <div class="step-label">Départ base</div>
+                  <div class="step-time">14:02</div>
+                </div>
+              </div>
+              <div class="step-row done">
+                <div class="step-check">✓</div>
+                <div class="step-info">
+                  <div class="step-label">Arrivée CHU</div>
+                  <div class="step-time">14:18</div>
+                </div>
+              </div>
+              <div class="step-row active" id="step-charge" onclick="validerEtape(this,'Chargement patient','14:23')">
+                <div class="step-check">→</div>
+                <div class="step-info">
+                  <div class="step-label">Chargement patient</div>
+                  <div class="step-time">En cours…</div>
+                </div>
+                <div class="step-caret">Valider</div>
+              </div>
+              <div class="step-row" id="step-route" onclick="validerEtape(this,'En route destination','')">
+                <div class="step-check"></div>
+                <div class="step-info">
+                  <div class="step-label">En route destination</div>
+                  <div class="step-time">—</div>
+                </div>
+              </div>
+              <div class="step-row" id="step-arrivee" onclick="validerEtape(this,'Arrivée destination','')">
+                <div class="step-check"></div>
+                <div class="step-info">
+                  <div class="step-label">Arrivée EHPAD</div>
+                  <div class="step-time">—</div>
+                </div>
+              </div>
+              <div class="step-row" id="step-termine" onclick="validerEtape(this,'Mission terminée','')">
+                <div class="step-check"></div>
+                <div class="step-info">
+                  <div class="step-label">Mission terminée</div>
+                  <div class="step-time">—</div>
+                </div>
+              </div>
+            </div>
+
+            <button class="big-btn primary" onclick="goTo('screen-signature')">✍ Faire signer le patient</button>
+            <button class="big-btn ghost" onclick="goBack()">← Retour accueil</button>
+          </div>
+        </div>
+
+        <!-- ═══ SCREEN: SIGNATURE ═══ -->
+        <div class="screen hidden" id="screen-signature">
+          <div class="ms-header">
+            <div class="ms-back" onclick="goBack()">← Retour</div>
+            <div class="ms-title">Signature patient</div>
+            <div class="ms-sub">MIS-5503 · Leroy André</div>
+          </div>
+          <div class="sig-canvas-wrap">
+            <div class="sig-label">Veuillez demander au patient de signer dans le cadre ci-dessous pour valider le transport.</div>
+            <canvas id="sigCanvas" width="339" height="220"></canvas>
+            <div style="font-size:11px;color:var(--dim);font-family:var(--font-mono);text-align:center">Signature confidentielle · Chiffrée AES-256 · HDS</div>
+          </div>
+          <div class="sig-actions">
+            <button class="big-btn ghost" style="flex:1;margin:0" onclick="clearSig()">Effacer</button>
+            <button class="big-btn success" style="flex:2;margin:0;margin-left:8px" onclick="saveSig()">✓ Valider signature</button>
+          </div>
+        </div>
+
+        <!-- ═══ SCREEN: SCAN ═══ -->
+        <div class="screen hidden" id="screen-scan">
+          <div class="ms-header">
+            <div class="ms-back" onclick="goBack()">← Retour</div>
+            <div class="ms-title">Scanner document</div>
+            <div class="ms-sub">Carte vitale · Ordonnance · Bon transport</div>
+          </div>
+          <div class="scan-viewfinder">
+            <div class="scan-overlay"></div>
+            <div class="scan-frame">
+              <div class="scan-corner tl"></div>
+              <div class="scan-corner tr"></div>
+              <div class="scan-corner bl"></div>
+              <div class="scan-corner br"></div>
+              <div class="scan-line"></div>
+            </div>
+            <div class="scan-hint">Centrez le document dans le cadre</div>
+          </div>
+          <div class="scan-controls">
+            <button class="big-btn ghost" style="flex:1;margin:0" onclick="goBack()">Annuler</button>
+            <button class="big-btn primary" style="flex:2;margin:0;margin-left:8px" onclick="simulateScan()">📷 Capturer</button>
+          </div>
+        </div>
+
+        <!-- ═══ SCREEN: INCIDENT ═══ -->
+        <div class="screen hidden" id="screen-incident">
+          <div class="ms-header">
+            <div class="ms-back" onclick="goBack()">← Retour</div>
+            <div class="ms-title">Signaler un incident</div>
+            <div class="ms-sub">MIS-5503 · Transmis au régulateur</div>
+          </div>
+          <div class="incident-body">
+            <div class="inc-field">
+              <div class="inc-label">Type d'incident</div>
+              <select class="inc-select">
+                <option>Chute du patient</option>
+                <option>Panne véhicule</option>
+                <option>Retard trafic</option>
+                <option>Refus de transport</option>
+                <option>Problème médical</option>
+                <option>Accident de route</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div class="inc-field">
+              <div class="inc-label">Gravité</div>
+              <div class="severity-row">
+                <div class="sev-btn sel-low" onclick="setSev(this,'low')">Faible</div>
+                <div class="sev-btn" onclick="setSev(this,'med')">Modéré</div>
+                <div class="sev-btn" onclick="setSev(this,'high')">Urgent</div>
+              </div>
+            </div>
+            <div class="inc-field">
+              <div class="inc-label">Description</div>
+              <textarea class="inc-textarea" placeholder="Décrivez l'incident en quelques mots…"></textarea>
+            </div>
+            <div class="inc-field">
+              <div class="inc-label">Localisation GPS</div>
+              <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:10px;padding:10px 12px;font-family:var(--font-mono);font-size:12px;color:var(--teal)">47.2184° N, 1.5536° W · Auto-détecté</div>
+            </div>
+            <button class="big-btn danger" onclick="sendIncident()">⚠ Envoyer au régulateur</button>
+            <button class="big-btn ghost" onclick="goBack()">Annuler</button>
+          </div>
+        </div>
+
+      </div><!-- phone-screen -->
+    </div><!-- phone-frame -->
+  </div><!-- phone-wrap -->
+
+  <!-- EXPLAINER -->
+  <div class="explainer">
+    <div class="exp-title">PDA Terrain</div>
+    <div class="exp-sub">Interface mobile embarquée dans chaque ambulance. Conçue pour être utilisée avec des gants, en mouvement, en toutes conditions. Synchronisation temps réel avec le dispatch.</div>
+
+    <div class="exp-section">
+      <div class="exp-section-title">Écrans disponibles</div>
+      <div class="exp-item active-item" onclick="goTo('screen-home');setActive(this)">
+        <div class="exp-item-icon" style="background:rgba(59,130,246,.1);color:var(--accent2)">🏠</div>
+        <div class="exp-item-body">
+          <div class="exp-item-title">Accueil & missions du jour</div>
+          <div class="exp-item-desc">Mission active, ETA live, actions rapides, liste des prochaines missions.</div>
+        </div>
+      </div>
+      <div class="exp-item" onclick="goTo('screen-mission');setActive(this)">
+        <div class="exp-item-icon" style="background:rgba(20,184,166,.1);color:var(--teal)">🗺</div>
+        <div class="exp-item-body">
+          <div class="exp-item-title">Détail mission & statuts</div>
+          <div class="exp-item-desc">Carte GPS mini, fiche patient, étapes de mission à valider en un tap.</div>
+        </div>
+      </div>
+      <div class="exp-item" onclick="goTo('screen-signature');setActive(this)">
+        <div class="exp-item-icon" style="background:rgba(168,85,247,.1);color:var(--purple)">✍</div>
+        <div class="exp-item-body">
+          <div class="exp-item-title">Signature électronique patient</div>
+          <div class="exp-item-desc">Pad de signature tactile. Stockage chiffré AES-256, conforme HDS.</div>
+        </div>
+      </div>
+      <div class="exp-item" onclick="goTo('screen-scan');setActive(this)">
+        <div class="exp-item-icon" style="background:rgba(34,197,94,.1);color:var(--green)">📷</div>
+        <div class="exp-item-body">
+          <div class="exp-item-title">Scanner de documents</div>
+          <div class="exp-item-desc">Carte vitale, ordonnance, bon de transport. OCR automatique côté serveur.</div>
+        </div>
+      </div>
+      <div class="exp-item" onclick="goTo('screen-incident');setActive(this)">
+        <div class="exp-item-icon" style="background:rgba(239,68,68,.1);color:var(--red)">⚠</div>
+        <div class="exp-item-body">
+          <div class="exp-item-title">Signalement incident terrain</div>
+          <div class="exp-item-desc">Type, gravité, description, GPS auto. Alerte immédiate au régulateur.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-section">
+      <div class="exp-section-title">Stack technique</div>
+      <div class="exp-stack">
+        <span class="stack-pill teal">Flutter 3</span>
+        <span class="stack-pill teal">Dart</span>
+        <span class="stack-pill">WebSocket</span>
+        <span class="stack-pill">GPS natif</span>
+        <span class="stack-pill">Offline-first</span>
+        <span class="stack-pill">SQLite local</span>
+        <span class="stack-pill">AES-256</span>
+        <span class="stack-pill">OCR cloud</span>
+        <span class="stack-pill">Push notifs</span>
+        <span class="stack-pill">HDS compliant</span>
+      </div>
+    </div>
+
+    <div class="exp-section">
+      <div class="exp-section-title">Points clés UX terrain</div>
+      <div class="exp-item">
+        <div class="exp-item-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">👆</div>
+        <div class="exp-item-body">
+          <div class="exp-item-title">Grandes zones tactiles</div>
+          <div class="exp-item-desc">Boutons ≥ 44px, utilisables avec des gants d'examen ou en conduite.</div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-item-icon" style="background:rgba(20,184,166,.1);color:var(--teal)">📶</div>
+        <div class="exp-item-body">
+          <div class="exp-item-title">Mode hors-ligne automatique</div>
+          <div class="exp-item-desc">SQLite local, sync auto dès que le réseau revient. Zéro perte de données.</div>
+        </div>
+      </div>
+      <div class="exp-item">
+        <div class="exp-item-icon" style="background:rgba(59,130,246,.1);color:var(--accent2)">⚡</div>
+        <div class="exp-item-body">
+          <div class="exp-item-title">Temps réel WebSocket</div>
+          <div class="exp-item-desc">Nouvelles missions, alertes dispatch et mises à jour ETA en push, sans refresh.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Clock
+function tick(){
+  const n=new Date();
+  const t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  document.getElementById('phone-clock').textContent=t;
+  document.getElementById('shift-clock').textContent=t;
+}
+tick(); setInterval(tick,10000);
+
+// Screen navigation
+let currentScreen='screen-home';
+let history=[];
+function goTo(id){
+  if(id===currentScreen)return;
+  const cur=document.getElementById(currentScreen);
+  const next=document.getElementById(id);
+  cur.classList.add('slide-left');
+  next.classList.remove('hidden');
+  next.classList.remove('slide-left');
+  history.push(currentScreen);
+  currentScreen=id;
+}
+function goBack(){
+  if(!history.length)return;
+  const prev=history.pop();
+  const cur=document.getElementById(currentScreen);
+  const next=document.getElementById(prev);
+  cur.classList.add('hidden');
+  cur.classList.remove('slide-left');
+  next.classList.remove('slide-left');
+  currentScreen=prev;
+}
+
+// Explainer active state
+function setActive(el){
+  document.querySelectorAll('.exp-item').forEach(i=>i.classList.remove('active-item'));
+  el.classList.add('active-item');
+}
+
+// ETA countdown
+let eta=14;
+setInterval(()=>{
+  if(eta>0)eta--;
+  const el=document.getElementById('eta-counter');
+  if(el)el.textContent=eta+' min';
+},60000);
+
+// Step validation
+function validerEtape(el,label,time){
+  if(el.classList.contains('done'))return;
+  const now=new Date();
+  const t=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  el.classList.remove('active');
+  el.classList.add('done');
+  el.querySelector('.step-check').textContent='✓';
+  el.querySelector('.step-time').textContent=t;
+  el.querySelector('.step-caret')&&(el.querySelector('.step-caret').textContent='');
+  // Activer le suivant
+  const next=el.nextElementSibling;
+  if(next&&next.classList.contains('step-row')){
+    next.classList.add('active');
+    next.querySelector('.step-caret')&&(next.querySelector('.step-caret').textContent='Valider');
+  }
+}
+
+// Signature pad
+const sigCanvas=document.getElementById('sigCanvas');
+const ctx=sigCanvas.getContext('2d');
+let drawing=false;
+ctx.strokeStyle='var(--teal)';
+ctx.lineWidth=2.5;
+ctx.lineCap='round';
+ctx.lineJoin='round';
+function getPos(e){
+  const r=sigCanvas.getBoundingClientRect();
+  const scaleX=sigCanvas.width/r.width;
+  const scaleY=sigCanvas.height/r.height;
+  const src=e.touches?e.touches[0]:e;
+  return{x:(src.clientX-r.left)*scaleX,y:(src.clientY-r.top)*scaleY};
+}
+sigCanvas.addEventListener('mousedown',e=>{drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)});
+sigCanvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke()});
+sigCanvas.addEventListener('mouseup',()=>drawing=false);
+sigCanvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;const p=getPos(e);ctx.beginPath();ctx.moveTo(p.x,p.y)},{passive:false});
+sigCanvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke()},{passive:false});
+sigCanvas.addEventListener('touchend',()=>drawing=false);
+function clearSig(){ctx.clearRect(0,0,sigCanvas.width,sigCanvas.height)}
+function saveSig(){
+  goBack();
+  setTimeout(()=>{
+    // Flash success
+    const ms=document.getElementById('screen-home');
+    const toast=document.createElement('div');
+    toast.style.cssText='position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.3);border-radius:10px;padding:10px 18px;font-size:12px;color:var(--green);white-space:nowrap;z-index:20;font-family:var(--font-mono)';
+    toast.textContent='✓ Signature enregistrée';
+    document.getElementById('phone-screen').appendChild(toast);
+    setTimeout(()=>toast.remove(),2500);
+  },400);
+}
+
+// Scan simulate
+function simulateScan(){
+  const btn=document.querySelector('#screen-scan .big-btn.primary');
+  btn.textContent='⏳ Analyse OCR…';
+  btn.disabled=true;
+  setTimeout(()=>{
+    goBack();
+    setTimeout(()=>{
+      const toast=document.createElement('div');
+      toast.style.cssText='position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(20,184,166,.15);border:1px solid rgba(20,184,166,.3);border-radius:10px;padding:10px 18px;font-size:12px;color:var(--teal);white-space:nowrap;z-index:20;font-family:var(--font-mono)';
+      toast.textContent='✓ Document scanné & importé';
+      document.getElementById('phone-screen').appendChild(toast);
+      setTimeout(()=>toast.remove(),2500);
+      btn.textContent='📷 Capturer';
+      btn.disabled=false;
+    },300);
+  },2000);
+}
+
+// Incident severity
+function setSev(el,level){
+  document.querySelectorAll('.sev-btn').forEach(b=>{b.className='sev-btn'});
+  el.classList.add('sel-'+level);
+}
+
+// Send incident
+function sendIncident(){
+  goBack();
+  setTimeout(()=>{
+    const toast=document.createElement('div');
+    toast.style.cssText='position:absolute;bottom:80px;left:50%;transform:translateX(-50%);background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 18px;font-size:12px;color:var(--red);white-space:nowrap;z-index:20;font-family:var(--font-mono)';
+    toast.textContent='⚠ Incident transmis au régulateur';
+    document.getElementById('phone-screen').appendChild(toast);
+    setTimeout(()=>toast.remove(),2800);
+  },300);
+}
+</script>
+</body>
+</html>
