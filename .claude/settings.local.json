@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm prisma *)"
+      "Bash(pnpm prisma *)",
+      "Bash(npx eslint *)"
     ]
   }
 }

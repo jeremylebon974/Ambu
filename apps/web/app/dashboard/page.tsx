@@ -42,14 +42,13 @@ export default function DashboardPage() {
       router.push('/login');
       return;
     }
-    const u = auth.getUser();
-    setUser(u);
-    loadMissions();
-  }, []);
+    void loadMissions();
+  }, [router]);
 
   async function loadMissions() {
     try {
       setLoading(true);
+      setUser(auth.getUser());
       const token = auth.getToken()!;
       const data = await api.getMissions(token);
       setMissions(data);

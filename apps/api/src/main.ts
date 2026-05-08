@@ -16,4 +16,4 @@ async function bootstrap() {
   console.log(`🚀 Serveur démarré sur http://localhost:${port}`);
 }
 
-bootstrap();
+void bootstrap();

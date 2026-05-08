@@ -25,10 +25,10 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
       keepAliveInitialDelayMillis: 10000,
     });
 
-    pool.on('error', (_err) => {});
+    pool.on('error', () => {});
 
     const adapter = new PrismaPg(pool);
-    super({ adapter } as any);
+    super({ adapter });
     this.pool = pool;
   }
 
@@ -39,8 +39,8 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
     try {
       await this.$connect();
       this.logger.log('✅ Base de données connectée');
-      this.heartbeat = setInterval(async () => {
-        try { await this.pool.query('SELECT 1'); } catch {}
+      this.heartbeat = setInterval(() => {
+        void this.pool.query('SELECT 1').catch(() => undefined);
       }, 30000);
     } catch (error) {
       this.logger.error('❌ Erreur connexion', error);

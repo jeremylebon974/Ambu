@@ -33,7 +33,7 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
             keepAlive: true,
             keepAliveInitialDelayMillis: 10000,
         });
-        pool.on('error', (_err) => { });
+        pool.on('error', () => { });
         const adapter = new adapter_pg_1.PrismaPg(pool);
         super({ adapter });
         this.logger = new common_1.Logger(PrismaService_1.name);
@@ -46,11 +46,8 @@ let PrismaService = PrismaService_1 = class PrismaService extends client_1.Prism
         try {
             await this.$connect();
             this.logger.log('✅ Base de données connectée');
-            this.heartbeat = setInterval(async () => {
-                try {
-                    await this.pool.query('SELECT 1');
-                }
-                catch { }
+            this.heartbeat = setInterval(() => {
+                void this.pool.query('SELECT 1').catch(() => undefined);
             }, 30000);
         }
         catch (error) {
