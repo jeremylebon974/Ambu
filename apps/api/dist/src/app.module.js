@@ -15,6 +15,7 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const missions_module_1 = require("./modules/missions/missions.module");
 const events_module_1 = require("./events/events.module");
 const workers_module_1 = require("./workers/workers.module");
+const dispatch_module_1 = require("./modules/dispatch/dispatch.module");
 const jwt_auth_guard_1 = require("./modules/auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("./modules/auth/guards/roles.guard");
 const app_controller_1 = require("./app.controller");
@@ -40,6 +41,7 @@ exports.AppModule = AppModule = __decorate([
             missions_module_1.MissionsModule,
             events_module_1.EventsModule,
             workers_module_1.WorkersModule,
+            dispatch_module_1.DispatchModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [
