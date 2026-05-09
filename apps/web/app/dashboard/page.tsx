@@ -108,6 +108,21 @@ export default function DashboardPage() {
             </span>
           )}
           <button
+            onClick={() => router.push('/regulateur')}
+            style={{
+              backgroundColor: '#14B8A6',
+              border: 'none',
+              color: '#fff',
+              padding: '6px 14px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 600,
+            }}
+          >
+            Centre de Régulation
+          </button>
+          <button
             onClick={handleLogout}
             style={{
               backgroundColor: 'transparent',
