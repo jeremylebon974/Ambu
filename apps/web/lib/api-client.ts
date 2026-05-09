@@ -63,4 +63,17 @@ export const api = {
 
   getMissionEvents: (token: string, id: string) =>
     request<any[]>(`/missions/${id}/events`, { token }),
+
+  // Dispatch
+  getDispatchVehicles: (token: string) =>
+    request<any[]>('/dispatch/vehicles', { token }),
+
+  getDispatchStats: (token: string) =>
+    request<any>('/dispatch/stats', { token }),
+
+  triggerDispatch: (token: string, data: any) =>
+    request<any>('/dispatch', { method: 'POST', body: data, token }),
+
+  triggerAIDispatch: (token: string, data: any) =>
+    request<any>('/dispatch/ai', { method: 'POST', body: data, token }),
 };
