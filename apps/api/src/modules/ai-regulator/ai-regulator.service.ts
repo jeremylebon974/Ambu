@@ -67,13 +67,13 @@ export class AIRegulatorService {
   private async getExploitationContext(organizationId: string) {
     const [availableVehicles, activeMissions, pendingMissions] = await Promise.all([
       this.prisma.vehicle.count({
-        where: { organizationId, status: 'AVAILABLE' as any },
+        where: { organizationId },
       }),
       this.prisma.mission.count({
-        where: { organizationId, status: { in: ['ASSIGNED', 'EN_ROUTE_PICKUP', 'AT_PICKUP', 'EN_ROUTE_DROPOFF'] as any } },
+        where: { organizationId },
       }),
       this.prisma.mission.count({
-        where: { organizationId, status: 'PENDING' as any },
+        where: { organizationId },
       }),
     ]);
 
@@ -158,6 +158,7 @@ Réponds UNIQUEMENT en JSON valide:
 }`;
 
     try {
+      this.logger.log(`Appel Claude API — clé présente: ${!!process.env.ANTHROPIC_API_KEY}`);
       const response = await fetch(this.claudeApiUrl, {
         method: 'POST',
         headers: {
@@ -166,7 +167,7 @@ Réponds UNIQUEMENT en JSON valide:
           'anthropic-version': '2023-06-01',
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
+          model: 'claude-sonnet-4-5',
           max_tokens: 1500,
           messages: [{ role: 'user', content: prompt }],
         }),
@@ -183,7 +184,7 @@ Réponds UNIQUEMENT en JSON valide:
       return JSON.parse(clean) as RegulatorDecision;
 
     } catch (error) {
-      this.logger.error('Erreur Claude Régulateur', error);
+      this.logger.error('Erreur Claude Régulateur', JSON.stringify(error));
       return null;
     }
   }
