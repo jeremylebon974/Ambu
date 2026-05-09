@@ -7,6 +7,7 @@ import { MissionsModule } from './modules/missions/missions.module';
 import { EventsModule } from './events/events.module';
 import { WorkersModule } from './workers/workers.module';
 import { DispatchModule } from './modules/dispatch/dispatch.module';
+import { PdaModule } from './modules/pda/pda.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { AppController } from './app.controller';
@@ -30,6 +31,7 @@ import { AppService } from './app.service';
     EventsModule,
     WorkersModule,
     DispatchModule,
+    PdaModule,
   ],
   controllers: [AppController],
   providers: [

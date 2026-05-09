@@ -16,6 +16,7 @@ const missions_module_1 = require("./modules/missions/missions.module");
 const events_module_1 = require("./events/events.module");
 const workers_module_1 = require("./workers/workers.module");
 const dispatch_module_1 = require("./modules/dispatch/dispatch.module");
+const pda_module_1 = require("./modules/pda/pda.module");
 const jwt_auth_guard_1 = require("./modules/auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("./modules/auth/guards/roles.guard");
 const app_controller_1 = require("./app.controller");
@@ -42,6 +43,7 @@ exports.AppModule = AppModule = __decorate([
             events_module_1.EventsModule,
             workers_module_1.WorkersModule,
             dispatch_module_1.DispatchModule,
+            pda_module_1.PdaModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

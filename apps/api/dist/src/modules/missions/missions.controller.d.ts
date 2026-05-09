@@ -59,14 +59,14 @@ export declare class MissionsController {
         createdAt: Date;
         updatedAt: Date;
         organizationId: string;
-        patientId: string | null;
-        priority: number;
-        notes: string | null;
         status: import("../../../generated/prisma/enums").MissionStatus;
         crewId: string | null;
+        priority: number;
+        notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
+        patientId: string | null;
     }>;
     findAll(req: any, status?: string): Promise<({
         patient: {
@@ -122,14 +122,14 @@ export declare class MissionsController {
         createdAt: Date;
         updatedAt: Date;
         organizationId: string;
-        patientId: string | null;
-        priority: number;
-        notes: string | null;
         status: import("../../../generated/prisma/enums").MissionStatus;
         crewId: string | null;
+        priority: number;
+        notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
+        patientId: string | null;
     })[]>;
     findOne(id: string, req: any): Promise<{
         patient: {
@@ -182,17 +182,17 @@ export declare class MissionsController {
         events: {
             id: string;
             createdAt: Date;
-            data: import("@prisma/client/runtime/client").JsonValue | null;
             type: string;
             missionId: string;
+            data: import("@prisma/client/runtime/client").JsonValue | null;
         }[];
         documents: {
             url: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            patientId: string | null;
             type: import("../../../generated/prisma/enums").DocumentType;
+            patientId: string | null;
             missionId: string | null;
             filename: string;
             mimeType: string | null;
@@ -205,14 +205,14 @@ export declare class MissionsController {
         createdAt: Date;
         updatedAt: Date;
         organizationId: string;
-        patientId: string | null;
-        priority: number;
-        notes: string | null;
         status: import("../../../generated/prisma/enums").MissionStatus;
         crewId: string | null;
+        priority: number;
+        notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
+        patientId: string | null;
     }>;
     assign(id: string, dto: AssignMissionDto, req: any): Promise<{
         id: string;
@@ -220,14 +220,14 @@ export declare class MissionsController {
         createdAt: Date;
         updatedAt: Date;
         organizationId: string;
-        patientId: string | null;
-        priority: number;
-        notes: string | null;
         status: import("../../../generated/prisma/enums").MissionStatus;
         crewId: string | null;
+        priority: number;
+        notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
+        patientId: string | null;
     }>;
     updateStatus(id: string, dto: UpdateMissionDto, req: any): Promise<{
         id: string;
@@ -235,20 +235,20 @@ export declare class MissionsController {
         createdAt: Date;
         updatedAt: Date;
         organizationId: string;
-        patientId: string | null;
-        priority: number;
-        notes: string | null;
         status: import("../../../generated/prisma/enums").MissionStatus;
         crewId: string | null;
+        priority: number;
+        notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
+        patientId: string | null;
     }>;
     getEvents(id: string, req: any): Promise<{
         id: string;
         createdAt: Date;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
         type: string;
         missionId: string;
+        data: import("@prisma/client/runtime/client").JsonValue | null;
     }[]>;
 }
