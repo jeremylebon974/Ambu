@@ -9,6 +9,7 @@ import { WorkersModule } from './workers/workers.module';
 import { DispatchModule } from './modules/dispatch/dispatch.module';
 import { PdaModule } from './modules/pda/pda.module';
 import { AIRegulatorModule } from './modules/ai-regulator/ai-regulator.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { AppController } from './app.controller';
@@ -34,6 +35,7 @@ import { AppService } from './app.service';
     DispatchModule,
     PdaModule,
     AIRegulatorModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [
