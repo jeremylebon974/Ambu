@@ -5,6 +5,22 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../../lib/auth';
 
+function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
+  return (
+    <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <svg height={height} viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2 L22 36 L42 2 L35 2 L22 26 L9 2 Z" fill="white"/>
+        <rect x="24" y="0" width="9" height="7" rx="1" fill="#EF4444" transform="rotate(-12 28 3)"/>
+        <path d="M26 8 L34 8 L42 2 L35 2 Z" fill="#cccccc" opacity="0.4"/>
+      </svg>
+      <div style={{ fontSize: '15px', fontWeight: '900', letterSpacing: '-0.01em', fontFamily: 'DM Sans, sans-serif' }}>
+        <span style={{ color: '#EF4444' }}>VIE</span>
+        <span style={{ color: '#FFFFFF' }}>sionnaire</span>
+      </div>
+    </div>
+  );
+}
+
 const menuItems = [
   { label: 'Vue globale', icon: '📊', path: '/direction', active: true },
   { label: 'Régulation', icon: '🎛️', path: '/regulateur' },
@@ -51,8 +67,12 @@ export default function DirectionPage() {
         }}
       >
         <div style={{ padding: '0 8px 24px', borderBottom: '1px solid #1E2535', marginBottom: '16px' }}>
-          <div style={{ fontWeight: '800', fontSize: '15px' }}>👔 Direction</div>
-          <div style={{ fontSize: '11px', color: '#6B7A99', marginTop: '2px' }}>Tableau de bord exécutif</div>
+          <button
+            onClick={() => router.back()}
+            style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '12px', padding: '0 0 8px', display: 'block' }}
+          >← Retour</button>
+          <LogoViesionnaire height={30} onClick={() => router.push('/direction')} />
+          <div style={{ fontSize: '11px', color: '#6B7A99', marginTop: '8px' }}>👔 Direction — Tableau de bord exécutif</div>
         </div>
 
         {menuItems.map(item => (

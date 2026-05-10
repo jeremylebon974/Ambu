@@ -4,6 +4,22 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../lib/auth';
 
+function LogoViesionnaire({ height = 36, onClick }: { height?: number; onClick?: () => void }) {
+  return (
+    <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+      <svg height={height} viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2 L22 36 L42 2 L35 2 L22 26 L9 2 Z" fill="white"/>
+        <rect x="24" y="0" width="9" height="7" rx="1" fill="#EF4444" transform="rotate(-12 28 3)"/>
+        <path d="M26 8 L34 8 L42 2 L35 2 Z" fill="#cccccc" opacity="0.4"/>
+      </svg>
+      <div style={{ fontSize: '22px', fontWeight: '900', letterSpacing: '-0.01em', fontFamily: 'DM Sans, sans-serif' }}>
+        <span style={{ color: '#EF4444' }}>VIE</span>
+        <span style={{ color: '#FFFFFF' }}>sionnaire</span>
+      </div>
+    </div>
+  );
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
@@ -51,27 +67,16 @@ export default function LoginPage() {
         width: '400px',
         maxWidth: '90vw',
       }}>
+        <div style={{ marginBottom: '8px' }}>
+          <button
+            onClick={() => router.back()}
+            style={{ background: 'transparent', border: 'none', color: '#6b7a99', cursor: 'pointer', fontSize: '13px', padding: '0 0 8px' }}
+          >← Retour</button>
+        </div>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            width: '48px',
-            height: '48px',
-            background: 'linear-gradient(135deg, #14b8a6, #3b82f6)',
-            borderRadius: '12px',
-            margin: '0 auto 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '24px',
-          }}>🚑</div>
-          <h1 style={{
-            color: '#e8ecf5',
-            fontSize: '22px',
-            fontWeight: '800',
-            fontFamily: 'Syne, sans-serif',
-            margin: '0 0 6px',
-          }}>Paille en Queue</h1>
-          <p style={{ color: '#6b7a99', fontSize: '13px', margin: 0 }}>
-            Plateforme de gestion ambulancière
+          <LogoViesionnaire height={44} onClick={() => router.push('/')} />
+          <p style={{ color: '#6b7a99', fontSize: '13px', margin: '16px 0 0' }}>
+            Connectez-vous à votre espace
           </p>
         </div>
 
@@ -91,7 +96,7 @@ export default function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               required
               autoComplete="off"
-              placeholder="admin@paille-en-queue.fr"
+              placeholder="admin@viesionnaire.fr"
               style={{
                 width: '100%',
                 background: '#111622',
@@ -179,8 +184,8 @@ export default function LoginPage() {
           fontFamily: 'DM Mono, monospace',
         }}>
           <div style={{ marginBottom: '4px', color: '#3a4560' }}>Comptes de test :</div>
-          <div>admin@paille-en-queue.fr / Admin1234!</div>
-          <div>regulateur@paille-en-queue.fr / Regul1234!</div>
+          <div>admin@viesionnaire.fr / Admin1234!</div>
+          <div>regulateur@viesionnaire.fr / Regul1234!</div>
         </div>
       </div>
     </div>

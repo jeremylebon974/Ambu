@@ -9,6 +9,22 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
+function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
+  return (
+    <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <svg height={height} viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2 L22 36 L42 2 L35 2 L22 26 L9 2 Z" fill="white"/>
+        <rect x="24" y="0" width="9" height="7" rx="1" fill="#EF4444" transform="rotate(-12 28 3)"/>
+        <path d="M26 8 L34 8 L42 2 L35 2 Z" fill="#cccccc" opacity="0.4"/>
+      </svg>
+      <div style={{ fontSize: '15px', fontWeight: '900', letterSpacing: '-0.01em', fontFamily: 'DM Sans, sans-serif' }}>
+        <span style={{ color: '#EF4444' }}>VIE</span>
+        <span style={{ color: '#FFFFFF' }}>sionnaire</span>
+      </div>
+    </div>
+  );
+}
+
 interface Mission {
   id: string;
   status: string;
@@ -158,10 +174,8 @@ export default function RegulateurPage() {
         flexShrink: 0,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '20px' }}>🚑</span>
-          <span style={{ color: '#E8ECF5', fontWeight: '800', fontSize: '15px', fontFamily: 'Syne, sans-serif' }}>
-            Paille en Queue
-          </span>
+          <button onClick={() => router.back()} style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '16px', padding: '0 4px' }}>←</button>
+          <LogoViesionnaire height={30} onClick={() => router.push('/regulateur')} />
           <span style={{ color: '#2A3348', fontSize: '14px' }}>|</span>
           <span style={{ color: '#6B7A99', fontSize: '13px' }}>Centre de Régulation</span>
         </div>

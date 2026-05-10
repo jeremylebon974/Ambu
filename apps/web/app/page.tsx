@@ -54,6 +54,31 @@ const stats = [
   { label: 'Ponctualité', value: '98%', icon: '⏱️', color: '#22C55E' },
 ];
 
+// Composant logo VIEsionnaire
+function LogoViesionnaire({ height = 36, onClick }: { height?: number; onClick?: () => void }) {
+  return (
+    <div
+      onClick={onClick}
+      style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '10px' }}
+    >
+      <svg height={height} viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2 L22 36 L42 2 L35 2 L22 26 L9 2 Z" fill="white"/>
+        <rect x="24" y="0" width="9" height="7" rx="1" fill="#EF4444" transform="rotate(-12 28 3)"/>
+        <path d="M26 8 L34 8 L42 2 L35 2 Z" fill="#cccccc" opacity="0.4"/>
+      </svg>
+      <div style={{ lineHeight: 1.15 }}>
+        <div style={{ fontSize: '17px', fontWeight: '900', letterSpacing: '-0.01em', fontFamily: '"DM Sans", sans-serif' }}>
+          <span style={{ color: '#EF4444' }}>VIE</span>
+          <span style={{ color: '#FFFFFF' }}>sionnaire</span>
+        </div>
+        <div style={{ fontSize: '9px', color: '#6B7A99', letterSpacing: '0.08em', textTransform: 'uppercase' as const }}>
+          Médical • Innovation • Humanité
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Composant particule animée
 function Particle({ delay, x, y }: { delay: number; x: number; y: number }) {
   return (
@@ -203,30 +228,9 @@ export default function HomePage() {
           justifyContent: 'space-between',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <motion.div
-            whileHover={{ rotate: 10, scale: 1.1 }}
-            style={{
-              width: '40px',
-              height: '40px',
-              background: 'linear-gradient(135deg, #14B8A6, #3B82F6)',
-              borderRadius: '10px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px',
-              cursor: 'pointer',
-            }}
-          >🚑</motion.div>
-          <div>
-            <div style={{ fontWeight: '800', fontSize: '16px', letterSpacing: '-0.02em' }}>
-              Paille en Queue
-            </div>
-            <div style={{ fontSize: '11px', color: '#6B7A99' }}>
-              Transport Sanitaire • La Réunion
-            </div>
-          </div>
-        </div>
+        <motion.div whileHover={{ scale: 1.03 }}>
+          <LogoViesionnaire height={38} onClick={() => router.push('/')} />
+        </motion.div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <motion.div
@@ -555,7 +559,7 @@ export default function HomePage() {
             fontSize: '12px',
           }}
         >
-          <span>© 2026 Paille en Queue — Transport Sanitaire La Réunion</span>
+          <span>© 2026 VIEsionnaire — Médical • Innovation • Humanité</span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#14B8A6' }}>
             <motion.div
               animate={{ opacity: [1, 0, 1] }}

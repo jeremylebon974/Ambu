@@ -5,6 +5,22 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../../lib/auth';
 
+function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
+  return (
+    <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <svg height={height} viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2 L22 36 L42 2 L35 2 L22 26 L9 2 Z" fill="white"/>
+        <rect x="24" y="0" width="9" height="7" rx="1" fill="#EF4444" transform="rotate(-12 28 3)"/>
+        <path d="M26 8 L34 8 L42 2 L35 2 Z" fill="#cccccc" opacity="0.4"/>
+      </svg>
+      <div style={{ fontSize: '15px', fontWeight: '900', letterSpacing: '-0.01em', fontFamily: 'DM Sans, sans-serif' }}>
+        <span style={{ color: '#EF4444' }}>VIE</span>
+        <span style={{ color: '#FFFFFF' }}>sionnaire</span>
+      </div>
+    </div>
+  );
+}
+
 export default function PatientPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -32,13 +48,8 @@ export default function PatientPage() {
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '22px' }}>🏥</span>
-          <div>
-            <div style={{ fontWeight: '700', fontSize: '14px' }}>
-              {user ? `${user.firstName} ${user.lastName}` : 'Mon espace patient'}
-            </div>
-            <div style={{ fontSize: '11px', color: '#6B7A99' }}>Paille en Queue — Transport Sanitaire</div>
-          </div>
+          <button onClick={() => router.back()} style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '16px', padding: '0 4px' }}>←</button>
+          <LogoViesionnaire height={26} onClick={() => router.push('/patient')} />
         </div>
         <button
           onClick={() => { auth.logout(); router.push('/'); }}

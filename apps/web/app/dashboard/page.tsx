@@ -5,6 +5,22 @@ import { useRouter } from 'next/navigation';
 import { auth } from '../../lib/auth';
 import { api } from '../../lib/api-client';
 
+function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
+  return (
+    <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <svg height={height} viewBox="0 0 44 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2 2 L22 36 L42 2 L35 2 L22 26 L9 2 Z" fill="white"/>
+        <rect x="24" y="0" width="9" height="7" rx="1" fill="#EF4444" transform="rotate(-12 28 3)"/>
+        <path d="M26 8 L34 8 L42 2 L35 2 Z" fill="#cccccc" opacity="0.4"/>
+      </svg>
+      <div style={{ fontSize: '15px', fontWeight: '900', letterSpacing: '-0.01em', fontFamily: 'DM Sans, sans-serif' }}>
+        <span style={{ color: '#EF4444' }}>VIE</span>
+        <span style={{ color: '#FFFFFF' }}>sionnaire</span>
+      </div>
+    </div>
+  );
+}
+
 const STATUS_LABELS: Record<string, string> = {
   PENDING: 'En attente',
   ASSIGNED: 'Assignée',
@@ -96,10 +112,11 @@ export default function DashboardPage() {
         padding: '0 24px',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 32, height: 32, backgroundColor: '#3b82f6', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16 }}>
-            🚑
-          </div>
-          <span style={{ fontWeight: 700, fontSize: 16, color: '#f1f5f9' }}>Paille en Queue</span>
+          <button
+            onClick={() => router.back()}
+            style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer', fontSize: 18, padding: '0 4px' }}
+          >←</button>
+          <LogoViesionnaire height={32} onClick={() => router.push('/dashboard')} />
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {user && (
