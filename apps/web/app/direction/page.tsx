@@ -1,0 +1,203 @@
+'use client';
+
+import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { auth } from '../../lib/auth';
+
+const menuItems = [
+  { label: 'Vue globale', icon: '📊', path: '/direction', active: true },
+  { label: 'Régulation', icon: '🎛️', path: '/regulateur' },
+  { label: 'Planning', icon: '📅', path: '/planning' },
+  { label: 'Ambulanciers', icon: '🚑', path: '/direction/ambulanciers' },
+  { label: 'Facturation', icon: '💶', path: '/direction/facturation' },
+  { label: 'Configuration', icon: '⚙️', path: '/configuration' },
+];
+
+const kpis = [
+  { label: 'CA du mois', value: '47 820 €', evolution: '+12%', color: '#22C55E', icon: '💶' },
+  { label: 'Missions aujourd\'hui', value: '47', evolution: '+8%', color: '#14B8A6', icon: '📋' },
+  { label: 'Véhicules actifs', value: '18/24', evolution: '75%', color: '#3B82F6', icon: '🚑' },
+  { label: 'Taux ponctualité', value: '98%', evolution: '+2%', color: '#F59E0B', icon: '⏱️' },
+  { label: 'Salariés en service', value: '14', evolution: '61%', color: '#8B5CF6', icon: '👥' },
+  { label: 'Alertes actives', value: '2', evolution: '-3', color: '#EF4444', icon: '⚠️' },
+];
+
+export default function DirectionPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
+    auth.getUser().then(setUser);
+  }, [router]);
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#07090F', display: 'flex', fontFamily: 'DM Sans, sans-serif', color: '#E8ECF5' }}>
+
+      {/* SIDEBAR */}
+      <motion.aside
+        initial={{ x: -20, opacity: 0 }}
+        animate={{ x: 0, opacity: 1 }}
+        style={{
+          width: '220px',
+          background: '#0D1017',
+          borderRight: '1px solid #1E2535',
+          display: 'flex',
+          flexDirection: 'column',
+          padding: '24px 12px',
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ padding: '0 8px 24px', borderBottom: '1px solid #1E2535', marginBottom: '16px' }}>
+          <div style={{ fontWeight: '800', fontSize: '15px' }}>👔 Direction</div>
+          <div style={{ fontSize: '11px', color: '#6B7A99', marginTop: '2px' }}>Tableau de bord exécutif</div>
+        </div>
+
+        {menuItems.map(item => (
+          <motion.button
+            key={item.path}
+            whileHover={{ x: 4 }}
+            onClick={() => router.push(item.path)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '10px 12px',
+              borderRadius: '8px',
+              border: 'none',
+              background: item.active ? '#1A2235' : 'transparent',
+              color: item.active ? '#14B8A6' : '#6B7A99',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: item.active ? '600' : '400',
+              marginBottom: '4px',
+              textAlign: 'left',
+              width: '100%',
+              borderLeft: item.active ? '2px solid #14B8A6' : '2px solid transparent',
+            }}
+          >
+            <span>{item.icon}</span>
+            <span>{item.label}</span>
+          </motion.button>
+        ))}
+
+        <div style={{ flex: 1 }} />
+
+        <button
+          onClick={() => { auth.logout(); router.push('/'); }}
+          style={{
+            background: 'transparent',
+            border: '1px solid #1E2535',
+            borderRadius: '8px',
+            color: '#6B7A99',
+            padding: '8px',
+            cursor: 'pointer',
+            fontSize: '12px',
+          }}
+        >
+          Déconnexion
+        </button>
+      </motion.aside>
+
+      {/* CONTENU */}
+      <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
+
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}
+        >
+          <div>
+            <h1 style={{ fontSize: '22px', fontWeight: '800', margin: 0 }}>Vue d'exploitation</h1>
+            <p style={{ color: '#6B7A99', fontSize: '13px', margin: '4px 0 0' }}>
+              {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+          </div>
+          <motion.div
+            animate={{ opacity: [1, 0.5, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#14B8A6', fontSize: '12px' }}
+          >
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#14B8A6' }} />
+            Temps réel
+          </motion.div>
+        </motion.div>
+
+        {/* KPIs */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '32px' }}>
+          {kpis.map((kpi, i) => (
+            <motion.div
+              key={kpi.label}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              whileHover={{ y: -4 }}
+              style={{
+                background: '#0D1017',
+                border: `1px solid ${kpi.color}20`,
+                borderRadius: '14px',
+                padding: '20px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#6B7A99', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                    {kpi.label}
+                  </div>
+                  <div style={{ fontSize: '28px', fontWeight: '800', color: kpi.color, fontFamily: 'DM Mono, monospace' }}>
+                    {kpi.value}
+                  </div>
+                </div>
+                <div style={{ fontSize: '28px' }}>{kpi.icon}</div>
+              </div>
+              <div style={{ marginTop: '12px', fontSize: '12px', color: kpi.color }}>
+                {kpi.evolution} vs mois dernier
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Accès rapides */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          style={{ background: '#0D1017', borderRadius: '14px', border: '1px solid #1E2535', padding: '24px' }}
+        >
+          <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px' }}>Accès rapides</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+            {[
+              { label: 'Centre Régulation', icon: '🎛️', path: '/regulateur', color: '#14B8A6' },
+              { label: 'Planning', icon: '📅', path: '/planning', color: '#3B82F6' },
+              { label: 'Carte GPS', icon: '🗺️', path: '/dashboard/map', color: '#8B5CF6' },
+              { label: 'Configuration', icon: '⚙️', path: '/configuration', color: '#F59E0B' },
+            ].map(a => (
+              <motion.button
+                key={a.path}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
+                onClick={() => router.push(a.path)}
+                style={{
+                  background: a.color + '10',
+                  border: `1px solid ${a.color}30`,
+                  borderRadius: '12px',
+                  padding: '16px',
+                  cursor: 'pointer',
+                  color: a.color,
+                  fontSize: '13px',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: '24px', marginBottom: '8px' }}>{a.icon}</div>
+                {a.label}
+              </motion.button>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+}

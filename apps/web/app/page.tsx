@@ -1,65 +1,555 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
+
+const portails = [
+  {
+    id: 'direction',
+    titre: 'Direction',
+    sousTitre: 'Tableau de bord exécutif',
+    emoji: '👔',
+    description: 'KPI temps réel, facturation, performance exploitation, rapports mensuels automatiques.',
+    couleur: '#F59E0B',
+    path: '/login?role=direction',
+    features: ['Chiffre d\'affaires', 'Performance flotte', 'Rapports IA'],
+  },
+  {
+    id: 'regulateur',
+    titre: 'Régulateur',
+    sousTitre: 'Centre de régulation IA',
+    emoji: '🎛️',
+    description: 'Dispatch intelligent, carte temps réel, planning équipages, cerveau IA opérationnel.',
+    couleur: '#14B8A6',
+    path: '/login?role=regulateur',
+    features: ['Dispatch IA', 'Carte live', 'Planning auto'],
+  },
+  {
+    id: 'ambulancier',
+    titre: 'Ambulancier',
+    sousTitre: 'Terminal terrain PDA',
+    emoji: '🚑',
+    description: 'Missions, navigation, signatures, statuts temps réel, communication régulation.',
+    couleur: '#3B82F6',
+    path: '/login?role=ambulancier',
+    features: ['Mes missions', 'GPS live', 'Signature patient'],
+  },
+  {
+    id: 'patient',
+    titre: 'Patient',
+    sousTitre: 'Espace personnel',
+    emoji: '🏥',
+    description: 'Suivi transport, documents, historique, rendez-vous et remboursements.',
+    couleur: '#22C55E',
+    path: '/login?role=patient',
+    features: ['Mon transport', 'Mes documents', 'Historique'],
+  },
+];
+
+const stats = [
+  { label: 'Véhicules actifs', value: '24', icon: '🚑', color: '#14B8A6' },
+  { label: 'Missions aujourd\'hui', value: '47', icon: '📋', color: '#3B82F6' },
+  { label: 'Salariés', value: '23', icon: '👥', color: '#F59E0B' },
+  { label: 'Ponctualité', value: '98%', icon: '⏱️', color: '#22C55E' },
+];
+
+// Composant particule animée
+function Particle({ delay, x, y }: { delay: number; x: number; y: number }) {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <motion.div
+      style={{
+        position: 'absolute',
+        left: `${x}%`,
+        top: `${y}%`,
+        width: '2px',
+        height: '2px',
+        borderRadius: '50%',
+        background: '#14B8A6',
+        pointerEvents: 'none',
+      }}
+      animate={{
+        opacity: [0, 1, 0],
+        scale: [0, 1.5, 0],
+        y: [0, -30, -60],
+      }}
+      transition={{
+        duration: 3,
+        delay,
+        repeat: Infinity,
+        repeatDelay: Math.random() * 4,
+      }}
+    />
+  );
+}
+
+export default function HomePage() {
+  const router = useRouter();
+  const [time, setTime] = useState(new Date());
+  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollY } = useScroll();
+  const heroY = useTransform(scrollY, [0, 300], [0, -50]);
+  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0.3]);
+
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    delay: Math.random() * 3,
+  }));
+
+  useEffect(() => {
+    const timer = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      style={{
+        minHeight: '100vh',
+        background: '#03050A',
+        fontFamily: '"DM Sans", sans-serif',
+        color: '#E8ECF5',
+        overflow: 'hidden',
+        position: 'relative',
+      }}
+    >
+      {/* FOND ANIMÉ */}
+      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+        {/* Grille */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          backgroundImage: `
+            linear-gradient(rgba(20, 184, 166, 0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(20, 184, 166, 0.03) 1px, transparent 1px)
+          `,
+          backgroundSize: '60px 60px',
+        }} />
+
+        {/* Glow central */}
+        <motion.div
+          animate={{ opacity: [0.3, 0.6, 0.3], scale: [1, 1.1, 1] }}
+          transition={{ duration: 6, repeat: Infinity }}
+          style={{
+            position: 'absolute',
+            top: '20%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '600px',
+            height: '600px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(20,184,166,0.08) 0%, transparent 70%)',
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+
+        {/* Glow bleu */}
+        <motion.div
+          animate={{ opacity: [0.2, 0.4, 0.2] }}
+          transition={{ duration: 8, repeat: Infinity, delay: 2 }}
+          style={{
+            position: 'absolute',
+            bottom: '10%',
+            right: '10%',
+            width: '400px',
+            height: '400px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(59,130,246,0.06) 0%, transparent 70%)',
+          }}
+        />
+
+        {/* Particules */}
+        {particles.map(p => (
+          <Particle key={p.id} x={p.x} y={p.y} delay={p.delay} />
+        ))}
+      </div>
+
+      {/* HEADER */}
+      <motion.header
+        initial={{ y: -20, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6 }}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 100,
+          background: 'rgba(3, 5, 10, 0.8)',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(20, 184, 166, 0.1)',
+          padding: '0 40px',
+          height: '64px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <motion.div
+            whileHover={{ rotate: 10, scale: 1.1 }}
+            style={{
+              width: '40px',
+              height: '40px',
+              background: 'linear-gradient(135deg, #14B8A6, #3B82F6)',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '20px',
+              cursor: 'pointer',
+            }}
+          >🚑</motion.div>
+          <div>
+            <div style={{ fontWeight: '800', fontSize: '16px', letterSpacing: '-0.02em' }}>
+              Paille en Queue
+            </div>
+            <div style={{ fontSize: '11px', color: '#6B7A99' }}>
+              Transport Sanitaire • La Réunion
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <motion.div
+            animate={{ opacity: [1, 0.5, 1] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: '#14B8A6',
+              fontSize: '12px',
+              fontFamily: '"DM Mono", monospace',
+            }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#14B8A6' }} />
+            Système IA actif
+          </motion.div>
+
+          <div style={{
+            fontFamily: '"DM Mono", monospace',
+            fontSize: '13px',
+            color: '#6B7A99',
+          }}>
+            {time.toLocaleTimeString('fr-FR')}
+          </div>
+
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => router.push('/login')}
+            style={{
+              background: 'linear-gradient(135deg, #14B8A6, #3B82F6)',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              padding: '8px 20px',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: '13px',
+            }}
+          >
+            Connexion
+          </motion.button>
+        </div>
+      </motion.header>
+
+      {/* CONTENU */}
+      <div style={{ position: 'relative', zIndex: 1, paddingTop: '64px' }}>
+
+        {/* HERO */}
+        <motion.section
+          style={{ y: heroY, opacity: heroOpacity }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+        >
+          <div style={{
+            maxWidth: '900px',
+            margin: '0 auto',
+            padding: '80px 40px 60px',
+            textAlign: 'center',
+          }}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                background: 'rgba(20, 184, 166, 0.08)',
+                color: '#14B8A6',
+                border: '1px solid rgba(20, 184, 166, 0.2)',
+                borderRadius: '20px',
+                padding: '6px 16px',
+                fontSize: '12px',
+                fontWeight: '600',
+                marginBottom: '28px',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase' as const,
+              }}
+            >
+              <motion.div
+                animate={{ opacity: [1, 0, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+                style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#14B8A6' }}
+              />
+              Intelligence Artificielle Opérationnelle
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              style={{
+                fontSize: '52px',
+                fontWeight: '900',
+                marginBottom: '20px',
+                lineHeight: '1.1',
+                letterSpacing: '-0.03em',
+              }}
+            >
+              La régulation ambulance
+              <br />
+              <span style={{
+                background: 'linear-gradient(135deg, #14B8A6 0%, #3B82F6 50%, #8B5CF6 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}>
+                réinventée par l'IA
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              style={{
+                color: '#6B7A99',
+                fontSize: '17px',
+                maxWidth: '580px',
+                margin: '0 auto 50px',
+                lineHeight: '1.7',
+              }}
+            >
+              Dispatch intelligent, planning automatique, facturation CPAM et suivi terrain en temps réel — tout en un seul système.
+            </motion.p>
+
+            {/* STATS */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '12px',
+                marginBottom: '80px',
+              }}
+            >
+              {stats.map((s, i) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.7 + i * 0.1 }}
+                  whileHover={{ y: -4, scale: 1.02 }}
+                  style={{
+                    background: 'rgba(13, 16, 23, 0.8)',
+                    border: `1px solid ${s.color}20`,
+                    borderRadius: '14px',
+                    padding: '20px 16px',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  <div style={{ fontSize: '22px', marginBottom: '8px' }}>{s.icon}</div>
+                  <div style={{
+                    fontSize: '30px',
+                    fontWeight: '800',
+                    fontFamily: '"DM Mono", monospace',
+                    color: s.color,
+                    letterSpacing: '-0.02em',
+                  }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#6B7A99', marginTop: '4px' }}>
+                    {s.label}
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* PORTAILS */}
+        <section style={{
+          maxWidth: '1100px',
+          margin: '0 auto',
+          padding: '0 40px 100px',
+        }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+            style={{
+              textAlign: 'center',
+              marginBottom: '40px',
+            }}
+          >
+            <div style={{
+              fontSize: '11px',
+              color: '#3A4560',
+              textTransform: 'uppercase' as const,
+              letterSpacing: '0.15em',
+              fontWeight: '600',
+              marginBottom: '8px',
+            }}>
+              Accès par profil
+            </div>
+            <div style={{ fontSize: '22px', fontWeight: '700', color: '#E8ECF5' }}>
+              Choisissez votre espace
+            </div>
+          </motion.div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 1fr)',
+            gap: '20px',
+          }}>
+            {portails.map((p, i) => (
+              <motion.button
+                key={p.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.9 + i * 0.1 }}
+                whileHover={{ y: -6, scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
+                onHoverStart={() => setHoveredCard(p.id)}
+                onHoverEnd={() => setHoveredCard(null)}
+                onClick={() => router.push(p.path)}
+                style={{
+                  background: 'rgba(13, 16, 23, 0.9)',
+                  border: `1px solid ${hoveredCard === p.id ? p.couleur + '60' : p.couleur + '20'}`,
+                  borderRadius: '20px',
+                  padding: '28px',
+                  cursor: 'pointer',
+                  textAlign: 'left' as const,
+                  position: 'relative' as const,
+                  overflow: 'hidden' as const,
+                  backdropFilter: 'blur(10px)',
+                  transition: 'border-color 0.3s',
+                }}
+              >
+                {/* Glow hover */}
+                <AnimatePresence>
+                  {hoveredCard === p.id && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        height: '2px',
+                        background: `linear-gradient(90deg, transparent, ${p.couleur}, transparent)`,
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
+
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px', marginBottom: '16px' }}>
+                  <motion.div
+                    animate={hoveredCard === p.id ? { rotate: [0, -10, 10, 0] } : {}}
+                    transition={{ duration: 0.4 }}
+                    style={{
+                      width: '56px',
+                      height: '56px',
+                      background: p.couleur + '15',
+                      border: `1px solid ${p.couleur}30`,
+                      borderRadius: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '26px',
+                      flexShrink: 0,
+                    }}
+                  >
+                    {p.emoji}
+                  </motion.div>
+
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: '800', fontSize: '20px', color: '#E8ECF5', marginBottom: '2px' }}>
+                      {p.titre}
+                    </div>
+                    <div style={{ fontSize: '12px', color: p.couleur, fontWeight: '600', letterSpacing: '0.04em' }}>
+                      {p.sousTitre}
+                    </div>
+                  </div>
+
+                  <motion.div
+                    animate={hoveredCard === p.id ? { x: 4 } : { x: 0 }}
+                    style={{ color: p.couleur, fontSize: '20px', marginTop: '4px' }}
+                  >→</motion.div>
+                </div>
+
+                <p style={{ color: '#6B7A99', fontSize: '13px', lineHeight: '1.6', margin: '0 0 16px' }}>
+                  {p.description}
+                </p>
+
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' as const }}>
+                  {p.features.map(f => (
+                    <span
+                      key={f}
+                      style={{
+                        background: p.couleur + '10',
+                        color: p.couleur,
+                        border: `1px solid ${p.couleur}25`,
+                        borderRadius: '6px',
+                        padding: '3px 10px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                      }}
+                    >{f}</span>
+                  ))}
+                </div>
+              </motion.button>
+            ))}
+          </div>
+        </section>
+
+        {/* FOOTER */}
+        <motion.footer
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          style={{
+            borderTop: '1px solid #0D1017',
+            padding: '24px 40px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            color: '#3A4560',
+            fontSize: '12px',
+          }}
+        >
+          <span>© 2026 Paille en Queue — Transport Sanitaire La Réunion</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#14B8A6' }}>
+            <motion.div
+              animate={{ opacity: [1, 0, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#14B8A6' }}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+            Système IA opérationnel 24/7
+          </div>
+        </motion.footer>
+      </div>
     </div>
   );
 }

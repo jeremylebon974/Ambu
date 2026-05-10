@@ -18,7 +18,15 @@ export default function LoginPage() {
 
     try {
       await auth.login(email, password);
-      router.push('/dashboard');
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get('role');
+      const destination =
+        role === 'direction' ? '/direction' :
+        role === 'regulateur' ? '/regulateur' :
+        role === 'ambulancier' ? '/ambulancier' :
+        role === 'patient' ? '/patient' :
+        '/dashboard';
+      router.push(destination);
     } catch (err: any) {
       setError(err.message || 'Email ou mot de passe incorrect');
     } finally {
