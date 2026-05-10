@@ -39,7 +39,7 @@ export default function PdaPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      setPdaList(data);
+      setPdaList(Array.isArray(data) ? data : []);
     } catch (err) {
       addLog('❌ Erreur chargement liste PDA');
     }
@@ -423,6 +423,26 @@ export default function PdaPage() {
             }}
           >
             🆘 ALERTE SOS RÉGULATION
+          </motion.button>
+
+          {/* SCAN DOCUMENT */}
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            onClick={() => router.push('/pda/scan')}
+            style={{
+              width: '100%',
+              marginTop: '10px',
+              background: '#0D1017',
+              border: '1px solid #8B5CF640',
+              borderRadius: '12px',
+              color: '#8B5CF6',
+              padding: '14px',
+              fontSize: '14px',
+              fontWeight: '700',
+              cursor: 'pointer',
+            }}
+          >
+            📸 Scanner un document
           </motion.button>
         </div>
 
