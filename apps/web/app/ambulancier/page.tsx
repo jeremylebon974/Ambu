@@ -37,8 +37,8 @@ export default function AmbulanciePage() {
     loadData();
   }, [router]);
 
-  const loadData = async () => {
-    const u = await auth.getUser();
+  const loadData = () => {
+    const u = auth.getUser();
     setUser(u);
     setLoading(false);
   };

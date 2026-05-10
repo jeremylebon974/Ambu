@@ -92,12 +92,28 @@ export default function HomePage() {
   const heroY = useTransform(scrollY, [0, 300], [0, -50]);
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0.3]);
 
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    delay: Math.random() * 3,
-  }));
+  const particles = [
+    { id: 0, x: 73, y: 77, delay: 2.9 },
+    { id: 1, x: 32, y: 24, delay: 1.2 },
+    { id: 2, x: 17, y: 3, delay: 0.5 },
+    { id: 3, x: 16, y: 1, delay: 2.8 },
+    { id: 4, x: 87, y: 48, delay: 2.6 },
+    { id: 5, x: 35, y: 4, delay: 2.6 },
+    { id: 6, x: 34, y: 87, delay: 1.5 },
+    { id: 7, x: 27, y: 82, delay: 0.2 },
+    { id: 8, x: 27, y: 79, delay: 0.5 },
+    { id: 9, x: 12, y: 35, delay: 1.3 },
+    { id: 10, x: 42, y: 49, delay: 2.2 },
+    { id: 11, x: 35, y: 12, delay: 0.9 },
+    { id: 12, x: 76, y: 42, delay: 1.6 },
+    { id: 13, x: 58, y: 25, delay: 2.9 },
+    { id: 14, x: 51, y: 80, delay: 1.6 },
+    { id: 15, x: 39, y: 34, delay: 0.9 },
+    { id: 16, x: 54, y: 23, delay: 2.1 },
+    { id: 17, x: 62, y: 22, delay: 1.5 },
+    { id: 18, x: 2, y: 40, delay: 2.1 },
+    { id: 19, x: 89, y: 77, delay: 1.5 },
+  ];
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);

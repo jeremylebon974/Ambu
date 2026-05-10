@@ -29,7 +29,8 @@ export default function DirectionPage() {
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
-    auth.getUser().then(setUser);
+    const u = auth.getUser();
+    setUser(u);
   }, [router]);
 
   return (
