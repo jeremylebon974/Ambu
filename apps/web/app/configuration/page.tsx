@@ -3,6 +3,20 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
+async function saveConfig(section: string, data: any) {
+  const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+  await fetch(`${API_URL}/configuration`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ [section]: data }),
+  });
+}
+
 export default function ConfigurationPage() {
   const router = useRouter();
   const [activeSection, setActiveSection] = useState('codes');
@@ -151,6 +165,7 @@ export default function ConfigurationPage() {
 // ── COMPOSANT CODES ────────────────────────────────────────────────────────
 
 function CodesTable() {
+  const [saved, setSaved] = useState(false);
   const [codes, setCodes] = useState([
     { code: 'AC', label: 'Activité Continue', couleur: '#14B8A6', description: 'Journée normale de travail — ambulance ou VSL' },
     { code: 'PJ', label: 'Permanence Jour', couleur: '#3B82F6', description: 'Poste de jour — disponible en journée' },
@@ -257,7 +272,10 @@ function CodesTable() {
         >+ Ajouter</button>
       </div>
 
-      <button style={saveButtonStyle}>💾 Sauvegarder les codes</button>
+      <button
+        onClick={async () => { await saveConfig('codes', codes); setSaved(true); setTimeout(() => setSaved(false), 3000); }}
+        style={saveButtonStyle}
+      >{saved ? '✅ Sauvegardé !' : '💾 Sauvegarder les codes'}</button>
     </div>
   );
 }
@@ -265,6 +283,7 @@ function CodesTable() {
 // ── COMPOSANT HORAIRES ─────────────────────────────────────────────────────
 
 function HorairesTable() {
+  const [saved, setSaved] = useState(false);
   const [horaires, setHoraires] = useState([
     { nom: 'Matin', debut: '07:00', fin: '19:00', duree: '12h', nuit: false, description: '' },
     { nom: 'Soir', debut: '12:00', fin: '24:00', duree: '12h', nuit: true, description: '' },
@@ -306,7 +325,10 @@ function HorairesTable() {
           </tbody>
         </table>
       </div>
-      <button style={saveButtonStyle}>💾 Sauvegarder les horaires</button>
+      <button
+        onClick={async () => { await saveConfig('horaires', horaires); setSaved(true); setTimeout(() => setSaved(false), 3000); }}
+        style={saveButtonStyle}
+      >{saved ? '✅ Sauvegardé !' : '💾 Sauvegarder les horaires'}</button>
     </div>
   );
 }
@@ -314,6 +336,7 @@ function HorairesTable() {
 // ── COMPOSANT VEHICULES ────────────────────────────────────────────────────
 
 function VehiculesTable() {
+  const [saved, setSaved] = useState(false);
   const [vehicules, setVehicules] = useState([
     { numero: '798', type: 'AMB', diplomeRequis: 'DEA', equipements: 'O2, Brancard', actif: true },
     { numero: '817', type: 'AMB', diplomeRequis: 'DEA', equipements: 'O2, Brancard', actif: true },
@@ -332,7 +355,7 @@ function VehiculesTable() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #1E2535' }}>
-              {['N° Véhicule', 'Type', 'Diplôme requis', 'Équipements', 'Actif'].map(h => (
+              {['N° Véhicule', 'Type', 'Diplôme requis', 'Équipements', 'Actif', 'Action'].map(h => (
                 <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#6B7A99', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' }}>{h}</th>
               ))}
             </tr>
@@ -360,6 +383,12 @@ function VehiculesTable() {
                 </td>
                 <td style={{ padding: '12px 16px' }}>
                   <input type="checkbox" checked={v.actif} onChange={e => { const u=[...vehicules]; u[i].actif=e.target.checked; setVehicules(u); }} />
+                </td>
+                <td style={{ padding: '12px 16px' }}>
+                  <button
+                    onClick={() => setVehicules(vehicules.filter((_, j) => j !== i))}
+                    style={{ background: '#EF444420', color: '#EF4444', border: '1px solid #EF444440', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontSize: '12px' }}
+                  >Supprimer</button>
                 </td>
               </tr>
             ))}
@@ -389,7 +418,10 @@ function VehiculesTable() {
           style={{ background: '#14B8A6', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 16px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}
         >+ Ajouter</button>
       </div>
-      <button style={saveButtonStyle}>💾 Sauvegarder les véhicules</button>
+      <button
+        onClick={async () => { await saveConfig('vehicules', vehicules); setSaved(true); setTimeout(() => setSaved(false), 3000); }}
+        style={saveButtonStyle}
+      >{saved ? '✅ Sauvegardé !' : '💾 Sauvegarder les véhicules'}</button>
     </div>
   );
 }
@@ -497,6 +529,7 @@ function PersonnelConfig() {
 // ── COMPOSANT LEGAL ────────────────────────────────────────────────────────
 
 function LegalConfig() {
+  const [saved, setSaved] = useState(false);
   const [config, setConfig] = useState({
     reposQuotidienMin: 11,
     reposHebdoMin: 35,
@@ -575,7 +608,10 @@ function LegalConfig() {
         </div>
       </div>
 
-      <button style={saveButtonStyle}>💾 Sauvegarder la configuration légale</button>
+      <button
+        onClick={async () => { await saveConfig('legal', config); setSaved(true); setTimeout(() => setSaved(false), 3000); }}
+        style={saveButtonStyle}
+      >{saved ? '✅ Sauvegardé !' : '💾 Sauvegarder la configuration légale'}</button>
     </div>
   );
 }
