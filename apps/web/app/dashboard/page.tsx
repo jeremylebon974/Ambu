@@ -123,6 +123,20 @@ export default function DashboardPage() {
             Centre de Régulation
           </button>
           <button
+            onClick={() => router.push('/planning')}
+            style={{
+              backgroundColor: 'transparent',
+              border: '1px solid #1E2535',
+              color: '#6B7A99',
+              padding: '6px 14px',
+              borderRadius: 6,
+              cursor: 'pointer',
+              fontSize: 13,
+            }}
+          >
+            📅 Planning
+          </button>
+          <button
             onClick={() => router.push('/configuration')}
             style={{
               backgroundColor: 'transparent',
