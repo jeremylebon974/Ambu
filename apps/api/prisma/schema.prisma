@@ -138,6 +138,7 @@ model Vehicle {
   model          String
   type           String
   status         VehicleStatus @default(AVAILABLE)
+  metadata       Json?
   isActive       Boolean       @default(true)
   organizationId String
   createdAt      DateTime      @default(now())

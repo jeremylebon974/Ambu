@@ -35,6 +35,7 @@ export type VehicleCountAggregateOutputType = {
     model: number;
     type: number;
     status: number;
+    metadata: number;
     isActive: number;
     organizationId: number;
     createdAt: number;
@@ -69,6 +70,7 @@ export type VehicleCountAggregateInputType = {
     model?: true;
     type?: true;
     status?: true;
+    metadata?: true;
     isActive?: true;
     organizationId?: true;
     createdAt?: true;
@@ -105,6 +107,7 @@ export type VehicleGroupByOutputType = {
     model: string;
     type: string;
     status: $Enums.VehicleStatus;
+    metadata: runtime.JsonValue | null;
     isActive: boolean;
     organizationId: string;
     createdAt: Date;
@@ -125,6 +128,7 @@ export type VehicleWhereInput = {
     model?: Prisma.StringFilter<"Vehicle"> | string;
     type?: Prisma.StringFilter<"Vehicle"> | string;
     status?: Prisma.EnumVehicleStatusFilter<"Vehicle"> | $Enums.VehicleStatus;
+    metadata?: Prisma.JsonNullableFilter<"Vehicle">;
     isActive?: Prisma.BoolFilter<"Vehicle"> | boolean;
     organizationId?: Prisma.StringFilter<"Vehicle"> | string;
     createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string;
@@ -139,6 +143,7 @@ export type VehicleOrderByWithRelationInput = {
     model?: Prisma.SortOrder;
     type?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
+    metadata?: Prisma.SortOrderInput | Prisma.SortOrder;
     isActive?: Prisma.SortOrder;
     organizationId?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -156,6 +161,7 @@ export type VehicleWhereUniqueInput = Prisma.AtLeast<{
     model?: Prisma.StringFilter<"Vehicle"> | string;
     type?: Prisma.StringFilter<"Vehicle"> | string;
     status?: Prisma.EnumVehicleStatusFilter<"Vehicle"> | $Enums.VehicleStatus;
+    metadata?: Prisma.JsonNullableFilter<"Vehicle">;
     isActive?: Prisma.BoolFilter<"Vehicle"> | boolean;
     organizationId?: Prisma.StringFilter<"Vehicle"> | string;
     createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string;
@@ -170,6 +176,7 @@ export type VehicleOrderByWithAggregationInput = {
     model?: Prisma.SortOrder;
     type?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
+    metadata?: Prisma.SortOrderInput | Prisma.SortOrder;
     isActive?: Prisma.SortOrder;
     organizationId?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -187,6 +194,7 @@ export type VehicleScalarWhereWithAggregatesInput = {
     model?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string;
     type?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string;
     status?: Prisma.EnumVehicleStatusWithAggregatesFilter<"Vehicle"> | $Enums.VehicleStatus;
+    metadata?: Prisma.JsonNullableWithAggregatesFilter<"Vehicle">;
     isActive?: Prisma.BoolWithAggregatesFilter<"Vehicle"> | boolean;
     organizationId?: Prisma.StringWithAggregatesFilter<"Vehicle"> | string;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"Vehicle"> | Date | string;
@@ -198,6 +206,7 @@ export type VehicleCreateInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -211,6 +220,7 @@ export type VehicleUncheckedCreateInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     organizationId: string;
     createdAt?: Date | string;
@@ -224,6 +234,7 @@ export type VehicleUpdateInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -237,6 +248,7 @@ export type VehicleUncheckedUpdateInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     organizationId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -250,6 +262,7 @@ export type VehicleCreateManyInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     organizationId: string;
     createdAt?: Date | string;
@@ -261,6 +274,7 @@ export type VehicleUpdateManyMutationInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -271,6 +285,7 @@ export type VehicleUncheckedUpdateManyInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     organizationId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -290,6 +305,7 @@ export type VehicleCountOrderByAggregateInput = {
     model?: Prisma.SortOrder;
     type?: Prisma.SortOrder;
     status?: Prisma.SortOrder;
+    metadata?: Prisma.SortOrder;
     isActive?: Prisma.SortOrder;
     organizationId?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
@@ -392,6 +408,7 @@ export type VehicleCreateWithoutOrganizationInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -404,6 +421,7 @@ export type VehicleUncheckedCreateWithoutOrganizationInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -440,6 +458,7 @@ export type VehicleScalarWhereInput = {
     model?: Prisma.StringFilter<"Vehicle"> | string;
     type?: Prisma.StringFilter<"Vehicle"> | string;
     status?: Prisma.EnumVehicleStatusFilter<"Vehicle"> | $Enums.VehicleStatus;
+    metadata?: Prisma.JsonNullableFilter<"Vehicle">;
     isActive?: Prisma.BoolFilter<"Vehicle"> | boolean;
     organizationId?: Prisma.StringFilter<"Vehicle"> | string;
     createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string;
@@ -451,6 +470,7 @@ export type VehicleCreateWithoutCrewsInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -463,6 +483,7 @@ export type VehicleUncheckedCreateWithoutCrewsInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     organizationId: string;
     createdAt?: Date | string;
@@ -488,6 +509,7 @@ export type VehicleUpdateWithoutCrewsInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -500,6 +522,7 @@ export type VehicleUncheckedUpdateWithoutCrewsInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     organizationId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -512,6 +535,7 @@ export type VehicleCreateWithoutGpsTracksInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -524,6 +548,7 @@ export type VehicleUncheckedCreateWithoutGpsTracksInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     organizationId: string;
     createdAt?: Date | string;
@@ -549,6 +574,7 @@ export type VehicleUpdateWithoutGpsTracksInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -561,6 +587,7 @@ export type VehicleUncheckedUpdateWithoutGpsTracksInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     organizationId?: Prisma.StringFieldUpdateOperationsInput | string;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -573,6 +600,7 @@ export type VehicleCreateManyOrganizationInput = {
     model: string;
     type: string;
     status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
@@ -583,6 +611,7 @@ export type VehicleUpdateWithoutOrganizationInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -595,6 +624,7 @@ export type VehicleUncheckedUpdateWithoutOrganizationInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -607,6 +637,7 @@ export type VehicleUncheckedUpdateManyWithoutOrganizationInput = {
     model?: Prisma.StringFieldUpdateOperationsInput | string;
     type?: Prisma.StringFieldUpdateOperationsInput | string;
     status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -634,6 +665,7 @@ export type VehicleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     model?: boolean;
     type?: boolean;
     status?: boolean;
+    metadata?: boolean;
     isActive?: boolean;
     organizationId?: boolean;
     createdAt?: boolean;
@@ -649,6 +681,7 @@ export type VehicleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
     model?: boolean;
     type?: boolean;
     status?: boolean;
+    metadata?: boolean;
     isActive?: boolean;
     organizationId?: boolean;
     createdAt?: boolean;
@@ -661,6 +694,7 @@ export type VehicleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
     model?: boolean;
     type?: boolean;
     status?: boolean;
+    metadata?: boolean;
     isActive?: boolean;
     organizationId?: boolean;
     createdAt?: boolean;
@@ -673,12 +707,13 @@ export type VehicleSelectScalar = {
     model?: boolean;
     type?: boolean;
     status?: boolean;
+    metadata?: boolean;
     isActive?: boolean;
     organizationId?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
 };
-export type VehicleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "plate" | "model" | "type" | "status" | "isActive" | "organizationId" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicle"]>;
+export type VehicleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "plate" | "model" | "type" | "status" | "metadata" | "isActive" | "organizationId" | "createdAt" | "updatedAt", ExtArgs["result"]["vehicle"]>;
 export type VehicleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>;
     crews?: boolean | Prisma.Vehicle$crewsArgs<ExtArgs>;
@@ -704,6 +739,7 @@ export type $VehiclePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
         model: string;
         type: string;
         status: $Enums.VehicleStatus;
+        metadata: runtime.JsonValue | null;
         isActive: boolean;
         organizationId: string;
         createdAt: Date;
@@ -773,6 +809,7 @@ export interface VehicleFieldRefs {
     readonly model: Prisma.FieldRef<"Vehicle", 'String'>;
     readonly type: Prisma.FieldRef<"Vehicle", 'String'>;
     readonly status: Prisma.FieldRef<"Vehicle", 'VehicleStatus'>;
+    readonly metadata: Prisma.FieldRef<"Vehicle", 'Json'>;
     readonly isActive: Prisma.FieldRef<"Vehicle", 'Boolean'>;
     readonly organizationId: Prisma.FieldRef<"Vehicle", 'String'>;
     readonly createdAt: Prisma.FieldRef<"Vehicle", 'DateTime'>;

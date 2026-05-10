@@ -87,6 +87,7 @@ export declare const VehicleScalarFieldEnum: {
     readonly model: "model";
     readonly type: "type";
     readonly status: "status";
+    readonly metadata: "metadata";
     readonly isActive: "isActive";
     readonly organizationId: "organizationId";
     readonly createdAt: "createdAt";

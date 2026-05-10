@@ -188,7 +188,6 @@ export declare class MissionsService {
             data: import("@prisma/client/runtime/client").JsonValue | null;
         }[];
         documents: {
-            url: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -196,6 +195,7 @@ export declare class MissionsService {
             patientId: string | null;
             missionId: string | null;
             filename: string;
+            url: string;
             mimeType: string | null;
             sizeBytes: number | null;
             isEncrypted: boolean;

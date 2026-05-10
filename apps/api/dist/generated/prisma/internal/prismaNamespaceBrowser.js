@@ -116,6 +116,7 @@ exports.VehicleScalarFieldEnum = {
     model: 'model',
     type: 'type',
     status: 'status',
+    metadata: 'metadata',
     isActive: 'isActive',
     organizationId: 'organizationId',
     createdAt: 'createdAt',
