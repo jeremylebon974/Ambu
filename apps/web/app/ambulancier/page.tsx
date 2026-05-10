@@ -186,6 +186,7 @@ export default function AmbulanciePage() {
               { label: 'Carte GPS', icon: '🗺️', color: '#14B8A6', path: '/dashboard/map' },
               { label: 'Mes documents', icon: '📄', color: '#8B5CF6', path: '/ambulancier/documents' },
               { label: 'Signaler incident', icon: '⚠️', color: '#EF4444', path: '/ambulancier/incident' },
+              { label: 'Terminal PDA', icon: '📱', color: '#14B8A6', path: '/pda' },
             ].map(a => (
               <motion.button
                 key={a.label}

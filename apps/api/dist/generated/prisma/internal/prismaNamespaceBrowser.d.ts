@@ -15,6 +15,7 @@ export declare const ModelName: {
     readonly User: "User";
     readonly Patient: "Patient";
     readonly Vehicle: "Vehicle";
+    readonly Pda: "Pda";
     readonly Crew: "Crew";
     readonly CrewMember: "CrewMember";
     readonly Mission: "Mission";
@@ -94,6 +95,18 @@ export declare const VehicleScalarFieldEnum: {
     readonly updatedAt: "updatedAt";
 };
 export type VehicleScalarFieldEnum = (typeof VehicleScalarFieldEnum)[keyof typeof VehicleScalarFieldEnum];
+export declare const PdaScalarFieldEnum: {
+    readonly id: "id";
+    readonly reference: "reference";
+    readonly vehicleId: "vehicleId";
+    readonly organizationId: "organizationId";
+    readonly isActive: "isActive";
+    readonly lastSeen: "lastSeen";
+    readonly currentUserId: "currentUserId";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type PdaScalarFieldEnum = (typeof PdaScalarFieldEnum)[keyof typeof PdaScalarFieldEnum];
 export declare const CrewScalarFieldEnum: {
     readonly id: "id";
     readonly name: "name";

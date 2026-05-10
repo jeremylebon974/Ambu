@@ -136,6 +136,7 @@ export type VehicleWhereInput = {
     organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>;
     crews?: Prisma.CrewListRelationFilter;
     gpsTracks?: Prisma.GpsTrackListRelationFilter;
+    pdas?: Prisma.PdaListRelationFilter;
 };
 export type VehicleOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -151,6 +152,7 @@ export type VehicleOrderByWithRelationInput = {
     organization?: Prisma.OrganizationOrderByWithRelationInput;
     crews?: Prisma.CrewOrderByRelationAggregateInput;
     gpsTracks?: Prisma.GpsTrackOrderByRelationAggregateInput;
+    pdas?: Prisma.PdaOrderByRelationAggregateInput;
 };
 export type VehicleWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -169,6 +171,7 @@ export type VehicleWhereUniqueInput = Prisma.AtLeast<{
     organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>;
     crews?: Prisma.CrewListRelationFilter;
     gpsTracks?: Prisma.GpsTrackListRelationFilter;
+    pdas?: Prisma.PdaListRelationFilter;
 }, "id" | "plate">;
 export type VehicleOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -213,6 +216,7 @@ export type VehicleCreateInput = {
     organization: Prisma.OrganizationCreateNestedOneWithoutVehiclesInput;
     crews?: Prisma.CrewCreateNestedManyWithoutVehicleInput;
     gpsTracks?: Prisma.GpsTrackCreateNestedManyWithoutVehicleInput;
+    pdas?: Prisma.PdaCreateNestedManyWithoutVehicleInput;
 };
 export type VehicleUncheckedCreateInput = {
     id?: string;
@@ -227,6 +231,7 @@ export type VehicleUncheckedCreateInput = {
     updatedAt?: Date | string;
     crews?: Prisma.CrewUncheckedCreateNestedManyWithoutVehicleInput;
     gpsTracks?: Prisma.GpsTrackUncheckedCreateNestedManyWithoutVehicleInput;
+    pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutVehicleInput;
 };
 export type VehicleUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -241,6 +246,7 @@ export type VehicleUpdateInput = {
     organization?: Prisma.OrganizationUpdateOneRequiredWithoutVehiclesNestedInput;
     crews?: Prisma.CrewUpdateManyWithoutVehicleNestedInput;
     gpsTracks?: Prisma.GpsTrackUpdateManyWithoutVehicleNestedInput;
+    pdas?: Prisma.PdaUpdateManyWithoutVehicleNestedInput;
 };
 export type VehicleUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -255,6 +261,7 @@ export type VehicleUncheckedUpdateInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     crews?: Prisma.CrewUncheckedUpdateManyWithoutVehicleNestedInput;
     gpsTracks?: Prisma.GpsTrackUncheckedUpdateManyWithoutVehicleNestedInput;
+    pdas?: Prisma.PdaUncheckedUpdateManyWithoutVehicleNestedInput;
 };
 export type VehicleCreateManyInput = {
     id?: string;
@@ -333,6 +340,10 @@ export type VehicleMinOrderByAggregateInput = {
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
 };
+export type VehicleNullableScalarRelationFilter = {
+    is?: Prisma.VehicleWhereInput | null;
+    isNot?: Prisma.VehicleWhereInput | null;
+};
 export type VehicleScalarRelationFilter = {
     is?: Prisma.VehicleWhereInput;
     isNot?: Prisma.VehicleWhereInput;
@@ -378,6 +389,20 @@ export type VehicleUncheckedUpdateManyWithoutOrganizationNestedInput = {
 export type EnumVehicleStatusFieldUpdateOperationsInput = {
     set?: $Enums.VehicleStatus;
 };
+export type VehicleCreateNestedOneWithoutPdasInput = {
+    create?: Prisma.XOR<Prisma.VehicleCreateWithoutPdasInput, Prisma.VehicleUncheckedCreateWithoutPdasInput>;
+    connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutPdasInput;
+    connect?: Prisma.VehicleWhereUniqueInput;
+};
+export type VehicleUpdateOneWithoutPdasNestedInput = {
+    create?: Prisma.XOR<Prisma.VehicleCreateWithoutPdasInput, Prisma.VehicleUncheckedCreateWithoutPdasInput>;
+    connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutPdasInput;
+    upsert?: Prisma.VehicleUpsertWithoutPdasInput;
+    disconnect?: Prisma.VehicleWhereInput | boolean;
+    delete?: Prisma.VehicleWhereInput | boolean;
+    connect?: Prisma.VehicleWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.VehicleUpdateToOneWithWhereWithoutPdasInput, Prisma.VehicleUpdateWithoutPdasInput>, Prisma.VehicleUncheckedUpdateWithoutPdasInput>;
+};
 export type VehicleCreateNestedOneWithoutCrewsInput = {
     create?: Prisma.XOR<Prisma.VehicleCreateWithoutCrewsInput, Prisma.VehicleUncheckedCreateWithoutCrewsInput>;
     connectOrCreate?: Prisma.VehicleCreateOrConnectWithoutCrewsInput;
@@ -414,6 +439,7 @@ export type VehicleCreateWithoutOrganizationInput = {
     updatedAt?: Date | string;
     crews?: Prisma.CrewCreateNestedManyWithoutVehicleInput;
     gpsTracks?: Prisma.GpsTrackCreateNestedManyWithoutVehicleInput;
+    pdas?: Prisma.PdaCreateNestedManyWithoutVehicleInput;
 };
 export type VehicleUncheckedCreateWithoutOrganizationInput = {
     id?: string;
@@ -427,6 +453,7 @@ export type VehicleUncheckedCreateWithoutOrganizationInput = {
     updatedAt?: Date | string;
     crews?: Prisma.CrewUncheckedCreateNestedManyWithoutVehicleInput;
     gpsTracks?: Prisma.GpsTrackUncheckedCreateNestedManyWithoutVehicleInput;
+    pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutVehicleInput;
 };
 export type VehicleCreateOrConnectWithoutOrganizationInput = {
     where: Prisma.VehicleWhereUniqueInput;
@@ -464,6 +491,75 @@ export type VehicleScalarWhereInput = {
     createdAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Vehicle"> | Date | string;
 };
+export type VehicleCreateWithoutPdasInput = {
+    id?: string;
+    plate: string;
+    model: string;
+    type: string;
+    status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    isActive?: boolean;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    organization: Prisma.OrganizationCreateNestedOneWithoutVehiclesInput;
+    crews?: Prisma.CrewCreateNestedManyWithoutVehicleInput;
+    gpsTracks?: Prisma.GpsTrackCreateNestedManyWithoutVehicleInput;
+};
+export type VehicleUncheckedCreateWithoutPdasInput = {
+    id?: string;
+    plate: string;
+    model: string;
+    type: string;
+    status?: $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    isActive?: boolean;
+    organizationId: string;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    crews?: Prisma.CrewUncheckedCreateNestedManyWithoutVehicleInput;
+    gpsTracks?: Prisma.GpsTrackUncheckedCreateNestedManyWithoutVehicleInput;
+};
+export type VehicleCreateOrConnectWithoutPdasInput = {
+    where: Prisma.VehicleWhereUniqueInput;
+    create: Prisma.XOR<Prisma.VehicleCreateWithoutPdasInput, Prisma.VehicleUncheckedCreateWithoutPdasInput>;
+};
+export type VehicleUpsertWithoutPdasInput = {
+    update: Prisma.XOR<Prisma.VehicleUpdateWithoutPdasInput, Prisma.VehicleUncheckedUpdateWithoutPdasInput>;
+    create: Prisma.XOR<Prisma.VehicleCreateWithoutPdasInput, Prisma.VehicleUncheckedCreateWithoutPdasInput>;
+    where?: Prisma.VehicleWhereInput;
+};
+export type VehicleUpdateToOneWithWhereWithoutPdasInput = {
+    where?: Prisma.VehicleWhereInput;
+    data: Prisma.XOR<Prisma.VehicleUpdateWithoutPdasInput, Prisma.VehicleUncheckedUpdateWithoutPdasInput>;
+};
+export type VehicleUpdateWithoutPdasInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    plate?: Prisma.StringFieldUpdateOperationsInput | string;
+    model?: Prisma.StringFieldUpdateOperationsInput | string;
+    type?: Prisma.StringFieldUpdateOperationsInput | string;
+    status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    organization?: Prisma.OrganizationUpdateOneRequiredWithoutVehiclesNestedInput;
+    crews?: Prisma.CrewUpdateManyWithoutVehicleNestedInput;
+    gpsTracks?: Prisma.GpsTrackUpdateManyWithoutVehicleNestedInput;
+};
+export type VehicleUncheckedUpdateWithoutPdasInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    plate?: Prisma.StringFieldUpdateOperationsInput | string;
+    model?: Prisma.StringFieldUpdateOperationsInput | string;
+    type?: Prisma.StringFieldUpdateOperationsInput | string;
+    status?: Prisma.EnumVehicleStatusFieldUpdateOperationsInput | $Enums.VehicleStatus;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    organizationId?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    crews?: Prisma.CrewUncheckedUpdateManyWithoutVehicleNestedInput;
+    gpsTracks?: Prisma.GpsTrackUncheckedUpdateManyWithoutVehicleNestedInput;
+};
 export type VehicleCreateWithoutCrewsInput = {
     id?: string;
     plate: string;
@@ -476,6 +572,7 @@ export type VehicleCreateWithoutCrewsInput = {
     updatedAt?: Date | string;
     organization: Prisma.OrganizationCreateNestedOneWithoutVehiclesInput;
     gpsTracks?: Prisma.GpsTrackCreateNestedManyWithoutVehicleInput;
+    pdas?: Prisma.PdaCreateNestedManyWithoutVehicleInput;
 };
 export type VehicleUncheckedCreateWithoutCrewsInput = {
     id?: string;
@@ -489,6 +586,7 @@ export type VehicleUncheckedCreateWithoutCrewsInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     gpsTracks?: Prisma.GpsTrackUncheckedCreateNestedManyWithoutVehicleInput;
+    pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutVehicleInput;
 };
 export type VehicleCreateOrConnectWithoutCrewsInput = {
     where: Prisma.VehicleWhereUniqueInput;
@@ -515,6 +613,7 @@ export type VehicleUpdateWithoutCrewsInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     organization?: Prisma.OrganizationUpdateOneRequiredWithoutVehiclesNestedInput;
     gpsTracks?: Prisma.GpsTrackUpdateManyWithoutVehicleNestedInput;
+    pdas?: Prisma.PdaUpdateManyWithoutVehicleNestedInput;
 };
 export type VehicleUncheckedUpdateWithoutCrewsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -528,6 +627,7 @@ export type VehicleUncheckedUpdateWithoutCrewsInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     gpsTracks?: Prisma.GpsTrackUncheckedUpdateManyWithoutVehicleNestedInput;
+    pdas?: Prisma.PdaUncheckedUpdateManyWithoutVehicleNestedInput;
 };
 export type VehicleCreateWithoutGpsTracksInput = {
     id?: string;
@@ -541,6 +641,7 @@ export type VehicleCreateWithoutGpsTracksInput = {
     updatedAt?: Date | string;
     organization: Prisma.OrganizationCreateNestedOneWithoutVehiclesInput;
     crews?: Prisma.CrewCreateNestedManyWithoutVehicleInput;
+    pdas?: Prisma.PdaCreateNestedManyWithoutVehicleInput;
 };
 export type VehicleUncheckedCreateWithoutGpsTracksInput = {
     id?: string;
@@ -554,6 +655,7 @@ export type VehicleUncheckedCreateWithoutGpsTracksInput = {
     createdAt?: Date | string;
     updatedAt?: Date | string;
     crews?: Prisma.CrewUncheckedCreateNestedManyWithoutVehicleInput;
+    pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutVehicleInput;
 };
 export type VehicleCreateOrConnectWithoutGpsTracksInput = {
     where: Prisma.VehicleWhereUniqueInput;
@@ -580,6 +682,7 @@ export type VehicleUpdateWithoutGpsTracksInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     organization?: Prisma.OrganizationUpdateOneRequiredWithoutVehiclesNestedInput;
     crews?: Prisma.CrewUpdateManyWithoutVehicleNestedInput;
+    pdas?: Prisma.PdaUpdateManyWithoutVehicleNestedInput;
 };
 export type VehicleUncheckedUpdateWithoutGpsTracksInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -593,6 +696,7 @@ export type VehicleUncheckedUpdateWithoutGpsTracksInput = {
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     crews?: Prisma.CrewUncheckedUpdateManyWithoutVehicleNestedInput;
+    pdas?: Prisma.PdaUncheckedUpdateManyWithoutVehicleNestedInput;
 };
 export type VehicleCreateManyOrganizationInput = {
     id?: string;
@@ -617,6 +721,7 @@ export type VehicleUpdateWithoutOrganizationInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     crews?: Prisma.CrewUpdateManyWithoutVehicleNestedInput;
     gpsTracks?: Prisma.GpsTrackUpdateManyWithoutVehicleNestedInput;
+    pdas?: Prisma.PdaUpdateManyWithoutVehicleNestedInput;
 };
 export type VehicleUncheckedUpdateWithoutOrganizationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -630,6 +735,7 @@ export type VehicleUncheckedUpdateWithoutOrganizationInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     crews?: Prisma.CrewUncheckedUpdateManyWithoutVehicleNestedInput;
     gpsTracks?: Prisma.GpsTrackUncheckedUpdateManyWithoutVehicleNestedInput;
+    pdas?: Prisma.PdaUncheckedUpdateManyWithoutVehicleNestedInput;
 };
 export type VehicleUncheckedUpdateManyWithoutOrganizationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -645,10 +751,12 @@ export type VehicleUncheckedUpdateManyWithoutOrganizationInput = {
 export type VehicleCountOutputType = {
     crews: number;
     gpsTracks: number;
+    pdas: number;
 };
 export type VehicleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     crews?: boolean | VehicleCountOutputTypeCountCrewsArgs;
     gpsTracks?: boolean | VehicleCountOutputTypeCountGpsTracksArgs;
+    pdas?: boolean | VehicleCountOutputTypeCountPdasArgs;
 };
 export type VehicleCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.VehicleCountOutputTypeSelect<ExtArgs> | null;
@@ -658,6 +766,9 @@ export type VehicleCountOutputTypeCountCrewsArgs<ExtArgs extends runtime.Types.E
 };
 export type VehicleCountOutputTypeCountGpsTracksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.GpsTrackWhereInput;
+};
+export type VehicleCountOutputTypeCountPdasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.PdaWhereInput;
 };
 export type VehicleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
@@ -673,6 +784,7 @@ export type VehicleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>;
     crews?: boolean | Prisma.Vehicle$crewsArgs<ExtArgs>;
     gpsTracks?: boolean | Prisma.Vehicle$gpsTracksArgs<ExtArgs>;
+    pdas?: boolean | Prisma.Vehicle$pdasArgs<ExtArgs>;
     _count?: boolean | Prisma.VehicleCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["vehicle"]>;
 export type VehicleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -718,6 +830,7 @@ export type VehicleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
     organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>;
     crews?: boolean | Prisma.Vehicle$crewsArgs<ExtArgs>;
     gpsTracks?: boolean | Prisma.Vehicle$gpsTracksArgs<ExtArgs>;
+    pdas?: boolean | Prisma.Vehicle$pdasArgs<ExtArgs>;
     _count?: boolean | Prisma.VehicleCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type VehicleIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -732,6 +845,7 @@ export type $VehiclePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
         organization: Prisma.$OrganizationPayload<ExtArgs>;
         crews: Prisma.$CrewPayload<ExtArgs>[];
         gpsTracks: Prisma.$GpsTrackPayload<ExtArgs>[];
+        pdas: Prisma.$PdaPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
@@ -799,6 +913,7 @@ export interface Prisma__VehicleClient<T, Null = never, ExtArgs extends runtime.
     organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>;
     crews<T extends Prisma.Vehicle$crewsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$crewsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CrewPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     gpsTracks<T extends Prisma.Vehicle$gpsTracksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$gpsTracksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GpsTrackPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    pdas<T extends Prisma.Vehicle$pdasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Vehicle$pdasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PdaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): runtime.Types.Utils.JsPromise<TResult1 | TResult2>;
     catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): runtime.Types.Utils.JsPromise<T | TResult>;
     finally(onfinally?: (() => void) | undefined | null): runtime.Types.Utils.JsPromise<T>;
@@ -936,6 +1051,17 @@ export type Vehicle$gpsTracksArgs<ExtArgs extends runtime.Types.Extensions.Inter
     take?: number;
     skip?: number;
     distinct?: Prisma.GpsTrackScalarFieldEnum | Prisma.GpsTrackScalarFieldEnum[];
+};
+export type Vehicle$pdasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    select?: Prisma.PdaSelect<ExtArgs> | null;
+    omit?: Prisma.PdaOmit<ExtArgs> | null;
+    include?: Prisma.PdaInclude<ExtArgs> | null;
+    where?: Prisma.PdaWhereInput;
+    orderBy?: Prisma.PdaOrderByWithRelationInput | Prisma.PdaOrderByWithRelationInput[];
+    cursor?: Prisma.PdaWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.PdaScalarFieldEnum | Prisma.PdaScalarFieldEnum[];
 };
 export type VehicleDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.VehicleSelect<ExtArgs> | null;

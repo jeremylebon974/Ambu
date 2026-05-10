@@ -32,15 +32,15 @@ export declare class AuthController {
         organizationId: string;
         organization: {
             id: string;
-            name: string;
-            siret: string | null;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
+            metadata: import("@prisma/client/runtime/client").JsonValue | null;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
-            metadata: import("@prisma/client/runtime/client").JsonValue | null;
+            name: string;
+            address: string | null;
+            phone: string | null;
+            email: string | null;
+            siret: string | null;
         };
     }>;
 }

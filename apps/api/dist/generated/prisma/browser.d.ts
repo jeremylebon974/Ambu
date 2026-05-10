@@ -6,6 +6,7 @@ export type Organization = Prisma.OrganizationModel;
 export type User = Prisma.UserModel;
 export type Patient = Prisma.PatientModel;
 export type Vehicle = Prisma.VehicleModel;
+export type Pda = Prisma.PdaModel;
 export type Crew = Prisma.CrewModel;
 export type CrewMember = Prisma.CrewMemberModel;
 export type Mission = Prisma.MissionModel;

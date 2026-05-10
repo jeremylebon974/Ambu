@@ -161,6 +161,7 @@ export declare const ModelName: {
     readonly User: "User";
     readonly Patient: "Patient";
     readonly Vehicle: "Vehicle";
+    readonly Pda: "Pda";
     readonly Crew: "Crew";
     readonly CrewMember: "CrewMember";
     readonly Mission: "Mission";
@@ -185,7 +186,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "organization" | "user" | "patient" | "vehicle" | "crew" | "crewMember" | "mission" | "missionEvent" | "gpsTrack" | "document" | "prescription" | "invoice" | "invoiceLine" | "mutuelle" | "notification" | "auditLog";
+        modelProps: "organization" | "user" | "patient" | "vehicle" | "pda" | "crew" | "crewMember" | "mission" | "missionEvent" | "gpsTrack" | "document" | "prescription" | "invoice" | "invoiceLine" | "mutuelle" | "notification" | "auditLog";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -482,6 +483,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 count: {
                     args: Prisma.VehicleCountArgs<ExtArgs>;
                     result: runtime.Types.Utils.Optional<Prisma.VehicleCountAggregateOutputType> | number;
+                };
+            };
+        };
+        Pda: {
+            payload: Prisma.$PdaPayload<ExtArgs>;
+            fields: Prisma.PdaFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.PdaFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.PdaFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>;
+                };
+                findFirst: {
+                    args: Prisma.PdaFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.PdaFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>;
+                };
+                findMany: {
+                    args: Prisma.PdaFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>[];
+                };
+                create: {
+                    args: Prisma.PdaCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>;
+                };
+                createMany: {
+                    args: Prisma.PdaCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.PdaCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>[];
+                };
+                delete: {
+                    args: Prisma.PdaDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>;
+                };
+                update: {
+                    args: Prisma.PdaUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.PdaDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.PdaUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.PdaUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>[];
+                };
+                upsert: {
+                    args: Prisma.PdaUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PdaPayload>;
+                };
+                aggregate: {
+                    args: Prisma.PdaAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregatePda>;
+                };
+                groupBy: {
+                    args: Prisma.PdaGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PdaGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.PdaCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PdaCountAggregateOutputType> | number;
                 };
             };
         };
@@ -1462,6 +1537,18 @@ export declare const VehicleScalarFieldEnum: {
     readonly updatedAt: "updatedAt";
 };
 export type VehicleScalarFieldEnum = (typeof VehicleScalarFieldEnum)[keyof typeof VehicleScalarFieldEnum];
+export declare const PdaScalarFieldEnum: {
+    readonly id: "id";
+    readonly reference: "reference";
+    readonly vehicleId: "vehicleId";
+    readonly organizationId: "organizationId";
+    readonly isActive: "isActive";
+    readonly lastSeen: "lastSeen";
+    readonly currentUserId: "currentUserId";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type PdaScalarFieldEnum = (typeof PdaScalarFieldEnum)[keyof typeof PdaScalarFieldEnum];
 export declare const CrewScalarFieldEnum: {
     readonly id: "id";
     readonly name: "name";
@@ -1685,6 +1772,7 @@ export type GlobalOmitConfig = {
     user?: Prisma.UserOmit;
     patient?: Prisma.PatientOmit;
     vehicle?: Prisma.VehicleOmit;
+    pda?: Prisma.PdaOmit;
     crew?: Prisma.CrewOmit;
     crewMember?: Prisma.CrewMemberOmit;
     mission?: Prisma.MissionOmit;

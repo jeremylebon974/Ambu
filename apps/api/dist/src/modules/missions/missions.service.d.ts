@@ -7,249 +7,249 @@ export declare class MissionsService {
     private readonly logger;
     constructor(prisma: PrismaService);
     create(dto: CreateMissionDto, organizationId: string): Promise<{
+        patient: {
+            id: string;
+            isActive: boolean;
+            organizationId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            address: string | null;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            phone: string | null;
+            email: string | null;
+            socialNumber: string | null;
+        };
         crew: {
             members: ({
                 user: {
                     id: string;
-                    phone: string | null;
-                    email: string;
                     isActive: boolean;
+                    organizationId: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    organizationId: string;
-                    passwordHash: string;
                     firstName: string;
                     lastName: string;
+                    phone: string | null;
+                    email: string;
                     role: import("../../../generated/prisma/enums").UserRole;
+                    passwordHash: string;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
                 };
             } & {
                 id: string;
                 createdAt: Date;
-                role: string;
                 crewId: string;
                 userId: string;
+                role: string;
             })[];
         } & {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             vehicleId: string;
-        };
-        patient: {
-            id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            organizationId: string;
-            firstName: string;
-            lastName: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
         };
     } & {
         id: string;
-        address: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         status: import("../../../generated/prisma/enums").MissionStatus;
         organizationId: string;
-        crewId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         priority: number;
+        address: string | null;
         notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
         patientId: string | null;
+        crewId: string | null;
     }>;
     findAll(organizationId: string, status?: string): Promise<({
+        patient: {
+            id: string;
+            isActive: boolean;
+            organizationId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            address: string | null;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            phone: string | null;
+            email: string | null;
+            socialNumber: string | null;
+        };
         crew: {
             members: ({
                 user: {
                     id: string;
-                    phone: string | null;
-                    email: string;
                     isActive: boolean;
+                    organizationId: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    organizationId: string;
-                    passwordHash: string;
                     firstName: string;
                     lastName: string;
+                    phone: string | null;
+                    email: string;
                     role: import("../../../generated/prisma/enums").UserRole;
+                    passwordHash: string;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
                 };
             } & {
                 id: string;
                 createdAt: Date;
-                role: string;
                 crewId: string;
                 userId: string;
+                role: string;
             })[];
         } & {
             id: string;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             vehicleId: string;
-        };
-        patient: {
-            id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            organizationId: string;
-            firstName: string;
-            lastName: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
         };
     } & {
         id: string;
-        address: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         status: import("../../../generated/prisma/enums").MissionStatus;
         organizationId: string;
-        crewId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         priority: number;
+        address: string | null;
         notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
         patientId: string | null;
+        crewId: string | null;
     })[]>;
     findOne(id: string, organizationId: string): Promise<{
+        patient: {
+            id: string;
+            isActive: boolean;
+            organizationId: string;
+            createdAt: Date;
+            updatedAt: Date;
+            address: string | null;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            phone: string | null;
+            email: string | null;
+            socialNumber: string | null;
+        };
         crew: {
             members: ({
                 user: {
                     id: string;
-                    phone: string | null;
-                    email: string;
                     isActive: boolean;
+                    organizationId: string;
                     createdAt: Date;
                     updatedAt: Date;
-                    organizationId: string;
-                    passwordHash: string;
                     firstName: string;
                     lastName: string;
+                    phone: string | null;
+                    email: string;
                     role: import("../../../generated/prisma/enums").UserRole;
+                    passwordHash: string;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
                 };
             } & {
                 id: string;
                 createdAt: Date;
-                role: string;
                 crewId: string;
                 userId: string;
+                role: string;
             })[];
         } & {
             id: string;
-            name: string;
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
+            name: string;
             vehicleId: string;
         };
-        patient: {
+        events: {
             id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
+            type: string;
             createdAt: Date;
-            updatedAt: Date;
-            organizationId: string;
-            firstName: string;
-            lastName: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
-        };
+            missionId: string;
+            data: import("@prisma/client/runtime/client").JsonValue | null;
+        }[];
         documents: {
-            url: string;
             id: string;
+            type: import("../../../generated/prisma/enums").DocumentType;
             createdAt: Date;
             updatedAt: Date;
-            type: import("../../../generated/prisma/enums").DocumentType;
             patientId: string | null;
             missionId: string | null;
             filename: string;
+            url: string;
             mimeType: string | null;
             sizeBytes: number | null;
             isEncrypted: boolean;
         }[];
-        events: {
-            id: string;
-            createdAt: Date;
-            type: string;
-            data: import("@prisma/client/runtime/client").JsonValue | null;
-            missionId: string;
-        }[];
     } & {
         id: string;
-        address: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         status: import("../../../generated/prisma/enums").MissionStatus;
         organizationId: string;
-        crewId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         priority: number;
+        address: string | null;
         notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
         patientId: string | null;
+        crewId: string | null;
     }>;
     assign(id: string, dto: AssignMissionDto, organizationId: string): Promise<{
         id: string;
-        address: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         status: import("../../../generated/prisma/enums").MissionStatus;
         organizationId: string;
-        crewId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         priority: number;
+        address: string | null;
         notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
         patientId: string | null;
+        crewId: string | null;
     }>;
     updateStatus(id: string, dto: UpdateMissionDto, organizationId: string, userId: string): Promise<{
         id: string;
-        address: string | null;
-        createdAt: Date;
-        updatedAt: Date;
         status: import("../../../generated/prisma/enums").MissionStatus;
         organizationId: string;
-        crewId: string | null;
+        createdAt: Date;
+        updatedAt: Date;
         priority: number;
+        address: string | null;
         notes: string | null;
         scheduledAt: Date | null;
         startedAt: Date | null;
         completedAt: Date | null;
         patientId: string | null;
+        crewId: string | null;
     }>;
     getEvents(id: string, organizationId: string): Promise<{
         id: string;
-        createdAt: Date;
         type: string;
-        data: import("@prisma/client/runtime/client").JsonValue | null;
+        createdAt: Date;
         missionId: string;
+        data: import("@prisma/client/runtime/client").JsonValue | null;
     }[]>;
 }

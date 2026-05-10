@@ -2,6 +2,7 @@ export type * from './models/Organization';
 export type * from './models/User';
 export type * from './models/Patient';
 export type * from './models/Vehicle';
+export type * from './models/Pda';
 export type * from './models/Crew';
 export type * from './models/CrewMember';
 export type * from './models/Mission';

@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NullsOrder = exports.JsonNullValueFilter = exports.QueryMode = exports.NullableJsonNullValueInput = exports.SortOrder = exports.AuditLogScalarFieldEnum = exports.NotificationScalarFieldEnum = exports.MutuelleScalarFieldEnum = exports.InvoiceLineScalarFieldEnum = exports.InvoiceScalarFieldEnum = exports.PrescriptionScalarFieldEnum = exports.DocumentScalarFieldEnum = exports.GpsTrackScalarFieldEnum = exports.MissionEventScalarFieldEnum = exports.MissionScalarFieldEnum = exports.CrewMemberScalarFieldEnum = exports.CrewScalarFieldEnum = exports.VehicleScalarFieldEnum = exports.PatientScalarFieldEnum = exports.UserScalarFieldEnum = exports.OrganizationScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.NullsOrder = exports.JsonNullValueFilter = exports.QueryMode = exports.NullableJsonNullValueInput = exports.SortOrder = exports.AuditLogScalarFieldEnum = exports.NotificationScalarFieldEnum = exports.MutuelleScalarFieldEnum = exports.InvoiceLineScalarFieldEnum = exports.InvoiceScalarFieldEnum = exports.PrescriptionScalarFieldEnum = exports.DocumentScalarFieldEnum = exports.GpsTrackScalarFieldEnum = exports.MissionEventScalarFieldEnum = exports.MissionScalarFieldEnum = exports.CrewMemberScalarFieldEnum = exports.CrewScalarFieldEnum = exports.PdaScalarFieldEnum = exports.VehicleScalarFieldEnum = exports.PatientScalarFieldEnum = exports.UserScalarFieldEnum = exports.OrganizationScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -49,6 +49,7 @@ exports.ModelName = {
     User: 'User',
     Patient: 'Patient',
     Vehicle: 'Vehicle',
+    Pda: 'Pda',
     Crew: 'Crew',
     CrewMember: 'CrewMember',
     Mission: 'Mission',
@@ -119,6 +120,17 @@ exports.VehicleScalarFieldEnum = {
     metadata: 'metadata',
     isActive: 'isActive',
     organizationId: 'organizationId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+};
+exports.PdaScalarFieldEnum = {
+    id: 'id',
+    reference: 'reference',
+    vehicleId: 'vehicleId',
+    organizationId: 'organizationId',
+    isActive: 'isActive',
+    lastSeen: 'lastSeen',
+    currentUserId: 'currentUserId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
 };

@@ -42,6 +42,9 @@ export interface PrismaClient<in LogOpts extends Prisma.LogLevel = never, in out
     get vehicle(): Prisma.VehicleDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;
+    get pda(): Prisma.PdaDelegate<ExtArgs, {
+        omit: OmitOpts;
+    }>;
     get crew(): Prisma.CrewDelegate<ExtArgs, {
         omit: OmitOpts;
     }>;

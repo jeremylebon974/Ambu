@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PdaController } from './pda.controller';
+import { PdaDeviceController } from './pda-device.controller';
 import { PdaService } from './pda.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -11,7 +12,7 @@ import { PrismaService } from '../prisma/prisma.service';
       signOptions: { expiresIn: '12h' },
     }),
   ],
-  controllers: [PdaController],
+  controllers: [PdaController, PdaDeviceController],
   providers: [PdaService, PrismaService],
   exports: [PdaService],
 })
