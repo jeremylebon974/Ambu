@@ -8,18 +8,18 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.MissionsModule = void 0;
 const common_1 = require("@nestjs/common");
-const missions_controller_1 = require("./missions.controller");
 const missions_service_1 = require("./missions.service");
-const missions_gateway_1 = require("./missions.gateway");
+const missions_controller_1 = require("./missions.controller");
+const vehicles_controller_1 = require("./vehicles.controller");
 const prisma_service_1 = require("../prisma/prisma.service");
 let MissionsModule = class MissionsModule {
 };
 exports.MissionsModule = MissionsModule;
 exports.MissionsModule = MissionsModule = __decorate([
     (0, common_1.Module)({
-        controllers: [missions_controller_1.MissionsController],
-        providers: [missions_service_1.MissionsService, missions_gateway_1.MissionsGateway, prisma_service_1.PrismaService],
-        exports: [missions_service_1.MissionsService, missions_gateway_1.MissionsGateway],
+        controllers: [missions_controller_1.MissionsController, vehicles_controller_1.VehiclesController],
+        providers: [missions_service_1.MissionsService, prisma_service_1.PrismaService],
+        exports: [missions_service_1.MissionsService],
     })
 ], MissionsModule);
 //# sourceMappingURL=missions.module.js.map

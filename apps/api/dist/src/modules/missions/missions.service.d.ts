@@ -7,21 +7,6 @@ export declare class MissionsService {
     private readonly logger;
     constructor(prisma: PrismaService);
     create(dto: CreateMissionDto, organizationId: string): Promise<{
-        patient: {
-            id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            firstName: string;
-            lastName: string;
-            organizationId: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
-        };
         crew: {
             members: ({
                 user: {
@@ -31,13 +16,13 @@ export declare class MissionsService {
                     isActive: boolean;
                     createdAt: Date;
                     updatedAt: Date;
+                    organizationId: string;
                     passwordHash: string;
                     firstName: string;
                     lastName: string;
                     role: import("../../../generated/prisma/enums").UserRole;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
-                    organizationId: string;
                 };
             } & {
                 id: string;
@@ -54,13 +39,28 @@ export declare class MissionsService {
             updatedAt: Date;
             vehicleId: string;
         };
+        patient: {
+            id: string;
+            address: string | null;
+            phone: string | null;
+            email: string | null;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            organizationId: string;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            socialNumber: string | null;
+        };
     } & {
         id: string;
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("../../../generated/prisma/enums").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -70,21 +70,6 @@ export declare class MissionsService {
         patientId: string | null;
     }>;
     findAll(organizationId: string, status?: string): Promise<({
-        patient: {
-            id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            firstName: string;
-            lastName: string;
-            organizationId: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
-        };
         crew: {
             members: ({
                 user: {
@@ -94,13 +79,13 @@ export declare class MissionsService {
                     isActive: boolean;
                     createdAt: Date;
                     updatedAt: Date;
+                    organizationId: string;
                     passwordHash: string;
                     firstName: string;
                     lastName: string;
                     role: import("../../../generated/prisma/enums").UserRole;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
-                    organizationId: string;
                 };
             } & {
                 id: string;
@@ -117,13 +102,28 @@ export declare class MissionsService {
             updatedAt: Date;
             vehicleId: string;
         };
+        patient: {
+            id: string;
+            address: string | null;
+            phone: string | null;
+            email: string | null;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            organizationId: string;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            socialNumber: string | null;
+        };
     } & {
         id: string;
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("../../../generated/prisma/enums").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -133,21 +133,6 @@ export declare class MissionsService {
         patientId: string | null;
     })[]>;
     findOne(id: string, organizationId: string): Promise<{
-        patient: {
-            id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            firstName: string;
-            lastName: string;
-            organizationId: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
-        };
         crew: {
             members: ({
                 user: {
@@ -157,13 +142,13 @@ export declare class MissionsService {
                     isActive: boolean;
                     createdAt: Date;
                     updatedAt: Date;
+                    organizationId: string;
                     passwordHash: string;
                     firstName: string;
                     lastName: string;
                     role: import("../../../generated/prisma/enums").UserRole;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
-                    organizationId: string;
                 };
             } & {
                 id: string;
@@ -180,14 +165,23 @@ export declare class MissionsService {
             updatedAt: Date;
             vehicleId: string;
         };
-        events: {
+        patient: {
             id: string;
+            address: string | null;
+            phone: string | null;
+            email: string | null;
+            isActive: boolean;
             createdAt: Date;
-            type: string;
-            missionId: string;
-            data: import("@prisma/client/runtime/client").JsonValue | null;
-        }[];
+            updatedAt: Date;
+            organizationId: string;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            socialNumber: string | null;
+        };
         documents: {
+            url: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -195,18 +189,24 @@ export declare class MissionsService {
             patientId: string | null;
             missionId: string | null;
             filename: string;
-            url: string;
             mimeType: string | null;
             sizeBytes: number | null;
             isEncrypted: boolean;
+        }[];
+        events: {
+            id: string;
+            createdAt: Date;
+            type: string;
+            data: import("@prisma/client/runtime/client").JsonValue | null;
+            missionId: string;
         }[];
     } & {
         id: string;
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("../../../generated/prisma/enums").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -220,8 +220,8 @@ export declare class MissionsService {
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("../../../generated/prisma/enums").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -235,8 +235,8 @@ export declare class MissionsService {
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("../../../generated/prisma/enums").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -249,7 +249,7 @@ export declare class MissionsService {
         id: string;
         createdAt: Date;
         type: string;
-        missionId: string;
         data: import("@prisma/client/runtime/client").JsonValue | null;
+        missionId: string;
     }[]>;
 }

@@ -118,10 +118,51 @@ export default function RegulateurPage() {
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/dark-v11',
-      center: [-1.5534, 47.2184],
-      zoom: 10,
+      center: [55.6182, -21.3647],
+      zoom: 11,
     });
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+    map.current.on('load', async () => {
+      try {
+        const token = auth.getToken();
+        const res = await fetch('http://localhost:3001/vehicles', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
+        const data = await res.json();
+        const DEPOT: [number, number] = [55.6182, -21.3647];
+
+        data.forEach((v: any, i: number) => {
+          const angle = (i / Math.max(data.length, 1)) * 2 * Math.PI;
+          const lng = DEPOT[0] + 0.005 * Math.cos(angle);
+          const lat = DEPOT[1] + 0.005 * Math.sin(angle);
+
+          const color = v.status === 'AVAILABLE' ? '#14B8A6'
+            : v.status === 'ON_MISSION' ? '#3B82F6'
+            : v.status === 'MAINTENANCE' ? '#F59E0B'
+            : '#6B7A99';
+
+          const el = document.createElement('div');
+          el.style.cssText = `background:#0D1017;border:2px solid ${color};border-radius:6px;padding:4px 8px;color:${color};font-size:11px;font-weight:700;font-family:DM Mono,monospace;cursor:pointer;white-space:nowrap;box-shadow:0 0 8px ${color}40;`;
+          el.textContent = v.plate;
+
+          new mapboxgl.Marker({ element: el })
+            .setLngLat([lng, lat])
+            .setPopup(
+              new mapboxgl.Popup({ offset: 25 }).setHTML(
+                `<div style="color:#E8ECF5;background:#0D1017;padding:8px;border-radius:6px;font-family:DM Sans,sans-serif">
+                  <div style="font-weight:700;margin-bottom:4px">${v.plate}</div>
+                  <div style="font-size:12px;color:${color}">${v.status}</div>
+                  <div style="font-size:11px;color:#6B7A99">${v.type}</div>
+                </div>`
+              )
+            )
+            .addTo(map.current!);
+        });
+      } catch (err) {
+        console.error('Erreur chargement véhicules carte:', err);
+      }
+    });
   };
 
   const handleAIDispatch = async () => {
