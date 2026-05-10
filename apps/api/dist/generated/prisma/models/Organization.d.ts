@@ -38,6 +38,7 @@ export type OrganizationCountAggregateOutputType = {
     isActive: number;
     createdAt: number;
     updatedAt: number;
+    metadata: number;
     _all: number;
 };
 export type OrganizationMinAggregateInputType = {
@@ -72,6 +73,7 @@ export type OrganizationCountAggregateInputType = {
     isActive?: true;
     createdAt?: true;
     updatedAt?: true;
+    metadata?: true;
     _all?: true;
 };
 export type OrganizationAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -108,6 +110,7 @@ export type OrganizationGroupByOutputType = {
     isActive: boolean;
     createdAt: Date;
     updatedAt: Date;
+    metadata: runtime.JsonValue | null;
     _count: OrganizationCountAggregateOutputType | null;
     _min: OrganizationMinAggregateOutputType | null;
     _max: OrganizationMaxAggregateOutputType | null;
@@ -128,6 +131,7 @@ export type OrganizationWhereInput = {
     isActive?: Prisma.BoolFilter<"Organization"> | boolean;
     createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string;
+    metadata?: Prisma.JsonNullableFilter<"Organization">;
     users?: Prisma.UserListRelationFilter;
     patients?: Prisma.PatientListRelationFilter;
     vehicles?: Prisma.VehicleListRelationFilter;
@@ -146,6 +150,7 @@ export type OrganizationOrderByWithRelationInput = {
     isActive?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    metadata?: Prisma.SortOrderInput | Prisma.SortOrder;
     users?: Prisma.UserOrderByRelationAggregateInput;
     patients?: Prisma.PatientOrderByRelationAggregateInput;
     vehicles?: Prisma.VehicleOrderByRelationAggregateInput;
@@ -167,6 +172,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
     isActive?: Prisma.BoolFilter<"Organization"> | boolean;
     createdAt?: Prisma.DateTimeFilter<"Organization"> | Date | string;
     updatedAt?: Prisma.DateTimeFilter<"Organization"> | Date | string;
+    metadata?: Prisma.JsonNullableFilter<"Organization">;
     users?: Prisma.UserListRelationFilter;
     patients?: Prisma.PatientListRelationFilter;
     vehicles?: Prisma.VehicleListRelationFilter;
@@ -185,6 +191,7 @@ export type OrganizationOrderByWithAggregationInput = {
     isActive?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    metadata?: Prisma.SortOrderInput | Prisma.SortOrder;
     _count?: Prisma.OrganizationCountOrderByAggregateInput;
     _max?: Prisma.OrganizationMaxOrderByAggregateInput;
     _min?: Prisma.OrganizationMinOrderByAggregateInput;
@@ -202,6 +209,7 @@ export type OrganizationScalarWhereWithAggregatesInput = {
     isActive?: Prisma.BoolWithAggregatesFilter<"Organization"> | boolean;
     createdAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string;
     updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Organization"> | Date | string;
+    metadata?: Prisma.JsonNullableWithAggregatesFilter<"Organization">;
 };
 export type OrganizationCreateInput = {
     id?: string;
@@ -213,6 +221,7 @@ export type OrganizationCreateInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleCreateNestedManyWithoutOrganizationInput;
@@ -231,6 +240,7 @@ export type OrganizationUncheckedCreateInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientUncheckedCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleUncheckedCreateNestedManyWithoutOrganizationInput;
@@ -249,6 +259,7 @@ export type OrganizationUpdateInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUpdateManyWithoutOrganizationNestedInput;
@@ -267,6 +278,7 @@ export type OrganizationUncheckedUpdateInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUncheckedUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -285,6 +297,7 @@ export type OrganizationCreateManyInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type OrganizationUpdateManyMutationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -296,6 +309,7 @@ export type OrganizationUpdateManyMutationInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type OrganizationUncheckedUpdateManyInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -307,6 +321,7 @@ export type OrganizationUncheckedUpdateManyInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
 };
 export type OrganizationCountOrderByAggregateInput = {
     id?: Prisma.SortOrder;
@@ -318,6 +333,7 @@ export type OrganizationCountOrderByAggregateInput = {
     isActive?: Prisma.SortOrder;
     createdAt?: Prisma.SortOrder;
     updatedAt?: Prisma.SortOrder;
+    metadata?: Prisma.SortOrder;
 };
 export type OrganizationMaxOrderByAggregateInput = {
     id?: Prisma.SortOrder;
@@ -457,6 +473,7 @@ export type OrganizationCreateWithoutUsersInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     patients?: Prisma.PatientCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleCreateNestedManyWithoutOrganizationInput;
     missions?: Prisma.MissionCreateNestedManyWithoutOrganizationInput;
@@ -474,6 +491,7 @@ export type OrganizationUncheckedCreateWithoutUsersInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     patients?: Prisma.PatientUncheckedCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleUncheckedCreateNestedManyWithoutOrganizationInput;
     missions?: Prisma.MissionUncheckedCreateNestedManyWithoutOrganizationInput;
@@ -504,6 +522,7 @@ export type OrganizationUpdateWithoutUsersInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     patients?: Prisma.PatientUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUpdateManyWithoutOrganizationNestedInput;
     missions?: Prisma.MissionUpdateManyWithoutOrganizationNestedInput;
@@ -521,6 +540,7 @@ export type OrganizationUncheckedUpdateWithoutUsersInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     patients?: Prisma.PatientUncheckedUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUncheckedUpdateManyWithoutOrganizationNestedInput;
     missions?: Prisma.MissionUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -538,6 +558,7 @@ export type OrganizationCreateWithoutPatientsInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleCreateNestedManyWithoutOrganizationInput;
     missions?: Prisma.MissionCreateNestedManyWithoutOrganizationInput;
@@ -555,6 +576,7 @@ export type OrganizationUncheckedCreateWithoutPatientsInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleUncheckedCreateNestedManyWithoutOrganizationInput;
     missions?: Prisma.MissionUncheckedCreateNestedManyWithoutOrganizationInput;
@@ -585,6 +607,7 @@ export type OrganizationUpdateWithoutPatientsInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUpdateManyWithoutOrganizationNestedInput;
     missions?: Prisma.MissionUpdateManyWithoutOrganizationNestedInput;
@@ -602,6 +625,7 @@ export type OrganizationUncheckedUpdateWithoutPatientsInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUncheckedUpdateManyWithoutOrganizationNestedInput;
     missions?: Prisma.MissionUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -619,6 +643,7 @@ export type OrganizationCreateWithoutVehiclesInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientCreateNestedManyWithoutOrganizationInput;
     missions?: Prisma.MissionCreateNestedManyWithoutOrganizationInput;
@@ -636,6 +661,7 @@ export type OrganizationUncheckedCreateWithoutVehiclesInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientUncheckedCreateNestedManyWithoutOrganizationInput;
     missions?: Prisma.MissionUncheckedCreateNestedManyWithoutOrganizationInput;
@@ -666,6 +692,7 @@ export type OrganizationUpdateWithoutVehiclesInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUpdateManyWithoutOrganizationNestedInput;
     missions?: Prisma.MissionUpdateManyWithoutOrganizationNestedInput;
@@ -683,6 +710,7 @@ export type OrganizationUncheckedUpdateWithoutVehiclesInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUncheckedUpdateManyWithoutOrganizationNestedInput;
     missions?: Prisma.MissionUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -700,6 +728,7 @@ export type OrganizationCreateWithoutMissionsInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleCreateNestedManyWithoutOrganizationInput;
@@ -717,6 +746,7 @@ export type OrganizationUncheckedCreateWithoutMissionsInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientUncheckedCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleUncheckedCreateNestedManyWithoutOrganizationInput;
@@ -747,6 +777,7 @@ export type OrganizationUpdateWithoutMissionsInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUpdateManyWithoutOrganizationNestedInput;
@@ -764,6 +795,7 @@ export type OrganizationUncheckedUpdateWithoutMissionsInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUncheckedUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -781,6 +813,7 @@ export type OrganizationCreateWithoutInvoicesInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleCreateNestedManyWithoutOrganizationInput;
@@ -798,6 +831,7 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientUncheckedCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleUncheckedCreateNestedManyWithoutOrganizationInput;
@@ -828,6 +862,7 @@ export type OrganizationUpdateWithoutInvoicesInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUpdateManyWithoutOrganizationNestedInput;
@@ -845,6 +880,7 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUncheckedUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -862,6 +898,7 @@ export type OrganizationCreateWithoutNotificationsInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleCreateNestedManyWithoutOrganizationInput;
@@ -879,6 +916,7 @@ export type OrganizationUncheckedCreateWithoutNotificationsInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientUncheckedCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleUncheckedCreateNestedManyWithoutOrganizationInput;
@@ -909,6 +947,7 @@ export type OrganizationUpdateWithoutNotificationsInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUpdateManyWithoutOrganizationNestedInput;
@@ -926,6 +965,7 @@ export type OrganizationUncheckedUpdateWithoutNotificationsInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUncheckedUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -943,6 +983,7 @@ export type OrganizationCreateWithoutAuditLogsInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleCreateNestedManyWithoutOrganizationInput;
@@ -960,6 +1001,7 @@ export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
     isActive?: boolean;
     createdAt?: Date | string;
     updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput;
     patients?: Prisma.PatientUncheckedCreateNestedManyWithoutOrganizationInput;
     vehicles?: Prisma.VehicleUncheckedCreateNestedManyWithoutOrganizationInput;
@@ -990,6 +1032,7 @@ export type OrganizationUpdateWithoutAuditLogsInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUpdateManyWithoutOrganizationNestedInput;
@@ -1007,6 +1050,7 @@ export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
     isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
     createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
     users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput;
     patients?: Prisma.PatientUncheckedUpdateManyWithoutOrganizationNestedInput;
     vehicles?: Prisma.VehicleUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -1066,6 +1110,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
     isActive?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    metadata?: boolean;
     users?: boolean | Prisma.Organization$usersArgs<ExtArgs>;
     patients?: boolean | Prisma.Organization$patientsArgs<ExtArgs>;
     vehicles?: boolean | Prisma.Organization$vehiclesArgs<ExtArgs>;
@@ -1085,6 +1130,7 @@ export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
     isActive?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    metadata?: boolean;
 }, ExtArgs["result"]["organization"]>;
 export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
@@ -1096,6 +1142,7 @@ export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
     isActive?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    metadata?: boolean;
 }, ExtArgs["result"]["organization"]>;
 export type OrganizationSelectScalar = {
     id?: boolean;
@@ -1107,8 +1154,9 @@ export type OrganizationSelectScalar = {
     isActive?: boolean;
     createdAt?: boolean;
     updatedAt?: boolean;
+    metadata?: boolean;
 };
-export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "siret" | "address" | "phone" | "email" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>;
+export type OrganizationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "siret" | "address" | "phone" | "email" | "isActive" | "createdAt" | "updatedAt" | "metadata", ExtArgs["result"]["organization"]>;
 export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     users?: boolean | Prisma.Organization$usersArgs<ExtArgs>;
     patients?: boolean | Prisma.Organization$patientsArgs<ExtArgs>;
@@ -1142,6 +1190,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
         isActive: boolean;
         createdAt: Date;
         updatedAt: Date;
+        metadata: runtime.JsonValue | null;
     }, ExtArgs["result"]["organization"]>;
     composites: {};
 };
@@ -1215,6 +1264,7 @@ export interface OrganizationFieldRefs {
     readonly isActive: Prisma.FieldRef<"Organization", 'Boolean'>;
     readonly createdAt: Prisma.FieldRef<"Organization", 'DateTime'>;
     readonly updatedAt: Prisma.FieldRef<"Organization", 'DateTime'>;
+    readonly metadata: Prisma.FieldRef<"Organization", 'Json'>;
 }
 export type OrganizationFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.OrganizationSelect<ExtArgs> | null;

@@ -40,6 +40,7 @@ export declare class AuthController {
             isActive: boolean;
             createdAt: Date;
             updatedAt: Date;
+            metadata: import("@prisma/client/runtime/client").JsonValue | null;
         };
     }>;
 }
