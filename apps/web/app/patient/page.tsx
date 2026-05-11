@@ -116,6 +116,29 @@ export default function PatientPage() {
           ))}
         </motion.div>
 
+        {/* Suivre transport */}
+        <motion.button
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          whileTap={{ scale: 0.97 }}
+          onClick={() => router.push('/map/patient')}
+          style={{
+            width: '100%',
+            background: 'linear-gradient(135deg, #14B8A6, #3B82F6)',
+            border: 'none',
+            borderRadius: '14px',
+            color: 'white',
+            padding: '16px',
+            fontSize: '15px',
+            fontWeight: '700',
+            cursor: 'pointer',
+            marginBottom: '12px',
+          }}
+        >
+          🚑 Suivre mon transport
+        </motion.button>
+
         {/* Contact */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

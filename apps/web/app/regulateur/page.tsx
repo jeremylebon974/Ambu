@@ -258,6 +258,22 @@ export default function RegulateurPage() {
         </div>
 
         <button
+          onClick={() => router.push('/map/regulateur')}
+          style={{
+            background: 'linear-gradient(135deg, #14B8A6, #3B82F6)',
+            border: 'none',
+            borderRadius: '8px',
+            color: 'white',
+            padding: '6px 12px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: '600',
+          }}
+        >
+          🗺️ Carte Live
+        </button>
+
+        <button
           onClick={() => router.push('/dashboard')}
           style={{
             background: 'transparent',

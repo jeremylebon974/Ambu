@@ -192,7 +192,7 @@ export default function DirectionPage() {
             {[
               { label: 'Centre Régulation', icon: '🎛️', path: '/regulateur', color: '#14B8A6' },
               { label: 'Planning', icon: '📅', path: '/planning', color: '#3B82F6' },
-              { label: 'Carte GPS', icon: '🗺️', path: '/dashboard/map', color: '#8B5CF6' },
+              { label: 'Carte GPS', icon: '🗺️', path: '/map/direction', color: '#8B5CF6' },
               { label: 'Configuration', icon: '⚙️', path: '/configuration', color: '#F59E0B' },
             ].map(a => (
               <motion.button
