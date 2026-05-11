@@ -25,11 +25,17 @@ export function DirectionBadge() {
   // Writer (Direction) : écrit + heartbeat tant que la page est montée
   useEffect(() => {
     if (!isDirection || !pathname) return;
-    if (pathname === '/direction') return;
+    if (pathname.startsWith('/direction')) return;
 
     const write = () => {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({ pathname, timestamp: Date.now() }));
+        const user = auth.getUser();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          pathname,
+          userId: user?.id,
+          role: user?.role,
+          timestamp: Date.now(),
+        }));
       } catch {}
     };
 
@@ -57,9 +63,12 @@ export function DirectionBadge() {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) { setSignalActive(false); return; }
         const data = JSON.parse(raw);
+        const currentUser = auth.getUser();
         const fresh = Date.now() - data.timestamp < FRESHNESS_MS;
         const matches = data.pathname === pathname;
-        setSignalActive(fresh && matches);
+        const isDirectionUser = data.role === 'ADMIN' || data.role === 'SUPER_ADMIN';
+        const isDifferentUser = data.userId !== currentUser?.id;
+        setSignalActive(fresh && matches && isDirectionUser && isDifferentUser);
       } catch {
         setSignalActive(false);
       }

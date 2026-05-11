@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../../lib/auth';
+import { DirectionBadge } from '../../components/DirectionBadge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -165,6 +166,7 @@ export default function PdaPage() {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
+        <DirectionBadge />
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -253,6 +255,7 @@ export default function PdaPage() {
       display: 'flex',
       flexDirection: 'column',
     }}>
+      <DirectionBadge />
       {/* HEADER PDA */}
       <div style={{
         background: '#0D1017',

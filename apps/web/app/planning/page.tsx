@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../lib/auth';
+import { DirectionBadge } from '../../components/DirectionBadge';
 
 function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
   return (
@@ -179,6 +180,7 @@ export default function PlanningPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#07090F', fontFamily: 'DM Sans, sans-serif', color: '#E8ECF5' }}>
+      <DirectionBadge />
 
       {/* HEADER */}
       <div style={{

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { DirectionBadge } from '../../components/DirectionBadge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -53,6 +54,7 @@ export default function ConfigurationPage() {
       fontFamily: 'DM Sans, sans-serif',
       color: '#E8ECF5',
     }}>
+      <DirectionBadge />
       {/* HEADER */}
       <div style={{
         height: '56px',
