@@ -1,74 +1,113 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { usePathname, useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../lib/auth';
 
-const VISIBLE_PATHS = [
-  '/regulateur',
-  '/ambulancier',
-  '/patient',
-  '/map/regulateur',
-  '/map/ambulancier',
-  '/map/patient',
-];
+const STORAGE_KEY = 'directionOnline';
+const FRESHNESS_MS = 30_000;
+const POLL_MS = 5_000;
+const HEARTBEAT_MS = 5_000;
 
 export function DirectionBadge() {
-  const router = useRouter();
   const pathname = usePathname();
-  const [isDirection, setIsDirection] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+  const [signalActive, setSignalActive] = useState(false);
 
   useEffect(() => {
     const user = auth.getUser();
-    setIsDirection(user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN');
+    setRole(user?.role ?? null);
   }, []);
 
-  if (!isDirection) return null;
-  if (!VISIBLE_PATHS.includes(pathname || '')) return null;
+  const isDirection = role === 'ADMIN' || role === 'SUPER_ADMIN';
+
+  // Writer (Direction) : écrit + heartbeat tant que la page est montée
+  useEffect(() => {
+    if (!isDirection || !pathname) return;
+    if (pathname === '/direction') return;
+
+    const write = () => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ pathname, timestamp: Date.now() }));
+      } catch {}
+    };
+
+    write();
+    const heartbeat = setInterval(write, HEARTBEAT_MS);
+
+    return () => {
+      clearInterval(heartbeat);
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const data = JSON.parse(raw);
+          if (data.pathname === pathname) localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch {}
+    };
+  }, [isDirection, pathname]);
+
+  // Reader (autres rôles) : poll toutes les 5s
+  useEffect(() => {
+    if (isDirection || !pathname) return;
+
+    const check = () => {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) { setSignalActive(false); return; }
+        const data = JSON.parse(raw);
+        const fresh = Date.now() - data.timestamp < FRESHNESS_MS;
+        const matches = data.pathname === pathname;
+        setSignalActive(fresh && matches);
+      } catch {
+        setSignalActive(false);
+      }
+    };
+
+    check();
+    const poll = setInterval(check, POLL_MS);
+    return () => clearInterval(poll);
+  }, [isDirection, pathname]);
+
+  if (isDirection) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: '12px',
-        right: '12px',
-        zIndex: 9999,
-        background: '#EF4444',
-        color: '#FFFFFF',
-        opacity: 0.92,
-        borderRadius: '20px',
-        padding: '6px 12px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        fontFamily: 'DM Sans, sans-serif',
-        fontSize: '12px',
-        fontWeight: '700',
-        boxShadow: '0 4px 14px rgba(239,68,68,0.35)',
-        pointerEvents: 'auto',
-      }}
-    >
-      <motion.div
-        animate={{ opacity: [1, 0.3, 1], scale: [1, 1.2, 1] }}
-        transition={{ duration: 1.2, repeat: Infinity }}
-        style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#FFFFFF' }}
-      />
-      <span style={{ letterSpacing: '0.04em' }}>VUE DIRECTION</span>
-      <button
-        onClick={() => router.push('/direction')}
-        style={{
-          background: 'rgba(255,255,255,0.18)',
-          border: '1px solid rgba(255,255,255,0.3)',
-          color: '#FFFFFF',
-          borderRadius: '12px',
-          padding: '3px 10px',
-          cursor: 'pointer',
-          fontSize: '11px',
-          fontWeight: '700',
-          fontFamily: 'DM Sans, sans-serif',
-        }}
-      >← Direction</button>
-    </div>
+    <AnimatePresence>
+      {signalActive && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.25 }}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            left: '20px',
+            zIndex: 9999,
+            background: '#F59E0B',
+            color: '#1A1A2E',
+            borderRadius: '14px',
+            padding: '10px 14px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontFamily: 'DM Sans, sans-serif',
+            boxShadow: '0 10px 25px rgba(245, 158, 11, 0.35)',
+            maxWidth: '260px',
+          }}
+        >
+          <motion.div
+            animate={{ scale: [1, 1.3, 1], opacity: [1, 0.55, 1] }}
+            transition={{ duration: 1.4, repeat: Infinity }}
+            style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#1A1A2E', flexShrink: 0 }}
+          />
+          <div>
+            <div style={{ fontSize: '13px', fontWeight: '800' }}>👁️ Direction en ligne</div>
+            <div style={{ fontSize: '11px', opacity: 0.85 }}>La direction consulte cet espace</div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
