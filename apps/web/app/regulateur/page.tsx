@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../lib/auth';
 import { api } from '../../lib/api-client';
+import { DirectionBadge } from '../../components/DirectionBadge';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -202,6 +203,7 @@ export default function RegulateurPage() {
 
   return (
     <div style={{ height: '100vh', background: '#07090F', display: 'flex', flexDirection: 'column', fontFamily: 'DM Sans, sans-serif', overflow: 'hidden' }}>
+      <DirectionBadge />
 
       {/* HEADER */}
       <div style={{

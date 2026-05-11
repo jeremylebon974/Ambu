@@ -107,6 +107,7 @@ function Particle({ delay, x, y }: { delay: number; x: number; y: number }) {
 export default function HomePage() {
   const router = useRouter();
   const [time, setTime] = useState(new Date());
+  const [mounted, setMounted] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [liveStats, setLiveStats] = useState([
@@ -143,6 +144,7 @@ export default function HomePage() {
   ];
 
   useEffect(() => {
+    setMounted(true);
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -285,7 +287,7 @@ export default function HomePage() {
             fontSize: '13px',
             color: '#6B7A99',
           }}>
-            {time.toLocaleTimeString('fr-FR')}
+            {mounted ? time.toLocaleTimeString('fr-FR') : ''}
           </div>
 
           <motion.button
@@ -473,8 +475,8 @@ export default function HomePage() {
             gap: '20px',
           }}>
             {portails.map((p, i) => (
+              <div key={p.id} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <motion.button
-                key={p.id}
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.9 + i * 0.1 }}
@@ -571,6 +573,24 @@ export default function HomePage() {
                   ))}
                 </div>
               </motion.button>
+
+              {p.id === 'patient' && (
+                <button
+                  onClick={() => router.push('/register')}
+                  style={{
+                    background: 'transparent',
+                    border: 'none',
+                    color: '#22C55E',
+                    cursor: 'pointer',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    textAlign: 'center',
+                    padding: '6px',
+                    fontFamily: 'DM Sans, sans-serif',
+                  }}
+                >Pas encore de compte ? S'inscrire →</button>
+              )}
+              </div>
             ))}
           </div>
         </section>

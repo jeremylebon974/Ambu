@@ -33,14 +33,13 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await auth.login(email, password);
-      const params = new URLSearchParams(window.location.search);
-      const role = params.get('role');
+      const data = await auth.login(email, password);
+      const userRole = data?.user?.role;
       const destination =
-        role === 'direction' ? '/direction' :
-        role === 'regulateur' ? '/regulateur' :
-        role === 'ambulancier' ? '/ambulancier' :
-        role === 'patient' ? '/patient' :
+        userRole === 'ADMIN' || userRole === 'SUPER_ADMIN' ? '/direction' :
+        userRole === 'REGULATEUR' ? '/regulateur' :
+        userRole === 'AMBULANCIER' ? '/ambulancier' :
+        userRole === 'PATIENT' ? '/patient' :
         '/dashboard';
       router.push(destination);
     } catch (err: any) {

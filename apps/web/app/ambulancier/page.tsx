@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../../lib/auth';
+import { DirectionBadge } from '../../components/DirectionBadge';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -86,6 +87,7 @@ export default function AmbulanciePage() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#07090F', fontFamily: 'DM Sans, sans-serif', color: '#E8ECF5' }}>
+      <DirectionBadge />
 
       {/* HEADER MOBILE */}
       <motion.div

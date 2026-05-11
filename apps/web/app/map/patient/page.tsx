@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { auth } from '../../../lib/auth';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { DirectionBadge } from '../../../components/DirectionBadge';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
@@ -153,6 +154,7 @@ export default function MapPatientPage() {
       overflow: 'hidden',
       position: 'relative',
     }}>
+      <DirectionBadge />
       {/* CARTE plein écran */}
       <div ref={mapContainer} style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }} />
 

@@ -1,10 +1,23 @@
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { RefreshDto } from './dto/refresh.dto';
 export declare class AuthController {
     private authService;
     constructor(authService: AuthService);
     login(dto: LoginDto): Promise<{
+        accessToken: string;
+        refreshToken: string;
+        user: {
+            id: string;
+            email: string;
+            firstName: string;
+            lastName: string;
+            role: import("../../../generated/prisma/enums").UserRole;
+            organizationId: string;
+        };
+    }>;
+    register(dto: RegisterDto): Promise<{
         accessToken: string;
         refreshToken: string;
         user: {
@@ -32,14 +45,14 @@ export declare class AuthController {
         organizationId: string;
         organization: {
             id: string;
+            email: string | null;
+            isActive: boolean;
+            phone: string | null;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             siret: string | null;
             address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             metadata: import("@prisma/client/runtime/client").JsonValue | null;
         };
     }>;

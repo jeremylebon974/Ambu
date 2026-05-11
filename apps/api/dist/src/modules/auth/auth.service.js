@@ -71,6 +71,31 @@ let AuthService = AuthService_1 = class AuthService {
         this.logger.log(`Connexion : ${user.email}`);
         return { user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, organizationId: user.organizationId }, ...tokens };
     }
+    async register(dto) {
+        const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
+        if (existing)
+            throw new common_1.ConflictException('Email déjà utilisé');
+        const org = await this.prisma.organization.findFirst();
+        if (!org)
+            throw new common_1.NotFoundException('Aucune organisation configurée');
+        const passwordHash = await bcrypt.hash(dto.password, 10);
+        const user = await this.prisma.user.create({
+            data: {
+                email: dto.email,
+                passwordHash,
+                firstName: dto.firstName,
+                lastName: dto.lastName,
+                role: (dto.role || 'PATIENT'),
+                organizationId: org.id,
+            },
+        });
+        const tokens = await this.generateTokens(user);
+        this.logger.log(`Inscription : ${user.email} (${user.role})`);
+        return {
+            user: { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, organizationId: user.organizationId },
+            ...tokens,
+        };
+    }
     async refresh(userId, refreshToken) {
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         if (!user || !user.refreshToken)
