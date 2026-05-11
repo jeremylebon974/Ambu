@@ -47,16 +47,23 @@ export declare class AuthService {
         organizationId: string;
         organization: {
             id: string;
-            createdAt: Date;
-            name: string;
-            metadata: import("@prisma/client/runtime/client").JsonValue | null;
-            isActive: boolean;
-            updatedAt: Date;
-            address: string | null;
-            phone: string | null;
             email: string | null;
+            isActive: boolean;
+            phone: string | null;
+            createdAt: Date;
+            updatedAt: Date;
+            name: string;
             siret: string | null;
+            address: string | null;
+            metadata: import("@prisma/client/runtime/client").JsonValue | null;
         };
     }>;
+    listUsers(organizationId: string): Promise<{
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: import("../../../generated/prisma/enums").UserRole;
+    }[]>;
     private generateTokens;
 }

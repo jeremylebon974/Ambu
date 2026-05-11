@@ -29,6 +29,7 @@ export declare const ModelName: {
     readonly Notification: "Notification";
     readonly AuditLog: "AuditLog";
     readonly Presence: "Presence";
+    readonly Planning: "Planning";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -263,6 +264,21 @@ export declare const PresenceScalarFieldEnum: {
     readonly createdAt: "createdAt";
 };
 export type PresenceScalarFieldEnum = (typeof PresenceScalarFieldEnum)[keyof typeof PresenceScalarFieldEnum];
+export declare const PlanningScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly organizationId: "organizationId";
+    readonly date: "date";
+    readonly code: "code";
+    readonly startTime: "startTime";
+    readonly endTime: "endTime";
+    readonly note: "note";
+    readonly validatedBy: "validatedBy";
+    readonly validatedAt: "validatedAt";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type PlanningScalarFieldEnum = (typeof PlanningScalarFieldEnum)[keyof typeof PlanningScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";

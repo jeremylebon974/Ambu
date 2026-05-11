@@ -88,6 +88,7 @@ model Organization {
   auditLogs     AuditLog[]
   pdas          Pda[]
   presences     Presence[]
+  plannings     Planning[]
 }
 
 model User {
@@ -111,6 +112,7 @@ model User {
   auditLogs     AuditLog[]
   pdas          Pda[]
   presence      Presence?
+  plannings     Planning[]
 }
 
 model Patient {
@@ -364,4 +366,23 @@ model Presence {
   createdAt      DateTime @default(now())
 
   @@unique([userId])
+}
+
+model Planning {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  date           DateTime
+  code           String
+  startTime      String?
+  endTime        String?
+  note           String?
+  validatedBy    String?
+  validatedAt    DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@unique([userId, date])
 }

@@ -141,6 +141,7 @@ export type OrganizationWhereInput = {
     auditLogs?: Prisma.AuditLogListRelationFilter;
     pdas?: Prisma.PdaListRelationFilter;
     presences?: Prisma.PresenceListRelationFilter;
+    plannings?: Prisma.PlanningListRelationFilter;
 };
 export type OrganizationOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -162,6 +163,7 @@ export type OrganizationOrderByWithRelationInput = {
     auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput;
     pdas?: Prisma.PdaOrderByRelationAggregateInput;
     presences?: Prisma.PresenceOrderByRelationAggregateInput;
+    plannings?: Prisma.PlanningOrderByRelationAggregateInput;
 };
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -186,6 +188,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
     auditLogs?: Prisma.AuditLogListRelationFilter;
     pdas?: Prisma.PdaListRelationFilter;
     presences?: Prisma.PresenceListRelationFilter;
+    plannings?: Prisma.PlanningListRelationFilter;
 }, "id" | "siret">;
 export type OrganizationOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -237,6 +240,7 @@ export type OrganizationCreateInput = {
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateInput = {
     id?: string;
@@ -258,6 +262,7 @@ export type OrganizationUncheckedCreateInput = {
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -279,6 +284,7 @@ export type OrganizationUpdateInput = {
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -300,6 +306,7 @@ export type OrganizationUncheckedUpdateInput = {
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateManyInput = {
     id?: string;
@@ -501,6 +508,18 @@ export type OrganizationUpdateOneRequiredWithoutPresencesNestedInput = {
     connect?: Prisma.OrganizationWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutPresencesInput, Prisma.OrganizationUpdateWithoutPresencesInput>, Prisma.OrganizationUncheckedUpdateWithoutPresencesInput>;
 };
+export type OrganizationCreateNestedOneWithoutPlanningsInput = {
+    create?: Prisma.XOR<Prisma.OrganizationCreateWithoutPlanningsInput, Prisma.OrganizationUncheckedCreateWithoutPlanningsInput>;
+    connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutPlanningsInput;
+    connect?: Prisma.OrganizationWhereUniqueInput;
+};
+export type OrganizationUpdateOneRequiredWithoutPlanningsNestedInput = {
+    create?: Prisma.XOR<Prisma.OrganizationCreateWithoutPlanningsInput, Prisma.OrganizationUncheckedCreateWithoutPlanningsInput>;
+    connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutPlanningsInput;
+    upsert?: Prisma.OrganizationUpsertWithoutPlanningsInput;
+    connect?: Prisma.OrganizationWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.OrganizationUpdateToOneWithWhereWithoutPlanningsInput, Prisma.OrganizationUpdateWithoutPlanningsInput>, Prisma.OrganizationUncheckedUpdateWithoutPlanningsInput>;
+};
 export type OrganizationCreateWithoutUsersInput = {
     id?: string;
     name: string;
@@ -520,6 +539,7 @@ export type OrganizationCreateWithoutUsersInput = {
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutUsersInput = {
     id?: string;
@@ -540,6 +560,7 @@ export type OrganizationUncheckedCreateWithoutUsersInput = {
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutUsersInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -573,6 +594,7 @@ export type OrganizationUpdateWithoutUsersInput = {
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutUsersInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -593,6 +615,7 @@ export type OrganizationUncheckedUpdateWithoutUsersInput = {
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateWithoutPatientsInput = {
     id?: string;
@@ -613,6 +636,7 @@ export type OrganizationCreateWithoutPatientsInput = {
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutPatientsInput = {
     id?: string;
@@ -633,6 +657,7 @@ export type OrganizationUncheckedCreateWithoutPatientsInput = {
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutPatientsInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -666,6 +691,7 @@ export type OrganizationUpdateWithoutPatientsInput = {
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutPatientsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -686,6 +712,7 @@ export type OrganizationUncheckedUpdateWithoutPatientsInput = {
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateWithoutVehiclesInput = {
     id?: string;
@@ -706,6 +733,7 @@ export type OrganizationCreateWithoutVehiclesInput = {
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutVehiclesInput = {
     id?: string;
@@ -726,6 +754,7 @@ export type OrganizationUncheckedCreateWithoutVehiclesInput = {
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutVehiclesInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -759,6 +788,7 @@ export type OrganizationUpdateWithoutVehiclesInput = {
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutVehiclesInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -779,6 +809,7 @@ export type OrganizationUncheckedUpdateWithoutVehiclesInput = {
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateWithoutPdasInput = {
     id?: string;
@@ -799,6 +830,7 @@ export type OrganizationCreateWithoutPdasInput = {
     notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput;
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutPdasInput = {
     id?: string;
@@ -819,6 +851,7 @@ export type OrganizationUncheckedCreateWithoutPdasInput = {
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput;
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutPdasInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -852,6 +885,7 @@ export type OrganizationUpdateWithoutPdasInput = {
     notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput;
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutPdasInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -872,6 +906,7 @@ export type OrganizationUncheckedUpdateWithoutPdasInput = {
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput;
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateWithoutMissionsInput = {
     id?: string;
@@ -892,6 +927,7 @@ export type OrganizationCreateWithoutMissionsInput = {
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutMissionsInput = {
     id?: string;
@@ -912,6 +948,7 @@ export type OrganizationUncheckedCreateWithoutMissionsInput = {
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutMissionsInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -945,6 +982,7 @@ export type OrganizationUpdateWithoutMissionsInput = {
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutMissionsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -965,6 +1003,7 @@ export type OrganizationUncheckedUpdateWithoutMissionsInput = {
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateWithoutInvoicesInput = {
     id?: string;
@@ -985,6 +1024,7 @@ export type OrganizationCreateWithoutInvoicesInput = {
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutInvoicesInput = {
     id?: string;
@@ -1005,6 +1045,7 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutInvoicesInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -1038,6 +1079,7 @@ export type OrganizationUpdateWithoutInvoicesInput = {
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -1058,6 +1100,7 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateWithoutNotificationsInput = {
     id?: string;
@@ -1078,6 +1121,7 @@ export type OrganizationCreateWithoutNotificationsInput = {
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutNotificationsInput = {
     id?: string;
@@ -1098,6 +1142,7 @@ export type OrganizationUncheckedCreateWithoutNotificationsInput = {
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutNotificationsInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -1131,6 +1176,7 @@ export type OrganizationUpdateWithoutNotificationsInput = {
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutNotificationsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -1151,6 +1197,7 @@ export type OrganizationUncheckedUpdateWithoutNotificationsInput = {
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateWithoutAuditLogsInput = {
     id?: string;
@@ -1171,6 +1218,7 @@ export type OrganizationCreateWithoutAuditLogsInput = {
     notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
     id?: string;
@@ -1191,6 +1239,7 @@ export type OrganizationUncheckedCreateWithoutAuditLogsInput = {
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
     presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutAuditLogsInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -1224,6 +1273,7 @@ export type OrganizationUpdateWithoutAuditLogsInput = {
     notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -1244,6 +1294,7 @@ export type OrganizationUncheckedUpdateWithoutAuditLogsInput = {
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
     presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCreateWithoutPresencesInput = {
     id?: string;
@@ -1264,6 +1315,7 @@ export type OrganizationCreateWithoutPresencesInput = {
     notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput;
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationUncheckedCreateWithoutPresencesInput = {
     id?: string;
@@ -1284,6 +1336,7 @@ export type OrganizationUncheckedCreateWithoutPresencesInput = {
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput;
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
+    plannings?: Prisma.PlanningUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 export type OrganizationCreateOrConnectWithoutPresencesInput = {
     where: Prisma.OrganizationWhereUniqueInput;
@@ -1317,6 +1370,7 @@ export type OrganizationUpdateWithoutPresencesInput = {
     notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput;
     auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationUncheckedUpdateWithoutPresencesInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -1337,6 +1391,104 @@ export type OrganizationUncheckedUpdateWithoutPresencesInput = {
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput;
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
+    plannings?: Prisma.PlanningUncheckedUpdateManyWithoutOrganizationNestedInput;
+};
+export type OrganizationCreateWithoutPlanningsInput = {
+    id?: string;
+    name: string;
+    siret?: string | null;
+    address?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    isActive?: boolean;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    users?: Prisma.UserCreateNestedManyWithoutOrganizationInput;
+    patients?: Prisma.PatientCreateNestedManyWithoutOrganizationInput;
+    vehicles?: Prisma.VehicleCreateNestedManyWithoutOrganizationInput;
+    missions?: Prisma.MissionCreateNestedManyWithoutOrganizationInput;
+    invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutOrganizationInput;
+    auditLogs?: Prisma.AuditLogCreateNestedManyWithoutOrganizationInput;
+    pdas?: Prisma.PdaCreateNestedManyWithoutOrganizationInput;
+    presences?: Prisma.PresenceCreateNestedManyWithoutOrganizationInput;
+};
+export type OrganizationUncheckedCreateWithoutPlanningsInput = {
+    id?: string;
+    name: string;
+    siret?: string | null;
+    address?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    isActive?: boolean;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    users?: Prisma.UserUncheckedCreateNestedManyWithoutOrganizationInput;
+    patients?: Prisma.PatientUncheckedCreateNestedManyWithoutOrganizationInput;
+    vehicles?: Prisma.VehicleUncheckedCreateNestedManyWithoutOrganizationInput;
+    missions?: Prisma.MissionUncheckedCreateNestedManyWithoutOrganizationInput;
+    invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutOrganizationInput;
+    auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutOrganizationInput;
+    pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutOrganizationInput;
+    presences?: Prisma.PresenceUncheckedCreateNestedManyWithoutOrganizationInput;
+};
+export type OrganizationCreateOrConnectWithoutPlanningsInput = {
+    where: Prisma.OrganizationWhereUniqueInput;
+    create: Prisma.XOR<Prisma.OrganizationCreateWithoutPlanningsInput, Prisma.OrganizationUncheckedCreateWithoutPlanningsInput>;
+};
+export type OrganizationUpsertWithoutPlanningsInput = {
+    update: Prisma.XOR<Prisma.OrganizationUpdateWithoutPlanningsInput, Prisma.OrganizationUncheckedUpdateWithoutPlanningsInput>;
+    create: Prisma.XOR<Prisma.OrganizationCreateWithoutPlanningsInput, Prisma.OrganizationUncheckedCreateWithoutPlanningsInput>;
+    where?: Prisma.OrganizationWhereInput;
+};
+export type OrganizationUpdateToOneWithWhereWithoutPlanningsInput = {
+    where?: Prisma.OrganizationWhereInput;
+    data: Prisma.XOR<Prisma.OrganizationUpdateWithoutPlanningsInput, Prisma.OrganizationUncheckedUpdateWithoutPlanningsInput>;
+};
+export type OrganizationUpdateWithoutPlanningsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.StringFieldUpdateOperationsInput | string;
+    siret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    users?: Prisma.UserUpdateManyWithoutOrganizationNestedInput;
+    patients?: Prisma.PatientUpdateManyWithoutOrganizationNestedInput;
+    vehicles?: Prisma.VehicleUpdateManyWithoutOrganizationNestedInput;
+    missions?: Prisma.MissionUpdateManyWithoutOrganizationNestedInput;
+    invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutOrganizationNestedInput;
+    auditLogs?: Prisma.AuditLogUpdateManyWithoutOrganizationNestedInput;
+    pdas?: Prisma.PdaUpdateManyWithoutOrganizationNestedInput;
+    presences?: Prisma.PresenceUpdateManyWithoutOrganizationNestedInput;
+};
+export type OrganizationUncheckedUpdateWithoutPlanningsInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    name?: Prisma.StringFieldUpdateOperationsInput | string;
+    siret?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue;
+    users?: Prisma.UserUncheckedUpdateManyWithoutOrganizationNestedInput;
+    patients?: Prisma.PatientUncheckedUpdateManyWithoutOrganizationNestedInput;
+    vehicles?: Prisma.VehicleUncheckedUpdateManyWithoutOrganizationNestedInput;
+    missions?: Prisma.MissionUncheckedUpdateManyWithoutOrganizationNestedInput;
+    invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutOrganizationNestedInput;
+    auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutOrganizationNestedInput;
+    pdas?: Prisma.PdaUncheckedUpdateManyWithoutOrganizationNestedInput;
+    presences?: Prisma.PresenceUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 export type OrganizationCountOutputType = {
     users: number;
@@ -1348,6 +1500,7 @@ export type OrganizationCountOutputType = {
     auditLogs: number;
     pdas: number;
     presences: number;
+    plannings: number;
 };
 export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     users?: boolean | OrganizationCountOutputTypeCountUsersArgs;
@@ -1359,6 +1512,7 @@ export type OrganizationCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
     auditLogs?: boolean | OrganizationCountOutputTypeCountAuditLogsArgs;
     pdas?: boolean | OrganizationCountOutputTypeCountPdasArgs;
     presences?: boolean | OrganizationCountOutputTypeCountPresencesArgs;
+    plannings?: boolean | OrganizationCountOutputTypeCountPlanningsArgs;
 };
 export type OrganizationCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.OrganizationCountOutputTypeSelect<ExtArgs> | null;
@@ -1390,6 +1544,9 @@ export type OrganizationCountOutputTypeCountPdasArgs<ExtArgs extends runtime.Typ
 export type OrganizationCountOutputTypeCountPresencesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     where?: Prisma.PresenceWhereInput;
 };
+export type OrganizationCountOutputTypeCountPlanningsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    where?: Prisma.PlanningWhereInput;
+};
 export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
     id?: boolean;
     name?: boolean;
@@ -1410,6 +1567,7 @@ export type OrganizationSelect<ExtArgs extends runtime.Types.Extensions.Internal
     auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>;
     pdas?: boolean | Prisma.Organization$pdasArgs<ExtArgs>;
     presences?: boolean | Prisma.Organization$presencesArgs<ExtArgs>;
+    plannings?: boolean | Prisma.Organization$planningsArgs<ExtArgs>;
     _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["organization"]>;
 export type OrganizationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1459,6 +1617,7 @@ export type OrganizationInclude<ExtArgs extends runtime.Types.Extensions.Interna
     auditLogs?: boolean | Prisma.Organization$auditLogsArgs<ExtArgs>;
     pdas?: boolean | Prisma.Organization$pdasArgs<ExtArgs>;
     presences?: boolean | Prisma.Organization$presencesArgs<ExtArgs>;
+    plannings?: boolean | Prisma.Organization$planningsArgs<ExtArgs>;
     _count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {};
@@ -1475,6 +1634,7 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
         auditLogs: Prisma.$AuditLogPayload<ExtArgs>[];
         pdas: Prisma.$PdaPayload<ExtArgs>[];
         presences: Prisma.$PresencePayload<ExtArgs>[];
+        plannings: Prisma.$PlanningPayload<ExtArgs>[];
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
@@ -1548,6 +1708,7 @@ export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends run
     auditLogs<T extends Prisma.Organization$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     pdas<T extends Prisma.Organization$pdasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$pdasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PdaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     presences<T extends Prisma.Organization$presencesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$presencesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PresencePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    plannings<T extends Prisma.Organization$planningsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Organization$planningsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PlanningPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): runtime.Types.Utils.JsPromise<TResult1 | TResult2>;
     catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): runtime.Types.Utils.JsPromise<T | TResult>;
     finally(onfinally?: (() => void) | undefined | null): runtime.Types.Utils.JsPromise<T>;
@@ -1760,6 +1921,17 @@ export type Organization$presencesArgs<ExtArgs extends runtime.Types.Extensions.
     take?: number;
     skip?: number;
     distinct?: Prisma.PresenceScalarFieldEnum | Prisma.PresenceScalarFieldEnum[];
+};
+export type Organization$planningsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    select?: Prisma.PlanningSelect<ExtArgs> | null;
+    omit?: Prisma.PlanningOmit<ExtArgs> | null;
+    include?: Prisma.PlanningInclude<ExtArgs> | null;
+    where?: Prisma.PlanningWhereInput;
+    orderBy?: Prisma.PlanningOrderByWithRelationInput | Prisma.PlanningOrderByWithRelationInput[];
+    cursor?: Prisma.PlanningWhereUniqueInput;
+    take?: number;
+    skip?: number;
+    distinct?: Prisma.PlanningScalarFieldEnum | Prisma.PlanningScalarFieldEnum[];
 };
 export type OrganizationDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.OrganizationSelect<ExtArgs> | null;

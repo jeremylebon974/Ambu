@@ -39,6 +39,9 @@ let AuthController = class AuthController {
     async getMe(req) {
         return this.authService.getMe(req.user.id);
     }
+    async listUsers(req) {
+        return this.authService.listUsers(req.user.organizationId);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -86,6 +89,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getMe", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('users'),
+    __param(0, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "listUsers", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

@@ -78,6 +78,14 @@ export class AuthService {
     return { id: user.id, email: user.email, firstName: user.firstName, lastName: user.lastName, role: user.role, organizationId: user.organizationId, organization: user.organization };
   }
 
+  async listUsers(organizationId: string) {
+    return this.prisma.user.findMany({
+      where: { organizationId, isActive: true },
+      select: { id: true, firstName: true, lastName: true, role: true, email: true },
+      orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
+    });
+  }
+
   private async generateTokens(user: any) {
     const payload = { sub: user.id, email: user.email, role: user.role, organizationId: user.organizationId };
     const [accessToken, refreshToken] = await Promise.all([

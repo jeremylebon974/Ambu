@@ -44,6 +44,17 @@ const statusLabels: Record<string, string> = {
   CANCELLED: 'Annulée',
 };
 
+const CODES_COLORS: Record<string, string> = {
+  PJ: '#14B8A6',
+  PN: '#8B5CF6',
+  AC: '#F59E0B',
+  RH: '#6B7A99',
+  CP: '#22C55E',
+  FM: '#3B82F6',
+};
+
+const JOURS_COURT = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
 export default function AmbulanciePage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
@@ -51,6 +62,7 @@ export default function AmbulanciePage() {
   const [loading, setLoading] = useState(true);
   const [statut, setStatut] = useState('EN SERVICE');
   const [sosEnvoye, setSosEnvoye] = useState(false);
+  const [weekPlanning, setWeekPlanning] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=ambulancier'); return; }
@@ -70,7 +82,36 @@ export default function AmbulanciePage() {
         setMissions(Array.isArray(data) ? data : []);
       }
     } catch {}
+    loadMyPlanning(u);
     setLoading(false);
+  };
+
+  const loadMyPlanning = async (currentUser: any) => {
+    if (!currentUser?.id) return;
+    const token = auth.getToken();
+    const today = new Date();
+    const monthsNeeded = new Set<string>();
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      monthsNeeded.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+    }
+    try {
+      const responses = await Promise.all(
+        Array.from(monthsNeeded).map(month =>
+          fetch(`${API_URL}/planning?month=${month}&userId=${currentUser.id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          }).then(r => r.ok ? r.json() : [])
+        )
+      );
+      const flat = responses.flat();
+      const map: Record<string, string> = {};
+      flat.forEach((p: any) => {
+        const ds = new Date(p.date).toISOString().slice(0, 10);
+        map[ds] = p.code;
+      });
+      setWeekPlanning(map);
+    } catch {}
   };
 
   const envoyerSOS = async () => {
@@ -210,6 +251,52 @@ export default function AmbulanciePage() {
               {m.patient && <div style={{ fontSize: '12px', color: '#6B7A99' }}>👤 {m.patient.lastName} {m.patient.firstName}</div>}
             </div>
           ))}
+        </motion.div>
+
+        {/* MON PLANNING CETTE SEMAINE */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          style={{ marginBottom: '20px' }}
+        >
+          <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '12px' }}>📅 Mon planning cette semaine</h2>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '6px' }}>
+            {Array.from({ length: 7 }).map((_, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() + i);
+              const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+              const dayIdx = d.getDay() === 0 ? 6 : d.getDay() - 1;
+              const code = weekPlanning[dateStr];
+              const color = CODES_COLORS[code] || '#2A3348';
+              const isToday = i === 0;
+              return (
+                <div key={dateStr} style={{
+                  background: isToday ? '#0D1017' : '#0A0C12',
+                  border: `1px solid ${isToday ? '#14B8A640' : '#1E2535'}`,
+                  borderRadius: '10px',
+                  padding: '8px 4px',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '10px', color: '#6B7A99', textTransform: 'uppercase', fontWeight: '600' }}>
+                    {JOURS_COURT[dayIdx]}
+                  </div>
+                  <div style={{ fontSize: '15px', fontWeight: '800', color: isToday ? '#14B8A6' : '#E8ECF5', margin: '2px 0' }}>
+                    {d.getDate()}
+                  </div>
+                  {code ? (
+                    <div style={{
+                      background: color + '25', color, border: `1px solid ${color}50`,
+                      borderRadius: '4px', padding: '2px 0', fontSize: '10px',
+                      fontWeight: '700', fontFamily: 'monospace',
+                    }}>{code}</div>
+                  ) : (
+                    <div style={{ fontSize: '10px', color: '#3A4560', fontFamily: 'monospace' }}>—</div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </motion.div>
 
         {/* ACTIONS RAPIDES */}

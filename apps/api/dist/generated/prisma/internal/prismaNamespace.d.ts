@@ -175,6 +175,7 @@ export declare const ModelName: {
     readonly Notification: "Notification";
     readonly AuditLog: "AuditLog";
     readonly Presence: "Presence";
+    readonly Planning: "Planning";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export interface TypeMapCb<GlobalOmitOptions = {}> extends runtime.Types.Utils.Fn<{
@@ -187,7 +188,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "organization" | "user" | "patient" | "vehicle" | "pda" | "crew" | "crewMember" | "mission" | "missionEvent" | "gpsTrack" | "document" | "prescription" | "invoice" | "invoiceLine" | "mutuelle" | "notification" | "auditLog" | "presence";
+        modelProps: "organization" | "user" | "patient" | "vehicle" | "pda" | "crew" | "crewMember" | "mission" | "missionEvent" | "gpsTrack" | "document" | "prescription" | "invoice" | "invoiceLine" | "mutuelle" | "notification" | "auditLog" | "presence" | "planning";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -1523,6 +1524,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 };
             };
         };
+        Planning: {
+            payload: Prisma.$PlanningPayload<ExtArgs>;
+            fields: Prisma.PlanningFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.PlanningFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.PlanningFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>;
+                };
+                findFirst: {
+                    args: Prisma.PlanningFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.PlanningFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>;
+                };
+                findMany: {
+                    args: Prisma.PlanningFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>[];
+                };
+                create: {
+                    args: Prisma.PlanningCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>;
+                };
+                createMany: {
+                    args: Prisma.PlanningCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.PlanningCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>[];
+                };
+                delete: {
+                    args: Prisma.PlanningDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>;
+                };
+                update: {
+                    args: Prisma.PlanningUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>;
+                };
+                deleteMany: {
+                    args: Prisma.PlanningDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.PlanningUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.PlanningUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>[];
+                };
+                upsert: {
+                    args: Prisma.PlanningUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PlanningPayload>;
+                };
+                aggregate: {
+                    args: Prisma.PlanningAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregatePlanning>;
+                };
+                groupBy: {
+                    args: Prisma.PlanningGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PlanningGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.PlanningCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PlanningCountAggregateOutputType> | number;
+                };
+            };
+        };
     };
 } & {
     other: {
@@ -1779,6 +1854,21 @@ export declare const PresenceScalarFieldEnum: {
     readonly createdAt: "createdAt";
 };
 export type PresenceScalarFieldEnum = (typeof PresenceScalarFieldEnum)[keyof typeof PresenceScalarFieldEnum];
+export declare const PlanningScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly organizationId: "organizationId";
+    readonly date: "date";
+    readonly code: "code";
+    readonly startTime: "startTime";
+    readonly endTime: "endTime";
+    readonly note: "note";
+    readonly validatedBy: "validatedBy";
+    readonly validatedAt: "validatedAt";
+    readonly createdAt: "createdAt";
+    readonly updatedAt: "updatedAt";
+};
+export type PlanningScalarFieldEnum = (typeof PlanningScalarFieldEnum)[keyof typeof PlanningScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";
@@ -1871,6 +1961,7 @@ export type GlobalOmitConfig = {
     notification?: Prisma.NotificationOmit;
     auditLog?: Prisma.AuditLogOmit;
     presence?: Prisma.PresenceOmit;
+    planning?: Prisma.PlanningOmit;
 };
 export type LogLevel = 'info' | 'query' | 'warn' | 'error';
 export type LogDefinition = {

@@ -24,3 +24,4 @@ export type Mutuelle = Prisma.MutuelleModel;
 export type Notification = Prisma.NotificationModel;
 export type AuditLog = Prisma.AuditLogModel;
 export type Presence = Prisma.PresenceModel;
+export type Planning = Prisma.PlanningModel;

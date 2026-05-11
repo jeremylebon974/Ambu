@@ -16,4 +16,5 @@ export type * from './models/Mutuelle';
 export type * from './models/Notification';
 export type * from './models/AuditLog';
 export type * from './models/Presence';
+export type * from './models/Planning';
 export type * from './commonInputTypes';

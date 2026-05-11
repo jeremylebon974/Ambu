@@ -21,6 +21,7 @@ const ai_regulator_module_1 = require("./modules/ai-regulator/ai-regulator.modul
 const notifications_module_1 = require("./modules/notifications/notifications.module");
 const configuration_module_1 = require("./modules/configuration/configuration.module");
 const presence_module_1 = require("./modules/presence/presence.module");
+const planning_module_1 = require("./modules/planning/planning.module");
 const jwt_auth_guard_1 = require("./modules/auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("./modules/auth/guards/roles.guard");
 const app_controller_1 = require("./app.controller");
@@ -52,6 +53,7 @@ exports.AppModule = AppModule = __decorate([
             notifications_module_1.NotificationsModule,
             configuration_module_1.ConfigurationModule,
             presence_module_1.PresenceModule,
+            planning_module_1.PlanningModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [
