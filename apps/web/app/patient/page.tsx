@@ -90,10 +90,10 @@ export default function PatientPage() {
           style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}
         >
           {[
-            { label: 'Mes transports', icon: '🚑', color: '#14B8A6' },
-            { label: 'Mes documents', icon: '📄', color: '#3B82F6' },
-            { label: 'Mes rendez-vous', icon: '📅', color: '#F59E0B' },
-            { label: 'Remboursements', icon: '💶', color: '#22C55E' },
+            { label: 'Mes transports', icon: '🚑', color: '#14B8A6', path: '/map/patient' },
+            { label: 'Mes documents', icon: '📄', color: '#3B82F6', path: '/patient/documents' },
+            { label: 'Mes rendez-vous', icon: '📅', color: '#F59E0B', path: '/patient/rendez-vous' },
+            { label: 'Remboursements', icon: '💶', color: '#22C55E', path: '/patient/remboursements' },
           ].map((a, i) => (
             <motion.div
               key={a.label}
@@ -101,6 +101,7 @@ export default function PatientPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 + i * 0.1 }}
               whileHover={{ scale: 1.02 }}
+              onClick={() => router.push(a.path)}
               style={{
                 background: '#0D1017',
                 border: `1px solid ${a.color}20`,
@@ -156,7 +157,9 @@ export default function PatientPage() {
           <div style={{ fontSize: '13px', color: '#6B7A99', marginBottom: '16px' }}>
             Notre équipe est disponible 24h/24 pour vos transports sanitaires
           </div>
-          <button style={{
+          <button
+            onClick={() => { window.location.href = 'tel:+262262000000'; }}
+            style={{
             background: '#14B8A6',
             border: 'none',
             borderRadius: '10px',

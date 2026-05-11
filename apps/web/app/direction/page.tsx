@@ -25,7 +25,7 @@ const menuItems = [
   { label: 'Vue globale', icon: '📊', path: '/direction', active: true },
   { label: 'Régulation', icon: '🎛️', path: '/regulateur' },
   { label: 'Planning', icon: '📅', path: '/planning' },
-  { label: 'Ambulanciers', icon: '🚑', path: '/direction/ambulanciers' },
+  { label: 'Personnel', icon: '👥', path: '/direction/personnel' },
   { label: 'Facturation', icon: '💶', path: '/direction/facturation' },
   { label: 'Configuration', icon: '⚙️', path: '/configuration' },
 ];
@@ -194,6 +194,9 @@ export default function DirectionPage() {
               { label: 'Planning', icon: '📅', path: '/planning', color: '#3B82F6' },
               { label: 'Carte GPS', icon: '🗺️', path: '/map/direction', color: '#8B5CF6' },
               { label: 'Configuration', icon: '⚙️', path: '/configuration', color: '#F59E0B' },
+              { label: 'Personnel', icon: '👥', path: '/direction/personnel', color: '#14B8A6' },
+              { label: 'Facturation', icon: '💶', path: '/direction/facturation', color: '#22C55E' },
+              { label: 'Carte globale', icon: '🗺️', path: '/map/direction', color: '#8B5CF6' },
             ].map(a => (
               <motion.button
                 key={a.path}

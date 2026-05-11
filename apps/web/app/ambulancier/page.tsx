@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../../lib/auth';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
   return (
     <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -47,6 +49,7 @@ export default function AmbulanciePage() {
   const [missions, setMissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [statut, setStatut] = useState('EN SERVICE');
+  const [sosEnvoye, setSosEnvoye] = useState(false);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=ambulancier'); return; }
@@ -57,6 +60,18 @@ export default function AmbulanciePage() {
     const u = auth.getUser();
     setUser(u);
     setLoading(false);
+  };
+
+  const envoyerSOS = async () => {
+    try {
+      const token = auth.getToken();
+      await fetch(`${API_URL}/pda/incident`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ type: 'SOS', gravite: 'CRITIQUE', description: 'Alerte SOS régulation' }),
+      });
+    } catch (_) {}
+    setSosEnvoye(true);
   };
 
   return (
@@ -183,10 +198,11 @@ export default function AmbulanciePage() {
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             {[
               { label: 'Mon planning', icon: '📅', color: '#3B82F6', path: '/planning' },
-              { label: 'Carte GPS', icon: '🗺️', color: '#14B8A6', path: '/dashboard/map' },
+              { label: 'Carte GPS', icon: '🗺️', color: '#14B8A6', path: '/map/ambulancier' },
               { label: 'Mes documents', icon: '📄', color: '#8B5CF6', path: '/ambulancier/documents' },
               { label: 'Signaler incident', icon: '⚠️', color: '#EF4444', path: '/ambulancier/incident' },
               { label: 'Terminal PDA', icon: '📱', color: '#14B8A6', path: '/pda' },
+              { label: 'Carte mission', icon: '🗺️', color: '#8B5CF6', path: '/map/ambulancier' },
             ].map(a => (
               <motion.button
                 key={a.label}
@@ -216,20 +232,22 @@ export default function AmbulanciePage() {
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4 }}
           whileTap={{ scale: 0.95 }}
+          onClick={envoyerSOS}
+          disabled={sosEnvoye}
           style={{
             width: '100%',
-            background: 'linear-gradient(135deg, #EF4444, #DC2626)',
+            background: sosEnvoye ? '#22C55E' : 'linear-gradient(135deg, #EF4444, #DC2626)',
             border: 'none',
             borderRadius: '14px',
             padding: '18px',
             color: 'white',
             fontSize: '16px',
             fontWeight: '800',
-            cursor: 'pointer',
+            cursor: sosEnvoye ? 'not-allowed' : 'pointer',
             letterSpacing: '0.05em',
           }}
         >
-          🆘 ALERTE SOS RÉGULATION
+          {sosEnvoye ? '✅ Alerte envoyée !' : '🆘 ALERTE SOS RÉGULATION'}
         </motion.button>
       </div>
     </div>
