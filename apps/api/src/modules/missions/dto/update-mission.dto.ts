@@ -1,10 +1,12 @@
 import { IsString, IsEnum, IsBoolean, IsOptional, IsDateString, IsNumber } from 'class-validator';
-import { MissionStatus, MissionType } from '../../../generated/prisma';
+import { MissionStatus } from '../../../../generated/prisma/client';
+
+export { MissionStatus };
 
 export class UpdateMissionDto {
-  @IsEnum(MissionType)
+  @IsString()
   @IsOptional()
-  type?: MissionType;
+  type?: string;
 
   @IsEnum(MissionStatus)
   @IsOptional()
@@ -45,4 +47,12 @@ export class UpdateMissionDto {
   @IsString()
   @IsOptional()
   notes?: string;
+
+  @IsString()
+  @IsOptional()
+  actualPickup?: string;
+
+  @IsString()
+  @IsOptional()
+  actualDropoff?: string;
 }

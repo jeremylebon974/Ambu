@@ -11,42 +11,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.UpdateMissionDto = exports.MissionStatus = void 0;
 const class_validator_1 = require("class-validator");
-var MissionStatus;
-(function (MissionStatus) {
-    MissionStatus["PENDING"] = "PENDING";
-    MissionStatus["ASSIGNED"] = "ASSIGNED";
-    MissionStatus["EN_ROUTE_PICKUP"] = "EN_ROUTE_PICKUP";
-    MissionStatus["AT_PICKUP"] = "AT_PICKUP";
-    MissionStatus["EN_ROUTE_DROPOFF"] = "EN_ROUTE_DROPOFF";
-    MissionStatus["AT_DROPOFF"] = "AT_DROPOFF";
-    MissionStatus["COMPLETED"] = "COMPLETED";
-    MissionStatus["VALIDATED"] = "VALIDATED";
-    MissionStatus["CANCELLED"] = "CANCELLED";
-    MissionStatus["ANOMALY"] = "ANOMALY";
-})(MissionStatus || (exports.MissionStatus = MissionStatus = {}));
+const client_1 = require("../../../../generated/prisma/client");
+Object.defineProperty(exports, "MissionStatus", { enumerable: true, get: function () { return client_1.MissionStatus; } });
 class UpdateMissionDto {
 }
 exports.UpdateMissionDto = UpdateMissionDto;
 __decorate([
-    (0, class_validator_1.IsEnum)(MissionStatus),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], UpdateMissionDto.prototype, "status", void 0);
-__decorate([
-    (0, class_validator_1.IsDateString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], UpdateMissionDto.prototype, "actualPickup", void 0);
-__decorate([
-    (0, class_validator_1.IsDateString)(),
-    (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", String)
-], UpdateMissionDto.prototype, "actualDropoff", void 0);
-__decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], UpdateMissionDto.prototype, "patientSignature", void 0);
+], UpdateMissionDto.prototype, "type", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(client_1.MissionStatus),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMissionDto.prototype, "status", void 0);
 __decorate([
     (0, class_validator_1.IsBoolean)(),
     (0, class_validator_1.IsOptional)(),
@@ -56,14 +35,50 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
-], UpdateMissionDto.prototype, "cancelReason", void 0);
+], UpdateMissionDto.prototype, "originAddress", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateMissionDto.prototype, "originLat", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateMissionDto.prototype, "originLng", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMissionDto.prototype, "destAddress", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateMissionDto.prototype, "destLat", void 0);
+__decorate([
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", Number)
+], UpdateMissionDto.prototype, "destLng", void 0);
+__decorate([
+    (0, class_validator_1.IsDateString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMissionDto.prototype, "scheduledAt", void 0);
 __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
     __metadata("design:type", String)
 ], UpdateMissionDto.prototype, "notes", void 0);
 __decorate([
+    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsOptional)(),
-    __metadata("design:type", Number)
-], UpdateMissionDto.prototype, "actualKm", void 0);
+    __metadata("design:type", String)
+], UpdateMissionDto.prototype, "actualPickup", void 0);
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], UpdateMissionDto.prototype, "actualDropoff", void 0);
 //# sourceMappingURL=update-mission.dto.js.map

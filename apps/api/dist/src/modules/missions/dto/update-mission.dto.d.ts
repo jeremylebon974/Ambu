@@ -1,22 +1,17 @@
-export declare enum MissionStatus {
-    PENDING = "PENDING",
-    ASSIGNED = "ASSIGNED",
-    EN_ROUTE_PICKUP = "EN_ROUTE_PICKUP",
-    AT_PICKUP = "AT_PICKUP",
-    EN_ROUTE_DROPOFF = "EN_ROUTE_DROPOFF",
-    AT_DROPOFF = "AT_DROPOFF",
-    COMPLETED = "COMPLETED",
-    VALIDATED = "VALIDATED",
-    CANCELLED = "CANCELLED",
-    ANOMALY = "ANOMALY"
-}
+import { MissionStatus } from '../../../../generated/prisma/client';
+export { MissionStatus };
 export declare class UpdateMissionDto {
+    type?: string;
     status?: MissionStatus;
+    isUrgent?: boolean;
+    originAddress?: string;
+    originLat?: number;
+    originLng?: number;
+    destAddress?: string;
+    destLat?: number;
+    destLng?: number;
+    scheduledAt?: string;
+    notes?: string;
     actualPickup?: string;
     actualDropoff?: string;
-    patientSignature?: string;
-    isUrgent?: boolean;
-    cancelReason?: string;
-    notes?: string;
-    actualKm?: number;
 }
