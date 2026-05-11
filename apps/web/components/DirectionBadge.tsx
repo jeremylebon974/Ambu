@@ -5,10 +5,11 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../lib/auth';
 
-const STORAGE_KEY = 'directionOnline';
-const FRESHNESS_MS = 30_000;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const POLL_MS = 5_000;
 const HEARTBEAT_MS = 5_000;
+
+const EXCLUDED_PATHS = ['/direction', '/direction/personnel', '/direction/facturation'];
 
 export function DirectionBadge() {
   const pathname = usePathname();
@@ -21,21 +22,22 @@ export function DirectionBadge() {
   }, []);
 
   const isDirection = role === 'ADMIN' || role === 'SUPER_ADMIN';
+  const isExcluded = EXCLUDED_PATHS.some(p => pathname?.startsWith(p));
 
-  // Writer (Direction) : écrit + heartbeat tant que la page est montée
+  // Writer — Direction envoie sa présence toutes les 5s
   useEffect(() => {
-    if (!isDirection || !pathname) return;
-    if (pathname.startsWith('/direction')) return;
+    if (!isDirection || !pathname || isExcluded) return;
 
-    const write = () => {
+    const token = auth.getToken();
+    if (!token) return;
+
+    const write = async () => {
       try {
-        const user = auth.getUser();
-        localStorage.setItem(STORAGE_KEY, JSON.stringify({
-          pathname,
-          userId: user?.id,
-          role: user?.role,
-          timestamp: Date.now(),
-        }));
+        await fetch(`${API_URL}/presence`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ pathname }),
+        });
       } catch {}
     };
 
@@ -45,30 +47,28 @@ export function DirectionBadge() {
     return () => {
       clearInterval(heartbeat);
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) {
-          const data = JSON.parse(raw);
-          if (data.pathname === pathname) localStorage.removeItem(STORAGE_KEY);
-        }
+        fetch(`${API_URL}/presence`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
       } catch {}
     };
-  }, [isDirection, pathname]);
+  }, [isDirection, pathname, isExcluded]);
 
-  // Reader (autres rôles) : poll toutes les 5s
+  // Reader — autres rôles polling toutes les 5s
   useEffect(() => {
     if (isDirection || !pathname) return;
 
-    const check = () => {
+    const token = auth.getToken();
+    if (!token) return;
+
+    const check = async () => {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) { setSignalActive(false); return; }
-        const data = JSON.parse(raw);
-        const currentUser = auth.getUser();
-        const fresh = Date.now() - data.timestamp < FRESHNESS_MS;
-        const matches = data.pathname === pathname;
-        const isDirectionUser = data.role === 'ADMIN' || data.role === 'SUPER_ADMIN';
-        const isDifferentUser = data.userId !== currentUser?.id;
-        setSignalActive(fresh && matches && isDirectionUser && isDifferentUser);
+        const res = await fetch(`${API_URL}/presence?pathname=${encodeURIComponent(pathname)}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        setSignalActive(data?.active === true);
       } catch {
         setSignalActive(false);
       }

@@ -11,6 +11,7 @@ import { PdaModule } from './modules/pda/pda.module';
 import { AIRegulatorModule } from './modules/ai-regulator/ai-regulator.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ConfigurationModule } from './modules/configuration/configuration.module';
+import { PresenceModule } from './modules/presence/presence.module';
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from './modules/auth/guards/roles.guard';
 import { AppController } from './app.controller';
@@ -38,6 +39,7 @@ import { AppService } from './app.service';
     AIRegulatorModule,
     NotificationsModule,
     ConfigurationModule,
+    PresenceModule,
   ],
   controllers: [AppController],
   providers: [

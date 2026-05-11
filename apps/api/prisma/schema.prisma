@@ -87,6 +87,7 @@ model Organization {
   notifications Notification[]
   auditLogs     AuditLog[]
   pdas          Pda[]
+  presences     Presence[]
 }
 
 model User {
@@ -109,6 +110,7 @@ model User {
   notifications Notification[]
   auditLogs     AuditLog[]
   pdas          Pda[]
+  presence      Presence?
 }
 
 model Patient {
@@ -348,4 +350,18 @@ model AuditLog {
 
   user         User?         @relation(fields: [userId], references: [id])
   organization Organization? @relation(fields: [organizationId], references: [id])
+}
+
+model Presence {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String
+  pathname       String
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  lastSeen       DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  @@unique([userId])
 }

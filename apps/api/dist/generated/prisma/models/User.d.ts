@@ -166,6 +166,7 @@ export type UserWhereInput = {
     notifications?: Prisma.NotificationListRelationFilter;
     auditLogs?: Prisma.AuditLogListRelationFilter;
     pdas?: Prisma.PdaListRelationFilter;
+    presence?: Prisma.XOR<Prisma.PresenceNullableScalarRelationFilter, Prisma.PresenceWhereInput> | null;
 };
 export type UserOrderByWithRelationInput = {
     id?: Prisma.SortOrder;
@@ -186,6 +187,7 @@ export type UserOrderByWithRelationInput = {
     notifications?: Prisma.NotificationOrderByRelationAggregateInput;
     auditLogs?: Prisma.AuditLogOrderByRelationAggregateInput;
     pdas?: Prisma.PdaOrderByRelationAggregateInput;
+    presence?: Prisma.PresenceOrderByWithRelationInput;
 };
 export type UserWhereUniqueInput = Prisma.AtLeast<{
     id?: string;
@@ -209,6 +211,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
     notifications?: Prisma.NotificationListRelationFilter;
     auditLogs?: Prisma.AuditLogListRelationFilter;
     pdas?: Prisma.PdaListRelationFilter;
+    presence?: Prisma.XOR<Prisma.PresenceNullableScalarRelationFilter, Prisma.PresenceWhereInput> | null;
 }, "id" | "email">;
 export type UserOrderByWithAggregationInput = {
     id?: Prisma.SortOrder;
@@ -264,6 +267,7 @@ export type UserCreateInput = {
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceCreateNestedOneWithoutUserInput;
 };
 export type UserUncheckedCreateInput = {
     id?: string;
@@ -283,6 +287,7 @@ export type UserUncheckedCreateInput = {
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceUncheckedCreateNestedOneWithoutUserInput;
 };
 export type UserUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -302,6 +307,7 @@ export type UserUpdateInput = {
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUpdateOneWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -321,6 +327,7 @@ export type UserUncheckedUpdateInput = {
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUncheckedUpdateOneWithoutUserNestedInput;
 };
 export type UserCreateManyInput = {
     id?: string;
@@ -523,6 +530,18 @@ export type UserUpdateOneWithoutAuditLogsNestedInput = {
     connect?: Prisma.UserWhereUniqueInput;
     update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutAuditLogsInput, Prisma.UserUpdateWithoutAuditLogsInput>, Prisma.UserUncheckedUpdateWithoutAuditLogsInput>;
 };
+export type UserCreateNestedOneWithoutPresenceInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutPresenceInput, Prisma.UserUncheckedCreateWithoutPresenceInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutPresenceInput;
+    connect?: Prisma.UserWhereUniqueInput;
+};
+export type UserUpdateOneRequiredWithoutPresenceNestedInput = {
+    create?: Prisma.XOR<Prisma.UserCreateWithoutPresenceInput, Prisma.UserUncheckedCreateWithoutPresenceInput>;
+    connectOrCreate?: Prisma.UserCreateOrConnectWithoutPresenceInput;
+    upsert?: Prisma.UserUpsertWithoutPresenceInput;
+    connect?: Prisma.UserWhereUniqueInput;
+    update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutPresenceInput, Prisma.UserUpdateWithoutPresenceInput>, Prisma.UserUncheckedUpdateWithoutPresenceInput>;
+};
 export type UserCreateWithoutOrganizationInput = {
     id?: string;
     email: string;
@@ -540,6 +559,7 @@ export type UserCreateWithoutOrganizationInput = {
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceCreateNestedOneWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutOrganizationInput = {
     id?: string;
@@ -558,6 +578,7 @@ export type UserUncheckedCreateWithoutOrganizationInput = {
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceUncheckedCreateNestedOneWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutOrganizationInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -615,6 +636,7 @@ export type UserCreateWithoutPdasInput = {
     crewMembers?: Prisma.CrewMemberCreateNestedManyWithoutUserInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput;
+    presence?: Prisma.PresenceCreateNestedOneWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutPdasInput = {
     id?: string;
@@ -633,6 +655,7 @@ export type UserUncheckedCreateWithoutPdasInput = {
     crewMembers?: Prisma.CrewMemberUncheckedCreateNestedManyWithoutUserInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput;
+    presence?: Prisma.PresenceUncheckedCreateNestedOneWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutPdasInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -664,6 +687,7 @@ export type UserUpdateWithoutPdasInput = {
     crewMembers?: Prisma.CrewMemberUpdateManyWithoutUserNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput;
+    presence?: Prisma.PresenceUpdateOneWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutPdasInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -682,6 +706,7 @@ export type UserUncheckedUpdateWithoutPdasInput = {
     crewMembers?: Prisma.CrewMemberUncheckedUpdateManyWithoutUserNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput;
+    presence?: Prisma.PresenceUncheckedUpdateOneWithoutUserNestedInput;
 };
 export type UserCreateWithoutCrewMembersInput = {
     id?: string;
@@ -700,6 +725,7 @@ export type UserCreateWithoutCrewMembersInput = {
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceCreateNestedOneWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutCrewMembersInput = {
     id?: string;
@@ -718,6 +744,7 @@ export type UserUncheckedCreateWithoutCrewMembersInput = {
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceUncheckedCreateNestedOneWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutCrewMembersInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -749,6 +776,7 @@ export type UserUpdateWithoutCrewMembersInput = {
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUpdateOneWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutCrewMembersInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -767,6 +795,7 @@ export type UserUncheckedUpdateWithoutCrewMembersInput = {
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUncheckedUpdateOneWithoutUserNestedInput;
 };
 export type UserCreateWithoutNotificationsInput = {
     id?: string;
@@ -785,6 +814,7 @@ export type UserCreateWithoutNotificationsInput = {
     crewMembers?: Prisma.CrewMemberCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceCreateNestedOneWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutNotificationsInput = {
     id?: string;
@@ -803,6 +833,7 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
     crewMembers?: Prisma.CrewMemberUncheckedCreateNestedManyWithoutUserInput;
     auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceUncheckedCreateNestedOneWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutNotificationsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -834,6 +865,7 @@ export type UserUpdateWithoutNotificationsInput = {
     crewMembers?: Prisma.CrewMemberUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUpdateOneWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutNotificationsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -852,6 +884,7 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
     crewMembers?: Prisma.CrewMemberUncheckedUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUncheckedUpdateOneWithoutUserNestedInput;
 };
 export type UserCreateWithoutAuditLogsInput = {
     id?: string;
@@ -870,6 +903,7 @@ export type UserCreateWithoutAuditLogsInput = {
     crewMembers?: Prisma.CrewMemberCreateNestedManyWithoutUserInput;
     notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceCreateNestedOneWithoutUserInput;
 };
 export type UserUncheckedCreateWithoutAuditLogsInput = {
     id?: string;
@@ -888,6 +922,7 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
     crewMembers?: Prisma.CrewMemberUncheckedCreateNestedManyWithoutUserInput;
     notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
     pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutCurrentUserInput;
+    presence?: Prisma.PresenceUncheckedCreateNestedOneWithoutUserInput;
 };
 export type UserCreateOrConnectWithoutAuditLogsInput = {
     where: Prisma.UserWhereUniqueInput;
@@ -919,6 +954,7 @@ export type UserUpdateWithoutAuditLogsInput = {
     crewMembers?: Prisma.CrewMemberUpdateManyWithoutUserNestedInput;
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUpdateOneWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutAuditLogsInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -936,6 +972,96 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
     updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
     crewMembers?: Prisma.CrewMemberUncheckedUpdateManyWithoutUserNestedInput;
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    pdas?: Prisma.PdaUncheckedUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUncheckedUpdateOneWithoutUserNestedInput;
+};
+export type UserCreateWithoutPresenceInput = {
+    id?: string;
+    email: string;
+    passwordHash: string;
+    firstName: string;
+    lastName: string;
+    role?: $Enums.UserRole;
+    isActive?: boolean;
+    refreshToken?: string | null;
+    lastLoginAt?: Date | string | null;
+    phone?: string | null;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    organization: Prisma.OrganizationCreateNestedOneWithoutUsersInput;
+    crewMembers?: Prisma.CrewMemberCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationCreateNestedManyWithoutUserInput;
+    auditLogs?: Prisma.AuditLogCreateNestedManyWithoutUserInput;
+    pdas?: Prisma.PdaCreateNestedManyWithoutCurrentUserInput;
+};
+export type UserUncheckedCreateWithoutPresenceInput = {
+    id?: string;
+    email: string;
+    passwordHash: string;
+    firstName: string;
+    lastName: string;
+    role?: $Enums.UserRole;
+    isActive?: boolean;
+    refreshToken?: string | null;
+    lastLoginAt?: Date | string | null;
+    phone?: string | null;
+    organizationId: string;
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+    crewMembers?: Prisma.CrewMemberUncheckedCreateNestedManyWithoutUserInput;
+    notifications?: Prisma.NotificationUncheckedCreateNestedManyWithoutUserInput;
+    auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutUserInput;
+    pdas?: Prisma.PdaUncheckedCreateNestedManyWithoutCurrentUserInput;
+};
+export type UserCreateOrConnectWithoutPresenceInput = {
+    where: Prisma.UserWhereUniqueInput;
+    create: Prisma.XOR<Prisma.UserCreateWithoutPresenceInput, Prisma.UserUncheckedCreateWithoutPresenceInput>;
+};
+export type UserUpsertWithoutPresenceInput = {
+    update: Prisma.XOR<Prisma.UserUpdateWithoutPresenceInput, Prisma.UserUncheckedUpdateWithoutPresenceInput>;
+    create: Prisma.XOR<Prisma.UserCreateWithoutPresenceInput, Prisma.UserUncheckedCreateWithoutPresenceInput>;
+    where?: Prisma.UserWhereInput;
+};
+export type UserUpdateToOneWithWhereWithoutPresenceInput = {
+    where?: Prisma.UserWhereInput;
+    data: Prisma.XOR<Prisma.UserUpdateWithoutPresenceInput, Prisma.UserUncheckedUpdateWithoutPresenceInput>;
+};
+export type UserUpdateWithoutPresenceInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    passwordHash?: Prisma.StringFieldUpdateOperationsInput | string;
+    firstName?: Prisma.StringFieldUpdateOperationsInput | string;
+    lastName?: Prisma.StringFieldUpdateOperationsInput | string;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    refreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    organization?: Prisma.OrganizationUpdateOneRequiredWithoutUsersNestedInput;
+    crewMembers?: Prisma.CrewMemberUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
+    auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput;
+    pdas?: Prisma.PdaUpdateManyWithoutCurrentUserNestedInput;
+};
+export type UserUncheckedUpdateWithoutPresenceInput = {
+    id?: Prisma.StringFieldUpdateOperationsInput | string;
+    email?: Prisma.StringFieldUpdateOperationsInput | string;
+    passwordHash?: Prisma.StringFieldUpdateOperationsInput | string;
+    firstName?: Prisma.StringFieldUpdateOperationsInput | string;
+    lastName?: Prisma.StringFieldUpdateOperationsInput | string;
+    role?: Prisma.EnumUserRoleFieldUpdateOperationsInput | $Enums.UserRole;
+    isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+    refreshToken?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    lastLoginAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+    phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+    organizationId?: Prisma.StringFieldUpdateOperationsInput | string;
+    createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+    crewMembers?: Prisma.CrewMemberUncheckedUpdateManyWithoutUserNestedInput;
+    notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
+    auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutCurrentUserNestedInput;
 };
 export type UserCreateManyOrganizationInput = {
@@ -969,6 +1095,7 @@ export type UserUpdateWithoutOrganizationInput = {
     notifications?: Prisma.NotificationUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUpdateOneWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateWithoutOrganizationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -987,6 +1114,7 @@ export type UserUncheckedUpdateWithoutOrganizationInput = {
     notifications?: Prisma.NotificationUncheckedUpdateManyWithoutUserNestedInput;
     auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutUserNestedInput;
     pdas?: Prisma.PdaUncheckedUpdateManyWithoutCurrentUserNestedInput;
+    presence?: Prisma.PresenceUncheckedUpdateOneWithoutUserNestedInput;
 };
 export type UserUncheckedUpdateManyWithoutOrganizationInput = {
     id?: Prisma.StringFieldUpdateOperationsInput | string;
@@ -1048,6 +1176,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
     notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>;
     auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>;
     pdas?: boolean | Prisma.User$pdasArgs<ExtArgs>;
+    presence?: boolean | Prisma.User$presenceArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 }, ExtArgs["result"]["user"]>;
 export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1104,6 +1233,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
     notifications?: boolean | Prisma.User$notificationsArgs<ExtArgs>;
     auditLogs?: boolean | Prisma.User$auditLogsArgs<ExtArgs>;
     pdas?: boolean | Prisma.User$pdasArgs<ExtArgs>;
+    presence?: boolean | Prisma.User$presenceArgs<ExtArgs>;
     _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1120,6 +1250,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
         notifications: Prisma.$NotificationPayload<ExtArgs>[];
         auditLogs: Prisma.$AuditLogPayload<ExtArgs>[];
         pdas: Prisma.$PdaPayload<ExtArgs>[];
+        presence: Prisma.$PresencePayload<ExtArgs> | null;
     };
     scalars: runtime.Types.Extensions.GetPayloadResult<{
         id: string;
@@ -1192,6 +1323,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
     notifications<T extends Prisma.User$notificationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$notificationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$NotificationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     auditLogs<T extends Prisma.User$auditLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$auditLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
     pdas<T extends Prisma.User$pdasArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$pdasArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PdaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>;
+    presence<T extends Prisma.User$presenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$presenceArgs<ExtArgs>>): Prisma.Prisma__PresenceClient<runtime.Types.Result.GetResult<Prisma.$PresencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>;
     then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): runtime.Types.Utils.JsPromise<TResult1 | TResult2>;
     catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): runtime.Types.Utils.JsPromise<T | TResult>;
     finally(onfinally?: (() => void) | undefined | null): runtime.Types.Utils.JsPromise<T>;
@@ -1354,6 +1486,12 @@ export type User$pdasArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     take?: number;
     skip?: number;
     distinct?: Prisma.PdaScalarFieldEnum | Prisma.PdaScalarFieldEnum[];
+};
+export type User$presenceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+    select?: Prisma.PresenceSelect<ExtArgs> | null;
+    omit?: Prisma.PresenceOmit<ExtArgs> | null;
+    include?: Prisma.PresenceInclude<ExtArgs> | null;
+    where?: Prisma.PresenceWhereInput;
 };
 export type UserDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
     select?: Prisma.UserSelect<ExtArgs> | null;

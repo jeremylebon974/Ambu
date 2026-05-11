@@ -174,6 +174,7 @@ export declare const ModelName: {
     readonly Mutuelle: "Mutuelle";
     readonly Notification: "Notification";
     readonly AuditLog: "AuditLog";
+    readonly Presence: "Presence";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export interface TypeMapCb<GlobalOmitOptions = {}> extends runtime.Types.Utils.Fn<{
@@ -186,7 +187,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         omit: GlobalOmitOptions;
     };
     meta: {
-        modelProps: "organization" | "user" | "patient" | "vehicle" | "pda" | "crew" | "crewMember" | "mission" | "missionEvent" | "gpsTrack" | "document" | "prescription" | "invoice" | "invoiceLine" | "mutuelle" | "notification" | "auditLog";
+        modelProps: "organization" | "user" | "patient" | "vehicle" | "pda" | "crew" | "crewMember" | "mission" | "missionEvent" | "gpsTrack" | "document" | "prescription" | "invoice" | "invoiceLine" | "mutuelle" | "notification" | "auditLog" | "presence";
         txIsolationLevel: TransactionIsolationLevel;
     };
     model: {
@@ -1448,6 +1449,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
                 };
             };
         };
+        Presence: {
+            payload: Prisma.$PresencePayload<ExtArgs>;
+            fields: Prisma.PresenceFieldRefs;
+            operations: {
+                findUnique: {
+                    args: Prisma.PresenceFindUniqueArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload> | null;
+                };
+                findUniqueOrThrow: {
+                    args: Prisma.PresenceFindUniqueOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>;
+                };
+                findFirst: {
+                    args: Prisma.PresenceFindFirstArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload> | null;
+                };
+                findFirstOrThrow: {
+                    args: Prisma.PresenceFindFirstOrThrowArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>;
+                };
+                findMany: {
+                    args: Prisma.PresenceFindManyArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>[];
+                };
+                create: {
+                    args: Prisma.PresenceCreateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>;
+                };
+                createMany: {
+                    args: Prisma.PresenceCreateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                createManyAndReturn: {
+                    args: Prisma.PresenceCreateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>[];
+                };
+                delete: {
+                    args: Prisma.PresenceDeleteArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>;
+                };
+                update: {
+                    args: Prisma.PresenceUpdateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>;
+                };
+                deleteMany: {
+                    args: Prisma.PresenceDeleteManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateMany: {
+                    args: Prisma.PresenceUpdateManyArgs<ExtArgs>;
+                    result: BatchPayload;
+                };
+                updateManyAndReturn: {
+                    args: Prisma.PresenceUpdateManyAndReturnArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>[];
+                };
+                upsert: {
+                    args: Prisma.PresenceUpsertArgs<ExtArgs>;
+                    result: runtime.Types.Utils.PayloadToResult<Prisma.$PresencePayload>;
+                };
+                aggregate: {
+                    args: Prisma.PresenceAggregateArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.AggregatePresence>;
+                };
+                groupBy: {
+                    args: Prisma.PresenceGroupByArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PresenceGroupByOutputType>[];
+                };
+                count: {
+                    args: Prisma.PresenceCountArgs<ExtArgs>;
+                    result: runtime.Types.Utils.Optional<Prisma.PresenceCountAggregateOutputType> | number;
+                };
+            };
+        };
     };
 } & {
     other: {
@@ -1694,6 +1769,16 @@ export declare const AuditLogScalarFieldEnum: {
     readonly createdAt: "createdAt";
 };
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum];
+export declare const PresenceScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly role: "role";
+    readonly pathname: "pathname";
+    readonly organizationId: "organizationId";
+    readonly lastSeen: "lastSeen";
+    readonly createdAt: "createdAt";
+};
+export type PresenceScalarFieldEnum = (typeof PresenceScalarFieldEnum)[keyof typeof PresenceScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";
@@ -1785,6 +1870,7 @@ export type GlobalOmitConfig = {
     mutuelle?: Prisma.MutuelleOmit;
     notification?: Prisma.NotificationOmit;
     auditLog?: Prisma.AuditLogOmit;
+    presence?: Prisma.PresenceOmit;
 };
 export type LogLevel = 'info' | 'query' | 'warn' | 'error';
 export type LogDefinition = {

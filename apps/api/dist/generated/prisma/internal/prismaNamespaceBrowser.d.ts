@@ -28,6 +28,7 @@ export declare const ModelName: {
     readonly Mutuelle: "Mutuelle";
     readonly Notification: "Notification";
     readonly AuditLog: "AuditLog";
+    readonly Presence: "Presence";
 };
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
 export declare const TransactionIsolationLevel: {
@@ -252,6 +253,16 @@ export declare const AuditLogScalarFieldEnum: {
     readonly createdAt: "createdAt";
 };
 export type AuditLogScalarFieldEnum = (typeof AuditLogScalarFieldEnum)[keyof typeof AuditLogScalarFieldEnum];
+export declare const PresenceScalarFieldEnum: {
+    readonly id: "id";
+    readonly userId: "userId";
+    readonly role: "role";
+    readonly pathname: "pathname";
+    readonly organizationId: "organizationId";
+    readonly lastSeen: "lastSeen";
+    readonly createdAt: "createdAt";
+};
+export type PresenceScalarFieldEnum = (typeof PresenceScalarFieldEnum)[keyof typeof PresenceScalarFieldEnum];
 export declare const SortOrder: {
     readonly asc: "asc";
     readonly desc: "desc";

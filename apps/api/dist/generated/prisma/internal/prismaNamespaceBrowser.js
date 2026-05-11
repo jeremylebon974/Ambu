@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.NullsOrder = exports.JsonNullValueFilter = exports.QueryMode = exports.NullableJsonNullValueInput = exports.SortOrder = exports.AuditLogScalarFieldEnum = exports.NotificationScalarFieldEnum = exports.MutuelleScalarFieldEnum = exports.InvoiceLineScalarFieldEnum = exports.InvoiceScalarFieldEnum = exports.PrescriptionScalarFieldEnum = exports.DocumentScalarFieldEnum = exports.GpsTrackScalarFieldEnum = exports.MissionEventScalarFieldEnum = exports.MissionScalarFieldEnum = exports.CrewMemberScalarFieldEnum = exports.CrewScalarFieldEnum = exports.PdaScalarFieldEnum = exports.VehicleScalarFieldEnum = exports.PatientScalarFieldEnum = exports.UserScalarFieldEnum = exports.OrganizationScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
+exports.NullsOrder = exports.JsonNullValueFilter = exports.QueryMode = exports.NullableJsonNullValueInput = exports.SortOrder = exports.PresenceScalarFieldEnum = exports.AuditLogScalarFieldEnum = exports.NotificationScalarFieldEnum = exports.MutuelleScalarFieldEnum = exports.InvoiceLineScalarFieldEnum = exports.InvoiceScalarFieldEnum = exports.PrescriptionScalarFieldEnum = exports.DocumentScalarFieldEnum = exports.GpsTrackScalarFieldEnum = exports.MissionEventScalarFieldEnum = exports.MissionScalarFieldEnum = exports.CrewMemberScalarFieldEnum = exports.CrewScalarFieldEnum = exports.PdaScalarFieldEnum = exports.VehicleScalarFieldEnum = exports.PatientScalarFieldEnum = exports.UserScalarFieldEnum = exports.OrganizationScalarFieldEnum = exports.TransactionIsolationLevel = exports.ModelName = exports.AnyNull = exports.JsonNull = exports.DbNull = exports.NullTypes = exports.Decimal = void 0;
 const runtime = __importStar(require("@prisma/client/runtime/index-browser"));
 exports.Decimal = runtime.Decimal;
 exports.NullTypes = {
@@ -61,7 +61,8 @@ exports.ModelName = {
     InvoiceLine: 'InvoiceLine',
     Mutuelle: 'Mutuelle',
     Notification: 'Notification',
-    AuditLog: 'AuditLog'
+    AuditLog: 'AuditLog',
+    Presence: 'Presence'
 };
 exports.TransactionIsolationLevel = runtime.makeStrictEnum({
     ReadUncommitted: 'ReadUncommitted',
@@ -265,6 +266,15 @@ exports.AuditLogScalarFieldEnum = {
     userAgent: 'userAgent',
     userId: 'userId',
     organizationId: 'organizationId',
+    createdAt: 'createdAt'
+};
+exports.PresenceScalarFieldEnum = {
+    id: 'id',
+    userId: 'userId',
+    role: 'role',
+    pathname: 'pathname',
+    organizationId: 'organizationId',
+    lastSeen: 'lastSeen',
     createdAt: 'createdAt'
 };
 exports.SortOrder = {

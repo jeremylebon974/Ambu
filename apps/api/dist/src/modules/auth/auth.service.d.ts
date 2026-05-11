@@ -47,15 +47,15 @@ export declare class AuthService {
         organizationId: string;
         organization: {
             id: string;
-            email: string | null;
-            isActive: boolean;
-            phone: string | null;
             createdAt: Date;
-            updatedAt: Date;
             name: string;
-            siret: string | null;
-            address: string | null;
             metadata: import("@prisma/client/runtime/client").JsonValue | null;
+            isActive: boolean;
+            updatedAt: Date;
+            address: string | null;
+            phone: string | null;
+            email: string | null;
+            siret: string | null;
         };
     }>;
     private generateTokens;
