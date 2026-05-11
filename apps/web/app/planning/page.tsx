@@ -134,12 +134,7 @@ export default function PlanningPage() {
   const handleAIGenerate = async () => {
     setAiLoading(true);
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
-      if (!token) {
-        console.error('Token manquant — redirection login');
-        router.push('/login');
-        return;
-      }
+      const token = auth.getToken();
       const response = await fetch(`${API_URL}/regulator/analyze`, {
         method: 'POST',
         headers: {

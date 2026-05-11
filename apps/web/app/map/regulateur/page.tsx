@@ -584,15 +584,22 @@ export default function MapRegulateurPage() {
                 </div>
 
                 {[
-                  { icon: '⚡', title: 'Couverture optimale', desc: 'La flotte couvre correctement le secteur Sud de La Réunion.', color: '#14B8A6' },
-                  { icon: '📊', title: 'Pic d\'activité prévu', desc: 'Augmentation probable des demandes entre 14h-16h.', color: '#F59E0B' },
-                  { icon: '🎯', title: 'Recommandation', desc: `Maintenir ${Math.max(2, stats.available)} véhicules disponibles minimum.`, color: '#3B82F6' },
+                  { icon: '⚡', title: 'Couverture optimale', desc: 'La flotte couvre correctement le secteur Sud de La Réunion.', color: '#14B8A6', simulated: true },
+                  { icon: '📊', title: 'Pic d\'activité prévu', desc: 'Augmentation probable des demandes entre 14h-16h.', color: '#F59E0B', simulated: true },
+                  { icon: '🎯', title: 'Recommandation', desc: `Maintenir ${Math.max(2, stats.available)} véhicules disponibles minimum.`, color: '#3B82F6', simulated: false },
                 ].map(s => (
                   <div key={s.title} style={{ background: '#111622', border: `1px solid ${s.color}20`, borderRadius: '10px', padding: '12px', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
                       <span style={{ fontSize: '16px' }}>{s.icon}</span>
-                      <div>
-                        <div style={{ fontSize: '12px', fontWeight: '600', color: s.color, marginBottom: '2px' }}>{s.title}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
+                          <span style={{ fontSize: '12px', fontWeight: '600', color: s.color }}>{s.title}</span>
+                          {s.simulated && (
+                            <span style={{ fontSize: '9px', color: '#6B7A99', background: '#1E2535', border: '1px solid #2A3348', borderRadius: '4px', padding: '1px 5px', letterSpacing: '0.04em' }}>
+                              SIMULÉ
+                            </span>
+                          )}
+                        </div>
                         <div style={{ fontSize: '11px', color: '#6B7A99', lineHeight: '1.5' }}>{s.desc}</div>
                       </div>
                     </div>

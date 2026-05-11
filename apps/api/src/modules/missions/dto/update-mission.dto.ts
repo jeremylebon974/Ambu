@@ -1,34 +1,14 @@
-import { IsString, IsOptional, IsBoolean, IsDateString, IsEnum } from 'class-validator';
-
-export enum MissionStatus {
-  PENDING = 'PENDING',
-  ASSIGNED = 'ASSIGNED',
-  EN_ROUTE_PICKUP = 'EN_ROUTE_PICKUP',
-  AT_PICKUP = 'AT_PICKUP',
-  EN_ROUTE_DROPOFF = 'EN_ROUTE_DROPOFF',
-  AT_DROPOFF = 'AT_DROPOFF',
-  COMPLETED = 'COMPLETED',
-  VALIDATED = 'VALIDATED',
-  CANCELLED = 'CANCELLED',
-  ANOMALY = 'ANOMALY',
-}
+import { IsString, IsEnum, IsBoolean, IsOptional, IsDateString, IsNumber } from 'class-validator';
+import { MissionStatus, MissionType } from '../../../generated/prisma';
 
 export class UpdateMissionDto {
+  @IsEnum(MissionType)
+  @IsOptional()
+  type?: MissionType;
+
   @IsEnum(MissionStatus)
   @IsOptional()
   status?: MissionStatus;
-
-  @IsDateString()
-  @IsOptional()
-  actualPickup?: string;
-
-  @IsDateString()
-  @IsOptional()
-  actualDropoff?: string;
-
-  @IsString()
-  @IsOptional()
-  patientSignature?: string;
 
   @IsBoolean()
   @IsOptional()
@@ -36,12 +16,33 @@ export class UpdateMissionDto {
 
   @IsString()
   @IsOptional()
-  cancelReason?: string;
+  originAddress?: string;
+
+  @IsNumber()
+  @IsOptional()
+  originLat?: number;
+
+  @IsNumber()
+  @IsOptional()
+  originLng?: number;
+
+  @IsString()
+  @IsOptional()
+  destAddress?: string;
+
+  @IsNumber()
+  @IsOptional()
+  destLat?: number;
+
+  @IsNumber()
+  @IsOptional()
+  destLng?: number;
+
+  @IsDateString()
+  @IsOptional()
+  scheduledAt?: string;
 
   @IsString()
   @IsOptional()
   notes?: string;
-
-  @IsOptional()
-  actualKm?: number;
 }

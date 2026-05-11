@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { auth } from '../../../lib/auth';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
@@ -18,6 +19,8 @@ export default function MapAmbulanciePage() {
   const patientMarker = useRef<mapboxgl.Marker | null>(null);
 
   const [mission, setMission] = useState<any>(null);
+  const [missionId, setMissionId] = useState<string | null>(null);
+  const [patientName, setPatientName] = useState('Patient • Mission active');
   const [step, setStep] = useState<'EN_ROUTE' | 'ON_SCENE' | 'TRANSPORTING'>('EN_ROUTE');
   const [eta, setEta] = useState(8);
   const [myPos, setMyPos] = useState({ lat: -21.3850, lng: 55.6050 });
@@ -25,7 +28,21 @@ export default function MapAmbulanciePage() {
   const patientPos = { lat: -21.3600, lng: 55.6300 };
   const destPos = { lat: -21.3400, lng: 55.6500 };
 
+  const updateMissionStatus = async (newStatus: string) => {
+    setStep(newStatus as any);
+    if (!missionId) return;
+    try {
+      const token = auth.getToken();
+      await fetch(`${API_URL}/missions/${missionId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } catch {}
+  };
+
   useEffect(() => {
+    if (!auth.isAuthenticated()) { router.push('/login?role=ambulancier'); return; }
     if (map.current || !mapContainer.current) return;
 
     map.current = new mapboxgl.Map({
@@ -95,6 +112,22 @@ export default function MapAmbulanciePage() {
       });
 
       simulateMovement();
+
+      // Charger la mission active
+      const token = auth.getToken();
+      fetch(`${API_URL}/missions`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then((data: any[]) => {
+          const active = Array.isArray(data)
+            ? data.find(m => ['ASSIGNED', 'EN_ROUTE', 'ON_SCENE', 'TRANSPORTING'].includes(m.status))
+            : null;
+          if (active) {
+            setMissionId(active.id);
+            setMission(active);
+            if (active.patient) setPatientName(`${active.patient.lastName} ${active.patient.firstName}`);
+          }
+        })
+        .catch(() => {});
 
       const etaTimer = setInterval(() => {
         setEta(prev => {
@@ -205,7 +238,7 @@ export default function MapAmbulanciePage() {
             {stepConfig.map(s => (
               <button
                 key={s.key}
-                onClick={() => setStep(s.key as any)}
+                onClick={() => updateMissionStatus(s.key)}
                 style={{
                   background: step === s.key ? s.color + '25' : '#111622',
                   border: `1px solid ${step === s.key ? s.color : '#1E2535'}`,
@@ -241,7 +274,7 @@ export default function MapAmbulanciePage() {
             fontSize: '20px', flexShrink: 0,
           }}>👤</div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '14px', fontWeight: '700', color: '#E8ECF5' }}>Patient • Mission active</div>
+            <div style={{ fontSize: '14px', fontWeight: '700', color: '#E8ECF5' }}>{patientName}</div>
             <div style={{ fontSize: '12px', color: '#6B7A99', marginTop: '2px' }}>📍 Adresse prise en charge</div>
           </div>
           <button style={{ background: '#14B8A620', border: 'none', borderRadius: '50%', width: '36px', height: '36px', cursor: 'pointer', fontSize: '16px' }}>📞</button>
@@ -250,7 +283,7 @@ export default function MapAmbulanciePage() {
         {/* Actions */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
           <button
-            onClick={() => setStep('ON_SCENE')}
+            onClick={() => updateMissionStatus('ON_SCENE')}
             style={{
               background: '#14B8A620',
               border: '1px solid #14B8A640',
@@ -263,7 +296,7 @@ export default function MapAmbulanciePage() {
             }}
           >📍 Sur place</button>
           <button
-            onClick={() => setStep('TRANSPORTING')}
+            onClick={() => updateMissionStatus('TRANSPORTING')}
             style={{
               background: '#8B5CF620',
               border: '1px solid #8B5CF640',

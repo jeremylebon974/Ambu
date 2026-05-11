@@ -3,10 +3,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
+import { auth } from '../../../lib/auth';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 export default function MapPatientPage() {
   const router = useRouter();
@@ -15,7 +18,7 @@ export default function MapPatientPage() {
   const marker = useRef<mapboxgl.Marker | null>(null);
   const [eta, setEta] = useState(12);
   const [status, setStatus] = useState('EN_ROUTE');
-  const [ambulance, setAmbulance] = useState({ plate: '798', driver: 'Kevin A.', type: 'Ambulance' });
+  const [ambulance, setAmbulance] = useState({ plate: '—', driver: '—', type: 'Ambulance' });
   const [position, setPosition] = useState({ lat: -21.3800, lng: 55.6100 });
 
   const statusSteps = [
@@ -27,6 +30,7 @@ export default function MapPatientPage() {
   ];
 
   useEffect(() => {
+    if (!auth.isAuthenticated()) { router.push('/login?role=patient'); return; }
     if (map.current || !mapContainer.current) return;
 
     map.current = new mapboxgl.Map({
@@ -81,6 +85,27 @@ export default function MapPatientPage() {
 
       // Simuler mouvement ambulance
       simulateMovement();
+
+      // Charger la mission active du patient
+      const token = auth.getToken();
+      fetch(`${API_URL}/missions`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.json())
+        .then((data: any[]) => {
+          const active = Array.isArray(data)
+            ? data.find(m => ['ASSIGNED', 'EN_ROUTE', 'ON_SCENE', 'TRANSPORTING'].includes(m.status))
+            : null;
+          if (active) {
+            setStatus(active.status);
+            if (active.crew?.vehicle) {
+              setAmbulance({
+                plate: active.crew.vehicle.plate || '—',
+                driver: active.crew.name || '—',
+                type: active.crew.vehicle.type || 'Ambulance',
+              });
+            }
+          }
+        })
+        .catch(() => {});
 
       // ETA countdown
       const etaTimer = setInterval(() => {

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../../../lib/auth';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
   return (
     <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -58,10 +60,36 @@ export default function DirectionPersonnelPage() {
   const router = useRouter();
   const [filtreDiplome, setFiltreDiplome] = useState('Tous');
   const [recherche, setRecherche] = useState('');
+  const [vehiclePlates, setVehiclePlates] = useState<string[]>([]);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
+    loadVehicles();
   }, [router]);
+
+  const loadVehicles = async () => {
+    try {
+      const token = auth.getToken();
+      const res = await fetch(`${API_URL}/vehicles`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setVehiclePlates(data.map((v: any) => v.plate).filter(Boolean));
+        }
+      }
+    } catch {}
+  };
+
+  // Associe les plaques réelles aux personnels EN SERVICE (par ordre d'apparition)
+  const getVehicleForPersonnel = (p: typeof personnel[0], index: number): string => {
+    if (p.statut !== 'EN SERVICE') return '—';
+    const enServiceIndex = personnel
+      .filter(x => x.statut === 'EN SERVICE')
+      .indexOf(p);
+    return vehiclePlates[enServiceIndex] || p.vehicule;
+  };
 
   const filtered = personnel.filter(p => {
     const matchDiplome = filtreDiplome === 'Tous' || p.diplome === filtreDiplome;
@@ -200,7 +228,7 @@ export default function DirectionPersonnelPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((p) => (
+              {filtered.map((p, index) => (
                 <tr key={`${p.lastName}-${p.firstName}`} style={{ borderBottom: '1px solid #1E2535' }}>
                   <td style={{ padding: '14px 16px' }}>
                     <div style={{ fontSize: '14px', fontWeight: '600', color: '#E8ECF5' }}>{p.lastName}</div>
@@ -227,7 +255,7 @@ export default function DirectionPersonnelPage() {
                     </span>
                   </td>
                   <td style={{ padding: '14px 16px', fontSize: '13px', color: '#6B7A99', fontFamily: 'DM Mono, monospace' }}>
-                    {p.vehicule}
+                    {getVehicleForPersonnel(p, index)}
                   </td>
                   <td style={{ padding: '14px 16px' }}>
                     <button

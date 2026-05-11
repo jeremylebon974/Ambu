@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../../lib/auth';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const MONTANT: Record<number, number> = { 1: 150, 2: 110, 3: 85, 4: 65 };
+
 function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
   return (
     <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -30,23 +33,54 @@ const menuItems = [
   { label: 'Configuration', icon: '⚙️', path: '/configuration' },
 ];
 
-const kpis = [
-  { label: 'CA du mois', value: '47 820 €', evolution: '+12%', color: '#22C55E', icon: '💶' },
-  { label: 'Missions aujourd\'hui', value: '47', evolution: '+8%', color: '#14B8A6', icon: '📋' },
-  { label: 'Véhicules actifs', value: '18/24', evolution: '75%', color: '#3B82F6', icon: '🚑' },
-  { label: 'Taux ponctualité', value: '98%', evolution: '+2%', color: '#F59E0B', icon: '⏱️' },
-  { label: 'Salariés en service', value: '14', evolution: '61%', color: '#8B5CF6', icon: '👥' },
-  { label: 'Alertes actives', value: '2', evolution: '-3', color: '#EF4444', icon: '⚠️' },
-];
 
 export default function DirectionPage() {
   const router = useRouter();
   const [user, setUser] = useState<any>(null);
+  const [kpis, setKpis] = useState([
+    { label: 'CA du mois',           value: '—',   evolution: '', color: '#22C55E', icon: '💶' },
+    { label: 'Missions aujourd\'hui', value: '—',   evolution: '', color: '#14B8A6', icon: '📋' },
+    { label: 'Véhicules actifs',      value: '—',   evolution: '', color: '#3B82F6', icon: '🚑' },
+    { label: 'Taux ponctualité',      value: '—',   evolution: '', color: '#F59E0B', icon: '⏱️' },
+    { label: 'Salariés en service',   value: '14',  evolution: '61%', color: '#8B5CF6', icon: '👥' },
+    { label: 'Alertes actives',       value: '0',   evolution: '', color: '#EF4444', icon: '⚠️' },
+  ]);
+
+  const loadKpis = async () => {
+    try {
+      const token = auth.getToken();
+      const headers = { Authorization: `Bearer ${token}` };
+      const [vRes, mRes] = await Promise.all([
+        fetch(`${API_URL}/vehicles`, { headers }),
+        fetch(`${API_URL}/missions`, { headers }),
+      ]);
+      const v = vRes.ok ? await vRes.json() : [];
+      const m = mRes.ok ? await mRes.json() : [];
+      const vArray = Array.isArray(v) ? v : [];
+      const mArray = Array.isArray(m) ? m : [];
+
+      const actifs = vArray.filter((x: any) => x.status === 'AVAILABLE' || x.status === 'ON_MISSION').length;
+      const total = vArray.length;
+      const completed = mArray.filter((x: any) => x.status === 'COMPLETED' || x.status === 'VALIDATED');
+      const ca = completed.reduce((sum: number, x: any) => sum + (MONTANT[x.priority] ?? 85), 0);
+      const ponctualite = mArray.length > 0 ? Math.round((completed.length / mArray.length) * 100) : 0;
+
+      setKpis([
+        { label: 'CA du mois',           value: `${ca.toLocaleString('fr-FR')} €`,                        evolution: '', color: '#22C55E', icon: '💶' },
+        { label: 'Missions aujourd\'hui', value: String(mArray.length),                                    evolution: '', color: '#14B8A6', icon: '📋' },
+        { label: 'Véhicules actifs',      value: `${actifs}/${total}`,                                     evolution: `${total > 0 ? Math.round((actifs / total) * 100) : 0}%`, color: '#3B82F6', icon: '🚑' },
+        { label: 'Taux ponctualité',      value: `${ponctualite}%`,                                        evolution: '', color: '#F59E0B', icon: '⏱️' },
+        { label: 'Salariés en service',   value: '14',                                                     evolution: '61%', color: '#8B5CF6', icon: '👥' },
+        { label: 'Alertes actives',       value: '0',                                                      evolution: '', color: '#EF4444', icon: '⚠️' },
+      ]);
+    } catch {}
+  };
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
     const u = auth.getUser();
     setUser(u);
+    loadKpis();
   }, [router]);
 
   return (
@@ -196,7 +230,6 @@ export default function DirectionPage() {
               { label: 'Configuration', icon: '⚙️', path: '/configuration', color: '#F59E0B' },
               { label: 'Personnel', icon: '👥', path: '/direction/personnel', color: '#14B8A6' },
               { label: 'Facturation', icon: '💶', path: '/direction/facturation', color: '#22C55E' },
-              { label: 'Carte globale', icon: '🗺️', path: '/map/direction', color: '#8B5CF6' },
             ].map(a => (
               <motion.button
                 key={a.path}

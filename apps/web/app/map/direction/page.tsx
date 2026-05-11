@@ -10,6 +10,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const MONTANT: Record<number, number> = { 1: 150, 2: 110, 3: 85, 4: 65 };
 
 export default function MapDirectionPage() {
   const router = useRouter();
@@ -79,7 +80,10 @@ export default function MapDirectionPage() {
         maintenance,
         total: vehiclesWithGPS.length,
         saturation: Math.round((onMission / Math.max(vehiclesWithGPS.length, 1)) * 100),
-        caJour: `${(mArray.filter((m: any) => m.status === 'COMPLETED').length * 85).toLocaleString()} €`,
+        caJour: `${mArray
+          .filter((m: any) => m.status === 'COMPLETED' || m.status === 'VALIDATED')
+          .reduce((sum: number, m: any) => sum + (MONTANT[m.priority] ?? 85), 0)
+          .toLocaleString('fr-FR')} €`,
         missions: mArray.length,
       });
 
@@ -87,7 +91,7 @@ export default function MapDirectionPage() {
       vehiclesWithGPS.forEach((v: any) => {
         const color = v.status === 'AVAILABLE' ? '#14B8A6' :
           v.status === 'ON_MISSION' ? '#3B82F6' :
-          v.status === 'MAINTENANCE' ? '#EF4444' : '#6B7A99';
+          v.status === 'MAINTENANCE' ? '#F59E0B' : '#6B7A99';
 
         const el = document.createElement('div');
         el.style.cssText = `

@@ -4,6 +4,8 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useRef } from 'react';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+
 const portails = [
   {
     id: 'direction',
@@ -47,12 +49,6 @@ const portails = [
   },
 ];
 
-const stats = [
-  { label: 'Véhicules actifs', value: '24', icon: '🚑', color: '#14B8A6' },
-  { label: 'Missions aujourd\'hui', value: '47', icon: '📋', color: '#3B82F6' },
-  { label: 'Salariés', value: '23', icon: '👥', color: '#F59E0B' },
-  { label: 'Ponctualité', value: '98%', icon: '⏱️', color: '#22C55E' },
-];
 
 // Composant logo VIEsionnaire
 function LogoViesionnaire({ height = 36, onClick }: { height?: number; onClick?: () => void }) {
@@ -113,6 +109,12 @@ export default function HomePage() {
   const [time, setTime] = useState(new Date());
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [liveStats, setLiveStats] = useState([
+    { label: 'Véhicules actifs',     value: '—',  icon: '🚑', color: '#14B8A6' },
+    { label: 'Missions aujourd\'hui', value: '—', icon: '📋', color: '#3B82F6' },
+    { label: 'Salariés',             value: '23', icon: '👥', color: '#F59E0B' },
+    { label: 'Ponctualité',          value: '—',  icon: '⏱️', color: '#22C55E' },
+  ]);
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 300], [0, -50]);
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0.3]);
@@ -143,6 +145,35 @@ export default function HomePage() {
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [vRes, mRes] = await Promise.all([
+          fetch(`${API_URL}/vehicles`),
+          fetch(`${API_URL}/missions`),
+        ]);
+        const vArray = vRes.ok ? await vRes.json() : [];
+        const mArray = mRes.ok ? await mRes.json() : [];
+        const v = Array.isArray(vArray) ? vArray : [];
+        const m = Array.isArray(mArray) ? mArray : [];
+
+        const actifs = v.filter((x: any) => x.status === 'AVAILABLE' || x.status === 'ON_MISSION').length;
+        const completed = m.filter((x: any) => x.status === 'COMPLETED').length;
+        const ponctualite = m.length > 0 ? Math.round((completed / m.length) * 100) : 0;
+
+        setLiveStats([
+          { label: 'Véhicules actifs',     value: actifs > 0 ? String(actifs) : '—',          icon: '🚑', color: '#14B8A6' },
+          { label: 'Missions aujourd\'hui', value: m.length > 0 ? String(m.length) : '—',      icon: '📋', color: '#3B82F6' },
+          { label: 'Salariés',             value: '23',                                          icon: '👥', color: '#F59E0B' },
+          { label: 'Ponctualité',          value: m.length > 0 ? `${ponctualite}%` : '—',      icon: '⏱️', color: '#22C55E' },
+        ]);
+      } catch {
+        // garde les valeurs '—' par défaut
+      }
+    };
+    fetchStats();
   }, []);
 
   return (
@@ -372,7 +403,7 @@ export default function HomePage() {
                 marginBottom: '80px',
               }}
             >
-              {stats.map((s, i) => (
+              {liveStats.map((s, i) => (
                 <motion.div
                   key={s.label}
                   initial={{ opacity: 0, y: 20 }}

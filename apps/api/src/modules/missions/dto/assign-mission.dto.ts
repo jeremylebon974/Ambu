@@ -2,8 +2,8 @@ import { IsString } from 'class-validator';
 
 export class AssignMissionDto {
   @IsString()
-  crewId: string;
+  vehicleId: string;
 
   @IsString()
-  vehicleId: string;
+  crewId: string;
 }
