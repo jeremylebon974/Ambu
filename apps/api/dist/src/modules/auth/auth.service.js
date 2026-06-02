@@ -85,7 +85,7 @@ let AuthService = AuthService_1 = class AuthService {
                 passwordHash,
                 firstName: dto.firstName,
                 lastName: dto.lastName,
-                role: 'PATIENT',
+                role: (dto.role ?? 'PATIENT'),
                 organizationId: org.id,
             },
         });

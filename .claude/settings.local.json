@@ -3,7 +3,8 @@
     "allow": [
       "Bash(pnpm prisma *)",
       "Bash(npx eslint *)",
-      "Bash(pnpm add *)"
+      "Bash(pnpm add *)",
+      "Bash(curl -X POST http://localhost:3001/auth/register -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"admin@viesionnaire.fr\\\\\",\\\\\"password\\\\\":\\\\\"Admin1234!\\\\\",\\\\\"firstName\\\\\":\\\\\"Jeremy\\\\\",\\\\\"lastName\\\\\":\\\\\"Admin\\\\\",\\\\\"role\\\\\":\\\\\"ADMIN\\\\\"}\")"
     ]
   }
 }
