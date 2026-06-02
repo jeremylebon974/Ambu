@@ -43,7 +43,7 @@ export class AuthService {
         passwordHash,
         firstName: dto.firstName,
         lastName: dto.lastName,
-        role: (dto.role || 'PATIENT') as any,
+        role: 'PATIENT' as any,
         organizationId: org.id,
       },
     });

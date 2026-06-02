@@ -6,21 +6,6 @@ export declare class MissionsController {
     private missionsService;
     constructor(missionsService: MissionsService);
     create(dto: CreateMissionDto, req: any): Promise<{
-        patient: {
-            id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            firstName: string;
-            lastName: string;
-            organizationId: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
-        };
         crew: {
             members: ({
                 user: {
@@ -30,13 +15,13 @@ export declare class MissionsController {
                     isActive: boolean;
                     createdAt: Date;
                     updatedAt: Date;
+                    organizationId: string;
                     passwordHash: string;
                     firstName: string;
                     lastName: string;
                     role: import("../../../generated/prisma/enums").UserRole;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
-                    organizationId: string;
                 };
             } & {
                 id: string;
@@ -53,13 +38,28 @@ export declare class MissionsController {
             updatedAt: Date;
             vehicleId: string;
         };
+        patient: {
+            id: string;
+            address: string | null;
+            phone: string | null;
+            email: string | null;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            organizationId: string;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            socialNumber: string | null;
+        };
     } & {
         id: string;
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("./dto/update-mission.dto").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -69,21 +69,6 @@ export declare class MissionsController {
         patientId: string | null;
     }>;
     findAll(req: any, status?: string): Promise<({
-        patient: {
-            id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            firstName: string;
-            lastName: string;
-            organizationId: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
-        };
         crew: {
             members: ({
                 user: {
@@ -93,13 +78,13 @@ export declare class MissionsController {
                     isActive: boolean;
                     createdAt: Date;
                     updatedAt: Date;
+                    organizationId: string;
                     passwordHash: string;
                     firstName: string;
                     lastName: string;
                     role: import("../../../generated/prisma/enums").UserRole;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
-                    organizationId: string;
                 };
             } & {
                 id: string;
@@ -116,13 +101,28 @@ export declare class MissionsController {
             updatedAt: Date;
             vehicleId: string;
         };
+        patient: {
+            id: string;
+            address: string | null;
+            phone: string | null;
+            email: string | null;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            organizationId: string;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            socialNumber: string | null;
+        };
     } & {
         id: string;
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("./dto/update-mission.dto").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -132,21 +132,6 @@ export declare class MissionsController {
         patientId: string | null;
     })[]>;
     findOne(id: string, req: any): Promise<{
-        patient: {
-            id: string;
-            address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
-            firstName: string;
-            lastName: string;
-            organizationId: string;
-            birthDate: Date | null;
-            gender: string | null;
-            socialNumber: string | null;
-        };
         crew: {
             members: ({
                 user: {
@@ -156,13 +141,13 @@ export declare class MissionsController {
                     isActive: boolean;
                     createdAt: Date;
                     updatedAt: Date;
+                    organizationId: string;
                     passwordHash: string;
                     firstName: string;
                     lastName: string;
                     role: import("../../../generated/prisma/enums").UserRole;
                     refreshToken: string | null;
                     lastLoginAt: Date | null;
-                    organizationId: string;
                 };
             } & {
                 id: string;
@@ -179,7 +164,23 @@ export declare class MissionsController {
             updatedAt: Date;
             vehicleId: string;
         };
+        patient: {
+            id: string;
+            address: string | null;
+            phone: string | null;
+            email: string | null;
+            isActive: boolean;
+            createdAt: Date;
+            updatedAt: Date;
+            organizationId: string;
+            firstName: string;
+            lastName: string;
+            birthDate: Date | null;
+            gender: string | null;
+            socialNumber: string | null;
+        };
         documents: {
+            url: string;
             id: string;
             createdAt: Date;
             updatedAt: Date;
@@ -187,7 +188,6 @@ export declare class MissionsController {
             patientId: string | null;
             missionId: string | null;
             filename: string;
-            url: string;
             mimeType: string | null;
             sizeBytes: number | null;
             isEncrypted: boolean;
@@ -196,16 +196,16 @@ export declare class MissionsController {
             id: string;
             createdAt: Date;
             type: string;
-            missionId: string;
             data: import("@prisma/client/runtime/client").JsonValue | null;
+            missionId: string;
         }[];
     } & {
         id: string;
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("./dto/update-mission.dto").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -219,8 +219,8 @@ export declare class MissionsController {
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("./dto/update-mission.dto").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -234,8 +234,8 @@ export declare class MissionsController {
         address: string | null;
         createdAt: Date;
         updatedAt: Date;
-        organizationId: string;
         status: import("./dto/update-mission.dto").MissionStatus;
+        organizationId: string;
         crewId: string | null;
         priority: number;
         notes: string | null;
@@ -248,7 +248,7 @@ export declare class MissionsController {
         id: string;
         createdAt: Date;
         type: string;
-        missionId: string;
         data: import("@prisma/client/runtime/client").JsonValue | null;
+        missionId: string;
     }[]>;
 }

@@ -13,6 +13,7 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  // TODO: rate limiting
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
