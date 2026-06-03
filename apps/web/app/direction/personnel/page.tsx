@@ -48,9 +48,20 @@ export default function DirectionPersonnelPage() {
   const [recherche, setRecherche] = useState('');
   const [filtreRole, setFiltreRole] = useState('Tous');
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', role: 'AMBULANCIER' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', role: 'AMBULANCIER' });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
+
+  const validatePassword = (pwd: string, confirm: string): string[] => {
+    const errors: string[] = [];
+    if (pwd.length < 8) errors.push('8 caractères minimum');
+    if (!/[A-Z]/.test(pwd)) errors.push('1 majuscule requise');
+    if (!/[0-9]/.test(pwd)) errors.push('1 chiffre requis');
+    if (!/[@!#$%&*]/.test(pwd)) errors.push('1 caractère spécial requis (@!#$%&*)');
+    if (confirm && pwd !== confirm) errors.push('Les mots de passe ne correspondent pas');
+    return errors;
+  };
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
@@ -78,17 +89,22 @@ export default function DirectionPersonnelPage() {
       setError('Tous les champs sont obligatoires.');
       return;
     }
+    const pwdErrors = validatePassword(form.password, form.confirmPassword);
+    setPasswordErrors(pwdErrors);
+    if (pwdErrors.length > 0) return;
     setSubmitting(true);
     try {
       const token = auth.getToken();
+      const { confirmPassword: _, ...payload } = form;
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       });
       if (res.ok) {
         setModalOpen(false);
-        setForm({ firstName: '', lastName: '', email: '', password: '', role: 'AMBULANCIER' });
+        setForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', role: 'AMBULANCIER' });
+        setPasswordErrors([]);
         await loadUsers();
       } else {
         const data = await res.json();
@@ -144,7 +160,7 @@ export default function DirectionPersonnelPage() {
         <motion.button
           whileHover={{ scale: 1.04 }}
           whileTap={{ scale: 0.96 }}
-          onClick={() => { setError(''); setModalOpen(true); }}
+          onClick={() => { setError(''); setPasswordErrors([]); setModalOpen(true); }}
           style={{
             background: 'linear-gradient(135deg, #14B8A6, #3B82F6)',
             border: 'none',
@@ -407,11 +423,39 @@ export default function DirectionPersonnelPage() {
                   <label style={{ fontSize: '11px', color: '#6B7A99', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Mot de passe</label>
                   <input
                     value={form.password}
-                    onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                    onChange={e => {
+                      const pwd = e.target.value;
+                      setForm(f => ({ ...f, password: pwd }));
+                      setPasswordErrors(validatePassword(pwd, form.confirmPassword));
+                    }}
                     placeholder="Minimum 8 caractères"
                     type="password"
-                    style={inputStyle}
+                    style={{ ...inputStyle, borderColor: passwordErrors.length > 0 ? '#EF4444' : '#2A3348' }}
                   />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', color: '#6B7A99', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>Confirmer le mot de passe</label>
+                  <input
+                    value={form.confirmPassword}
+                    onChange={e => {
+                      const confirm = e.target.value;
+                      setForm(f => ({ ...f, confirmPassword: confirm }));
+                      setPasswordErrors(validatePassword(form.password, confirm));
+                    }}
+                    placeholder="Répéter le mot de passe"
+                    type="password"
+                    style={{ ...inputStyle, borderColor: passwordErrors.some(e => e.includes('correspondent')) ? '#EF4444' : '#2A3348' }}
+                  />
+                  {passwordErrors.length > 0 && (
+                    <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      {passwordErrors.map(e => (
+                        <div key={e} style={{ fontSize: '11px', color: '#EF4444', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                          <span>✕</span> {e}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div>
