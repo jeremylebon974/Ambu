@@ -231,7 +231,7 @@ export default function EmployesPage() {
     if (!histUser) return;
     setHistLoading(true);
     setHistTab('missions');
-    const t = auth.getToken();
+    const t = auth.getToken() ?? '';
     Promise.all([
       safeFetch(`${API_URL}/missions?userId=${histUser.id}`, t),
       safeFetch(`${API_URL}/vehicles/logs?userId=${histUser.id}`, t),
