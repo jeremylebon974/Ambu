@@ -1,8 +1,15 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { auth } from '../../lib/auth';
+
+const PORTAL_RULES: Record<string, string[]> = {
+  direction:   ['ADMIN', 'SUPER_ADMIN'],
+  regulateur:  ['REGULATEUR', 'ADMIN', 'SUPER_ADMIN'],
+  ambulancier: ['AMBULANCIER', 'ADMIN', 'SUPER_ADMIN'],
+  patient:     ['PATIENT', 'ADMIN', 'SUPER_ADMIN'],
+};
 
 function LogoViesionnaire({ height = 36, onClick }: { height?: number; onClick?: () => void }) {
   return (
@@ -22,6 +29,7 @@ function LogoViesionnaire({ height = 36, onClick }: { height?: number; onClick?:
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -35,6 +43,16 @@ export default function LoginPage() {
     try {
       const data = await auth.login(email, password);
       const userRole = data?.user?.role;
+
+      const portalParam = searchParams.get('role');
+      if (portalParam && PORTAL_RULES[portalParam]) {
+        if (!PORTAL_RULES[portalParam].includes(userRole)) {
+          auth.logout();
+          setError('Accès refusé. Vous n\'avez pas les droits pour accéder à ce portail.');
+          return;
+        }
+      }
+
       const destination =
         userRole === 'ADMIN' || userRole === 'SUPER_ADMIN' ? '/direction' :
         userRole === 'REGULATEUR' ? '/regulateur' :
