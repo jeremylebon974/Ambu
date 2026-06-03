@@ -86,6 +86,22 @@ export class AuthService {
     });
   }
 
+  async updateUser(id: string, dto: { firstName?: string; lastName?: string; email?: string; role?: string }) {
+    const target = await this.prisma.user.findUnique({ where: { id } });
+    if (!target) throw new NotFoundException('Utilisateur introuvable');
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: {
+        ...(dto.firstName ? { firstName: dto.firstName } : {}),
+        ...(dto.lastName  ? { lastName:  dto.lastName  } : {}),
+        ...(dto.email     ? { email:     dto.email     } : {}),
+        ...(dto.role      ? { role: dto.role as any    } : {}),
+      },
+      select: { id: true, firstName: true, lastName: true, email: true, role: true },
+    });
+    return updated;
+  }
+
   async deleteUser(id: string, requesterId: string) {
     const target = await this.prisma.user.findUnique({ where: { id } });
     if (!target) throw new NotFoundException('Utilisateur introuvable');

@@ -125,6 +125,22 @@ let AuthService = AuthService_1 = class AuthService {
             orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
         });
     }
+    async updateUser(id, dto) {
+        const target = await this.prisma.user.findUnique({ where: { id } });
+        if (!target)
+            throw new common_1.NotFoundException('Utilisateur introuvable');
+        const updated = await this.prisma.user.update({
+            where: { id },
+            data: {
+                ...(dto.firstName ? { firstName: dto.firstName } : {}),
+                ...(dto.lastName ? { lastName: dto.lastName } : {}),
+                ...(dto.email ? { email: dto.email } : {}),
+                ...(dto.role ? { role: dto.role } : {}),
+            },
+            select: { id: true, firstName: true, lastName: true, email: true, role: true },
+        });
+        return updated;
+    }
     async deleteUser(id, requesterId) {
         const target = await this.prisma.user.findUnique({ where: { id } });
         if (!target)

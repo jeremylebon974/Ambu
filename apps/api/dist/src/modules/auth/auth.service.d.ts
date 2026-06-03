@@ -65,6 +65,18 @@ export declare class AuthService {
         lastName: string;
         role: import("../../../generated/prisma/enums").UserRole;
     }[]>;
+    updateUser(id: string, dto: {
+        firstName?: string;
+        lastName?: string;
+        email?: string;
+        role?: string;
+    }): Promise<{
+        id: string;
+        email: string;
+        firstName: string;
+        lastName: string;
+        role: import("../../../generated/prisma/enums").UserRole;
+    }>;
     deleteUser(id: string, requesterId: string): Promise<{
         message: string;
     }>;
