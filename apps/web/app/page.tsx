@@ -188,6 +188,12 @@ export default function HomePage() {
         position: 'relative',
       }}
     >
+      {/* LOGOS COINS */}
+      <img src="/AMBULANCES TAMATAVE.jpg"         alt="" style={{ position: 'fixed', top: '120px',    left: '20px',  width: '160px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
+      <img src="/AMBULANCES PAILLE EN QUEUE.jpg"  alt="" style={{ position: 'fixed', top: '120px',    right: '20px', width: '160px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
+      <img src="/AMBULANCES BRAS DE PONTHO.jpg"   alt="" style={{ position: 'fixed', bottom: '60px',  left: '20px',  width: '160px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
+      <img src="/AMBULANCES MASCAREIGNE.jpg"      alt="" style={{ position: 'fixed', bottom: '60px',  right: '20px', width: '160px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
+
       {/* FOND ANIMÉ */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
         {/* Grille */}
@@ -355,7 +361,7 @@ export default function HomePage() {
                 WebkitTextFillColor: 'transparent',
                 backgroundClip: 'text',
               }}>
-                réinventée par l'IA
+                réinventé par l'IA
               </span>
             </motion.h1>
 
