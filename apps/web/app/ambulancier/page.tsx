@@ -60,14 +60,65 @@ export default function AmbulanciePage() {
   const [user, setUser] = useState<any>(null);
   const [missions, setMissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [statut, setStatut] = useState('EN SERVICE');
-  const [sosEnvoye, setSosEnvoye] = useState(false);
+  const [statut,       setStatut]       = useState('EN SERVICE');
+  const [sosEnvoye,    setSosEnvoye]    = useState(false);
   const [weekPlanning, setWeekPlanning] = useState<Record<string, string>>({});
+  const [vehicleActuel, setVehicleActuel] = useState<string | null>(null);
+  const [kmModal,      setKmModal]      = useState<'DEPART' | 'ARRIVEE' | null>(null);
+  const [kmInput,      setKmInput]      = useState('');
+  const [savingKm,     setSavingKm]     = useState(false);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=ambulancier'); return; }
+    setVehicleActuel(localStorage.getItem('vehicleActuel'));
     loadData();
   }, [router]);
+
+  // GPS tracker silencieux toutes les 30 secondes
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+    let lastMoveTime = Date.now();
+    let lastPos: { lat: number; lng: number } | null = null;
+    const calcDist = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+      const R = 6371000;
+      const dLat = (b.lat - a.lat) * Math.PI / 180;
+      const dLon = (b.lng - a.lng) * Math.PI / 180;
+      const aa = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
+    };
+    const interval = setInterval(() => {
+      navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const timestamp = Date.now();
+        try {
+          const token = auth.getToken() ?? '';
+          await fetch(`${API_URL}/pda/gps`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ lat, lng, timestamp }),
+          });
+        } catch {}
+        const current = { lat, lng };
+        if (lastPos) {
+          if (calcDist(lastPos, current) >= 50) lastMoveTime = timestamp;
+          if (timestamp - lastMoveTime > 15 * 60 * 1000) {
+            try {
+              const token = auth.getToken() ?? '';
+              await fetch(`${API_URL}/pda/incident`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ type: 'GPS_IMMOBILE', gravite: 'ALERTE', description: 'Véhicule immobile depuis 15 minutes' }),
+              });
+              lastMoveTime = timestamp;
+            } catch {}
+          }
+        }
+        lastPos = current;
+      }, () => {}, { enableHighAccuracy: false, timeout: 10000 });
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadData = async () => {
     const u = auth.getUser();
@@ -112,6 +163,32 @@ export default function AmbulanciePage() {
       });
       setWeekPlanning(map);
     } catch {}
+  };
+
+  const handleEndOfService = () => {
+    if (!window.confirm('Terminer votre service ?')) return;
+    localStorage.removeItem('vehicleActuel');
+    auth.logout();
+    router.push('/');
+  };
+
+  const handleKmSubmit = async () => {
+    if (!kmInput || !vehicleActuel) return;
+    setSavingKm(true);
+    try {
+      const token = auth.getToken() ?? '';
+      const body = kmModal === 'DEPART'
+        ? { plate: vehicleActuel, kmDepart: Number(kmInput), statut: 'DEPART' }
+        : { plate: vehicleActuel, kmArrivee: Number(kmInput), statut: 'ARRIVEE' };
+      await fetch(`${API_URL}/vehicles/logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      setKmModal(null);
+      setKmInput('');
+    } catch {}
+    setSavingKm(false);
   };
 
   const envoyerSOS = async () => {
@@ -199,12 +276,12 @@ export default function AmbulanciePage() {
             {['EN SERVICE', 'PAUSE', 'FIN DE SERVICE'].map(s => (
               <button
                 key={s}
-                onClick={() => setStatut(s)}
+                onClick={() => s === 'FIN DE SERVICE' ? handleEndOfService() : setStatut(s)}
                 style={{
-                  background: statut === s ? '#14B8A6' : '#111622',
-                  border: '1px solid #1E2535',
+                  background: statut === s ? (s === 'FIN DE SERVICE' ? '#EF4444' : '#14B8A6') : '#111622',
+                  border: `1px solid ${s === 'FIN DE SERVICE' ? '#EF444440' : '#1E2535'}`,
                   borderRadius: '8px',
-                  color: statut === s ? 'white' : '#6B7A99',
+                  color: statut === s ? 'white' : (s === 'FIN DE SERVICE' ? '#EF4444' : '#6B7A99'),
                   padding: '6px 10px',
                   cursor: 'pointer',
                   fontSize: '10px',
@@ -299,6 +376,45 @@ export default function AmbulanciePage() {
           </div>
         </motion.div>
 
+        {/* MON VÉHICULE */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.28 }}
+          style={{ marginBottom: '20px' }}
+        >
+          <h2 style={{ fontSize: '15px', fontWeight: '700', marginBottom: '12px' }}>🚑 Mon véhicule</h2>
+          <div style={{ background: '#0D1017', border: '1px solid #3B82F640', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <motion.button
+              whileTap={{ scale: 0.97 }}
+              onClick={() => router.push('/pda/scan')}
+              style={{ background: '#3B82F615', border: '1px solid #3B82F640', borderRadius: '12px', padding: '14px', color: '#3B82F6', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            >
+              📷 Scanner QR véhicule
+            </motion.button>
+            {vehicleActuel && (
+              <div>
+                <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+                  <div style={{ fontSize: '11px', color: '#6B7A99', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '6px' }}>Véhicule affecté</div>
+                  <div style={{ fontSize: '28px', fontWeight: '900', fontFamily: 'DM Mono, monospace', color: '#3B82F6', background: '#3B82F610', border: '2px solid #3B82F640', borderRadius: '10px', padding: '8px 20px', display: 'inline-block', letterSpacing: '0.08em' }}>
+                    {vehicleActuel}
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <motion.button whileTap={{ scale: 0.96 }} onClick={() => { setKmModal('DEPART'); setKmInput(''); }}
+                    style={{ background: '#22C55E15', border: '1px solid #22C55E40', borderRadius: '10px', padding: '14px', color: '#22C55E', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+                    🟢 Km départ
+                  </motion.button>
+                  <motion.button whileTap={{ scale: 0.96 }} onClick={() => { setKmModal('ARRIVEE'); setKmInput(''); }}
+                    style={{ background: '#EF444415', border: '1px solid #EF444440', borderRadius: '10px', padding: '14px', color: '#EF4444', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+                    🔴 Km arrivée
+                  </motion.button>
+                </div>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
         {/* ACTIONS RAPIDES */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -313,7 +429,6 @@ export default function AmbulanciePage() {
               { label: 'Carte GPS', icon: '🗺️', color: '#14B8A6', path: '/map/ambulancier' },
               { label: 'Mes documents', icon: '📄', color: '#8B5CF6', path: '/ambulancier/documents' },
               { label: 'Signaler incident', icon: '⚠️', color: '#EF4444', path: '/ambulancier/incident' },
-              { label: 'Terminal PDA', icon: '📱', color: '#14B8A6', path: '/pda' },
             ].map(a => (
               <motion.button
                 key={a.label}
@@ -336,6 +451,39 @@ export default function AmbulanciePage() {
             ))}
           </div>
         </motion.div>
+
+        {/* MODAL KM */}
+        {kmModal && (
+          <div onClick={() => setKmModal(null)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000, padding: '0 0 24px' }}>
+            <div onClick={e => e.stopPropagation()}
+              style={{ background: '#0D1017', border: '1px solid #1E2535', borderRadius: '20px 20px 12px 12px', padding: '28px 24px', width: '100%', maxWidth: '480px' }}>
+              <div style={{ fontSize: '16px', fontWeight: '800', marginBottom: '6px' }}>
+                {kmModal === 'DEPART' ? '🟢 Kilométrage de départ' : '🔴 Kilométrage d\'arrivée'}
+              </div>
+              <div style={{ fontSize: '12px', color: '#6B7A99', fontFamily: 'monospace', marginBottom: '20px' }}>{vehicleActuel}</div>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={kmInput}
+                onChange={e => setKmInput(e.target.value)}
+                placeholder="Ex : 145 230"
+                autoFocus
+                style={{ width: '100%', boxSizing: 'border-box', background: '#111622', border: '2px solid #2A3348', borderRadius: '12px', color: '#E8ECF5', padding: '16px', fontSize: '24px', fontWeight: '700', fontFamily: 'DM Mono, monospace', outline: 'none', textAlign: 'center', marginBottom: '16px' }}
+              />
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <motion.button whileTap={{ scale: 0.97 }} onClick={handleKmSubmit} disabled={savingKm || !kmInput}
+                  style={{ flex: 1, background: savingKm ? '#1E2535' : 'linear-gradient(135deg, #14B8A6, #3B82F6)', color: savingKm ? '#6B7A99' : 'white', border: 'none', borderRadius: '12px', padding: '16px', fontSize: '15px', fontWeight: '800', cursor: savingKm || !kmInput ? 'not-allowed' : 'pointer' }}>
+                  {savingKm ? '⏳ Envoi...' : '✓ Valider'}
+                </motion.button>
+                <button onClick={() => setKmModal(null)}
+                  style={{ background: 'transparent', border: '1px solid #2A3348', borderRadius: '12px', color: '#6B7A99', padding: '16px 20px', cursor: 'pointer', fontSize: '14px' }}>
+                  Annuler
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* BOUTON SOS */}
         <motion.button
