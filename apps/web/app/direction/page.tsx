@@ -29,6 +29,8 @@ const menuItems = [
   { label: 'Régulation', icon: '🎛️', path: '/regulateur' },
   { label: 'Planning', icon: '📅', path: '/planning' },
   { label: 'Facturation', icon: '💶', path: '/direction/facturation' },
+  { label: 'Véhicules', icon: '🚑', path: '/direction/vehicules' },
+  { label: 'Employés', icon: '👥', path: '/direction/employes' },
   { label: 'Configuration', icon: '⚙️', path: '/direction/configuration' },
 ];
 
