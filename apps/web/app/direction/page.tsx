@@ -41,7 +41,7 @@ export default function DirectionPage() {
     { label: 'Missions aujourd\'hui', value: '—',   evolution: '', color: '#14B8A6', icon: '📋' },
     { label: 'Véhicules actifs',      value: '—',   evolution: '', color: '#3B82F6', icon: '🚑' },
     { label: 'Taux ponctualité',      value: '—',   evolution: '', color: '#F59E0B', icon: '⏱️' },
-    { label: 'Salariés en service',   value: '14',  evolution: '61%', color: '#8B5CF6', icon: '👥' },
+    { label: 'Employés',               value: '—',   evolution: '', color: '#8B5CF6', icon: '👥' },
     { label: 'Alertes actives',       value: '0',   evolution: '', color: '#EF4444', icon: '⚠️' },
   ]);
 
@@ -49,14 +49,17 @@ export default function DirectionPage() {
     try {
       const token = auth.getToken();
       const headers = { Authorization: `Bearer ${token}` };
-      const [vRes, mRes] = await Promise.all([
+      const [vRes, mRes, uRes] = await Promise.all([
         fetch(`${API_URL}/vehicles`, { headers }),
         fetch(`${API_URL}/missions`, { headers }),
+        fetch(`${API_URL}/auth/users`, { headers }),
       ]);
       const v = vRes.ok ? await vRes.json() : [];
       const m = mRes.ok ? await mRes.json() : [];
+      const u = uRes.ok ? await uRes.json() : [];
       const vArray = Array.isArray(v) ? v : [];
       const mArray = Array.isArray(m) ? m : [];
+      const uArray = Array.isArray(u) ? u : [];
 
       const actifs = vArray.filter((x: any) => x.status === 'AVAILABLE' || x.status === 'ON_MISSION').length;
       const total = vArray.length;
@@ -69,7 +72,7 @@ export default function DirectionPage() {
         { label: 'Missions aujourd\'hui', value: String(mArray.length),                                    evolution: '', color: '#14B8A6', icon: '📋' },
         { label: 'Véhicules actifs',      value: `${actifs}/${total}`,                                     evolution: `${total > 0 ? Math.round((actifs / total) * 100) : 0}%`, color: '#3B82F6', icon: '🚑' },
         { label: 'Taux ponctualité',      value: `${ponctualite}%`,                                        evolution: '', color: '#F59E0B', icon: '⏱️' },
-        { label: 'Salariés en service',   value: '14',                                                     evolution: '61%', color: '#8B5CF6', icon: '👥' },
+        { label: 'Employés',               value: String(uArray.length),                                    evolution: '', color: '#8B5CF6', icon: '👥' },
         { label: 'Alertes actives',       value: '0',                                                      evolution: '', color: '#EF4444', icon: '⚠️' },
       ]);
     } catch {}
