@@ -67,6 +67,7 @@ export default function AmbulanciePage() {
   const [kmModal,      setKmModal]      = useState<'DEPART' | 'ARRIVEE' | null>(null);
   const [kmInput,      setKmInput]      = useState('');
   const [savingKm,     setSavingKm]     = useState(false);
+  const [qrModalOpen,  setQrModalOpen]  = useState(false);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=ambulancier'); return; }
@@ -119,6 +120,35 @@ export default function AmbulanciePage() {
     }, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  // QR scanner — import dynamique pour éviter SSR
+  useEffect(() => {
+    if (!qrModalOpen) return;
+    let scanner: any;
+    import('html5-qrcode').then(({ Html5QrcodeScanner }) => {
+      scanner = new Html5QrcodeScanner(
+        'qr-reader-modal',
+        { fps: 10, qrbox: { width: 240, height: 240 }, rememberLastUsedCamera: true, supportedScanTypes: [0] },
+        false,
+      );
+      scanner.render(
+        (decodedText: string) => {
+          try {
+            const url = new URL(decodedText);
+            const plate = url.searchParams.get('vehicle');
+            if (plate) {
+              localStorage.setItem('vehicleActuel', plate);
+              setVehicleActuel(plate);
+              scanner.clear().catch(() => {});
+              setQrModalOpen(false);
+            }
+          } catch {}
+        },
+        () => {},
+      );
+    });
+    return () => { if (scanner) scanner.clear().catch(() => {}); };
+  }, [qrModalOpen]);
 
   const loadData = async () => {
     const u = auth.getUser();
@@ -387,7 +417,7 @@ export default function AmbulanciePage() {
           <div style={{ background: '#0D1017', border: '1px solid #3B82F640', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <motion.button
               whileTap={{ scale: 0.97 }}
-              onClick={() => router.push('/pda/scan')}
+              onClick={() => setQrModalOpen(true)}
               style={{ background: '#3B82F615', border: '1px solid #3B82F640', borderRadius: '12px', padding: '14px', color: '#3B82F6', fontSize: '14px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
             >
               📷 Scanner QR véhicule
@@ -481,6 +511,25 @@ export default function AmbulanciePage() {
                   Annuler
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL QR SCANNER */}
+        {qrModalOpen && (
+          <div style={{ position: 'fixed', inset: 0, background: '#000', zIndex: 2000, display: 'flex', flexDirection: 'column', fontFamily: 'DM Sans, sans-serif' }}>
+            <div style={{ background: '#0D1017', borderBottom: '1px solid #1E2535', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+              <div>
+                <div style={{ fontWeight: '700', fontSize: '15px', color: '#E8ECF5' }}>📷 Scanner QR véhicule</div>
+                <div style={{ fontSize: '11px', color: '#6B7A99', marginTop: '2px' }}>Pointez la caméra vers le QR code</div>
+              </div>
+              <button onClick={() => setQrModalOpen(false)}
+                style={{ background: '#1E2535', border: 'none', borderRadius: '8px', color: '#6B7A99', padding: '8px 14px', cursor: 'pointer', fontSize: '13px', fontWeight: '600' }}>
+                ✕ Fermer
+              </button>
+            </div>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', color: '#E8ECF5' }}>
+              <div id="qr-reader-modal" style={{ width: '100%', maxWidth: '380px' }} />
             </div>
           </div>
         )}
