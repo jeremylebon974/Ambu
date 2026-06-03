@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { auth } from '../../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
@@ -116,7 +116,7 @@ function VehicleKmForm({ plate }: { plate: string }) {
 }
 
 // ── PAGE ─────────────────────────────────────────────────────────────────────
-export default function PdaScanPage() {
+function ScanContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
   const vehiclePlate = searchParams.get('vehicle');
@@ -572,5 +572,13 @@ Si un champ n'est pas visible, mets null. Réponds UNIQUEMENT avec le JSON.`,
         )}
       </div>
     </div>
+  );
+}
+
+export default function PdaScanPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#07090f' }} />}>
+      <ScanContent />
+    </Suspense>
   );
 }
