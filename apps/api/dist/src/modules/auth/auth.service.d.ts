@@ -47,14 +47,14 @@ export declare class AuthService {
         organizationId: string;
         organization: {
             id: string;
+            email: string | null;
+            isActive: boolean;
+            phone: string | null;
+            createdAt: Date;
+            updatedAt: Date;
             name: string;
             siret: string | null;
             address: string | null;
-            phone: string | null;
-            email: string | null;
-            isActive: boolean;
-            createdAt: Date;
-            updatedAt: Date;
             metadata: import("@prisma/client/runtime/client").JsonValue | null;
         };
     }>;
@@ -65,5 +65,8 @@ export declare class AuthService {
         lastName: string;
         role: import("../../../generated/prisma/enums").UserRole;
     }[]>;
+    deleteUser(id: string, requesterId: string): Promise<{
+        message: string;
+    }>;
     private generateTokens;
 }

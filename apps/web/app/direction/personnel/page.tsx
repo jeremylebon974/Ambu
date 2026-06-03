@@ -286,7 +286,7 @@ export default function DirectionPersonnelPage() {
                       fontWeight: '700',
                     }}>{u.role}</span>
                   </td>
-                  <td style={{ padding: '14px 16px' }}>
+                  <td style={{ padding: '14px 16px', display: 'flex', gap: '8px', alignItems: 'center' }}>
                     <button
                       onClick={() => router.push('/planning')}
                       style={{
@@ -301,6 +301,30 @@ export default function DirectionPersonnelPage() {
                         fontFamily: 'DM Sans, sans-serif',
                       }}
                     >📅 Planning</button>
+                    {u.role !== 'SUPER_ADMIN' && (
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`Supprimer ${u.firstName} ${u.lastName} ?`)) return;
+                          const token = auth.getToken();
+                          await fetch(`${API_URL}/auth/users/${u.id}`, {
+                            method: 'DELETE',
+                            headers: { Authorization: `Bearer ${token}` },
+                          });
+                          await loadUsers();
+                        }}
+                        style={{
+                          background: '#EF444415',
+                          border: '1px solid #EF444430',
+                          borderRadius: '6px',
+                          color: '#EF4444',
+                          padding: '5px 12px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: '600',
+                          fontFamily: 'DM Sans, sans-serif',
+                        }}
+                      >🗑 Supprimer</button>
+                    )}
                   </td>
                 </tr>
               ))}

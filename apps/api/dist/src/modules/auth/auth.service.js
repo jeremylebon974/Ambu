@@ -125,6 +125,15 @@ let AuthService = AuthService_1 = class AuthService {
             orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
         });
     }
+    async deleteUser(id, requesterId) {
+        const target = await this.prisma.user.findUnique({ where: { id } });
+        if (!target)
+            throw new common_1.NotFoundException('Utilisateur introuvable');
+        if (target.id === requesterId)
+            throw new common_1.ForbiddenException('Impossible de supprimer son propre compte');
+        await this.prisma.user.delete({ where: { id } });
+        return { message: 'Utilisateur supprimé' };
+    }
     async generateTokens(user) {
         const payload = { sub: user.id, email: user.email, role: user.role, organizationId: user.organizationId };
         const [accessToken, refreshToken] = await Promise.all([

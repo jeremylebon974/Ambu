@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, NotFoundException, ForbiddenException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import { LoginDto } from './dto/login.dto';
@@ -84,6 +84,14 @@ export class AuthService {
       select: { id: true, firstName: true, lastName: true, role: true, email: true },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     });
+  }
+
+  async deleteUser(id: string, requesterId: string) {
+    const target = await this.prisma.user.findUnique({ where: { id } });
+    if (!target) throw new NotFoundException('Utilisateur introuvable');
+    if (target.id === requesterId) throw new ForbiddenException('Impossible de supprimer son propre compte');
+    await this.prisma.user.delete({ where: { id } });
+    return { message: 'Utilisateur supprimé' };
   }
 
   private async generateTokens(user: any) {

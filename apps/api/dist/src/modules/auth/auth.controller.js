@@ -19,6 +19,8 @@ const login_dto_1 = require("./dto/login.dto");
 const register_dto_1 = require("./dto/register.dto");
 const refresh_dto_1 = require("./dto/refresh.dto");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
+const roles_guard_1 = require("./guards/roles.guard");
+const roles_decorator_1 = require("./decorators/roles.decorator");
 const public_decorator_1 = require("./decorators/public.decorator");
 let AuthController = class AuthController {
     constructor(authService) {
@@ -41,6 +43,9 @@ let AuthController = class AuthController {
     }
     async listUsers(req) {
         return this.authService.listUsers(req.user.organizationId);
+    }
+    async deleteUser(id, req) {
+        return this.authService.deleteUser(id, req.user.id);
     }
 };
 exports.AuthController = AuthController;
@@ -97,6 +102,17 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "listUsers", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
+    (0, roles_decorator_1.Roles)('ADMIN', 'SUPER_ADMIN'),
+    (0, common_1.Delete)('users/:id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.OK),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "deleteUser", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])
