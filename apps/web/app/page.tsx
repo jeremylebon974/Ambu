@@ -29,7 +29,7 @@ const portails = [
   },
   {
     id: 'ambulancier',
-    titre: 'Ambulancier',
+    titre: 'Employé',
     sousTitre: 'Terminal terrain PDA',
     emoji: '🚑',
     description: 'Missions, navigation, signatures, statuts temps réel, communication régulation.',
@@ -290,23 +290,6 @@ export default function HomePage() {
             {mounted ? time.toLocaleTimeString('fr-FR') : ''}
           </div>
 
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => router.push('/login')}
-            style={{
-              background: 'linear-gradient(135deg, #14B8A6, #3B82F6)',
-              border: 'none',
-              borderRadius: '8px',
-              color: 'white',
-              padding: '8px 20px',
-              cursor: 'pointer',
-              fontWeight: '600',
-              fontSize: '13px',
-            }}
-          >
-            Connexion
-          </motion.button>
         </div>
       </motion.header>
 
