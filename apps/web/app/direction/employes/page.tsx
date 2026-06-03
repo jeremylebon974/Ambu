@@ -1,31 +1,32 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 type User = { id: string; firstName: string; lastName: string; email: string; role: string; avatar?: string };
+type Tab  = 'missions' | 'km' | 'incidents' | 'connexions';
 
 const ROLE_COLOR: Record<string, string> = {
-  SUPER_ADMIN:  '#EF4444',
-  ADMIN:        '#F59E0B',
-  REGULATEUR:   '#3B82F6',
-  AMBULANCIER:  '#14B8A6',
-  COMPTABLE:    '#8B5CF6',
-  PATIENT:      '#6B7A99',
+  SUPER_ADMIN: '#EF4444', ADMIN: '#F59E0B', REGULATEUR: '#3B82F6',
+  AMBULANCIER: '#14B8A6', COMPTABLE: '#8B5CF6', PATIENT: '#6B7A99',
+};
+
+const ROLE_ICON: Record<string, string> = {
+  AMBULANCIER: '🩺', REGULATEUR: '🎛️', ADMIN: '⚙️', SUPER_ADMIN: '🔑', COMPTABLE: '📊',
 };
 
 const menuItems = [
-  { label: 'Vue globale',  icon: '📊', path: '/direction' },
-  { label: 'Régulation',   icon: '🎛️', path: '/regulateur' },
-  { label: 'Planning',     icon: '📅', path: '/planning' },
-  { label: 'Facturation',  icon: '💶', path: '/direction/facturation' },
-  { label: 'Véhicules',    icon: '🚑', path: '/direction/vehicules' },
-  { label: 'Employés',     icon: '👥', path: '/direction/employes', active: true },
-  { label: 'Configuration',icon: '⚙️', path: '/direction/configuration' },
+  { label: 'Vue globale',   icon: '📊', path: '/direction' },
+  { label: 'Régulation',    icon: '🎛️', path: '/regulateur' },
+  { label: 'Planning',      icon: '📅', path: '/planning' },
+  { label: 'Facturation',   icon: '💶', path: '/direction/facturation' },
+  { label: 'Véhicules',     icon: '🚑', path: '/direction/vehicules' },
+  { label: 'Employés',      icon: '👥', path: '/direction/employes', active: true },
+  { label: 'Configuration', icon: '⚙️', path: '/direction/configuration' },
 ];
 
 function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
@@ -43,35 +44,221 @@ function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?:
   );
 }
 
+async function safeFetch(url: string, token: string): Promise<any[]> {
+  try {
+    const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : [];
+  } catch { return []; }
+}
+
+function fmt(dt: string | undefined, mode: 'date' | 'time' | 'datetime' = 'datetime'): string {
+  if (!dt) return '—';
+  const d = new Date(dt);
+  if (mode === 'date')     return d.toLocaleDateString('fr-FR');
+  if (mode === 'time')     return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function duration(start: string, end?: string): string {
+  if (!start || !end) return '—';
+  const diff = new Date(end).getTime() - new Date(start).getTime();
+  const m = Math.round(diff / 60000);
+  if (m < 60) return `${m} min`;
+  return `${Math.floor(m / 60)}h${String(m % 60).padStart(2, '0')}`;
+}
+
+const TABS: { key: Tab; label: string; icon: string }[] = [
+  { key: 'missions',   label: 'Missions',    icon: '📋' },
+  { key: 'km',         label: 'Kilométrage', icon: '🛣️' },
+  { key: 'incidents',  label: 'Incidents',   icon: '⚠️' },
+  { key: 'connexions', label: 'Connexions',  icon: '📡' },
+];
+
+// ── EMPTY STATE ───────────────────────────────────────────────────────────────
+function EmptyState() {
+  return <div style={{ textAlign: 'center', padding: '40px', color: '#6B7A99', fontSize: '13px' }}>Aucune donnée disponible</div>;
+}
+
+// ── TAB CONTENTS ──────────────────────────────────────────────────────────────
+function MissionsTab({ data }: { data: any[] }) {
+  if (!data.length) return <EmptyState />;
+  return (
+    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead>
+        <tr style={{ borderBottom: '1px solid #1E2535' }}>
+          {['Date', 'Heure', 'Patient', 'Départ → Arrivée', 'Statut', 'Durée'].map(h => (
+            <th key={h} style={thStyle}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((m, i) => (
+          <tr key={m.id ?? i} style={{ borderBottom: '1px solid #111622' }}>
+            <td style={tdStyle}>{fmt(m.scheduledAt ?? m.createdAt, 'date')}</td>
+            <td style={tdStyle}>{fmt(m.scheduledAt ?? m.startedAt, 'time')}</td>
+            <td style={tdStyle}>{m.patient ? `${m.patient.lastName ?? ''} ${m.patient.firstName ?? ''}`.trim() : '—'}</td>
+            <td style={{ ...tdStyle, fontSize: '12px', maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.address ?? '—'}</td>
+            <td style={tdStyle}>
+              <span style={{ background: '#14B8A620', color: '#14B8A6', border: '1px solid #14B8A640', padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
+                {m.status ?? '—'}
+              </span>
+            </td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#14B8A6' }}>{duration(m.startedAt, m.completedAt)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function KmTab({ data }: { data: any[] }) {
+  if (!data.length) return <EmptyState />;
+  return (
+    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead>
+        <tr style={{ borderBottom: '1px solid #1E2535' }}>
+          {['Date', 'Véhicule', 'Km départ', 'Km arrivée', 'Km parcourus', 'Statut'].map(h => (
+            <th key={h} style={thStyle}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((l, i) => {
+          const parcourus = l.kmArrivee && l.kmDepart ? l.kmArrivee - l.kmDepart : null;
+          return (
+            <tr key={l.id ?? i} style={{ borderBottom: '1px solid #111622' }}>
+              <td style={tdStyle}>{fmt(l.date ?? l.createdAt, 'datetime')}</td>
+              <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#14B8A6', fontWeight: '700' }}>{l.vehicle?.plate ?? l.vehicleId ?? '—'}</td>
+              <td style={{ ...tdStyle, fontFamily: 'monospace' }}>{l.kmDepart?.toLocaleString('fr-FR') ?? '—'}</td>
+              <td style={{ ...tdStyle, fontFamily: 'monospace' }}>{l.kmArrivee?.toLocaleString('fr-FR') ?? '—'}</td>
+              <td style={{ ...tdStyle, fontFamily: 'monospace', color: parcourus ? '#22C55E' : '#6B7A99', fontWeight: '700' }}>
+                {parcourus !== null ? `+${parcourus.toLocaleString('fr-FR')} km` : '—'}
+              </td>
+              <td style={tdStyle}>
+                <span style={{ background: l.statut === 'TERMINE' ? '#22C55E20' : '#F59E0B20', color: l.statut === 'TERMINE' ? '#22C55E' : '#F59E0B', border: `1px solid ${l.statut === 'TERMINE' ? '#22C55E' : '#F59E0B'}40`, padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
+                  {l.statut ?? 'EN_COURS'}
+                </span>
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  );
+}
+
+function IncidentsTab({ data }: { data: any[] }) {
+  if (!data.length) return <EmptyState />;
+  return (
+    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead>
+        <tr style={{ borderBottom: '1px solid #1E2535' }}>
+          {['Date', 'Type', 'Description'].map(h => (
+            <th key={h} style={thStyle}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((inc, i) => (
+          <tr key={inc.id ?? i} style={{ borderBottom: '1px solid #111622' }}>
+            <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{fmt(inc.createdAt ?? inc.date, 'datetime')}</td>
+            <td style={tdStyle}>
+              <span style={{ background: '#EF444420', color: '#EF4444', border: '1px solid #EF444440', padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
+                {inc.type ?? '—'}
+              </span>
+            </td>
+            <td style={{ ...tdStyle, color: '#6B7A99', fontSize: '12px' }}>{inc.description ?? inc.message ?? '—'}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function ConnexionsTab({ data }: { data: any[] }) {
+  if (!data.length) return <EmptyState />;
+  return (
+    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <thead>
+        <tr style={{ borderBottom: '1px solid #1E2535' }}>
+          {['Date', 'Connexion', 'Déconnexion', 'Véhicule', 'Durée session'].map(h => (
+            <th key={h} style={thStyle}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((s, i) => (
+          <tr key={s.id ?? i} style={{ borderBottom: '1px solid #111622' }}>
+            <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{fmt(s.connectedAt ?? s.createdAt, 'date')}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#22C55E' }}>{fmt(s.connectedAt ?? s.createdAt, 'time')}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#EF4444' }}>{s.disconnectedAt ? fmt(s.disconnectedAt, 'time') : <span style={{ color: '#22C55E', fontSize: '11px' }}>● En ligne</span>}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#14B8A6', fontWeight: '700' }}>{s.vehicle?.plate ?? s.vehicleId ?? '—'}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#6B7A99' }}>{duration(s.connectedAt ?? s.createdAt, s.disconnectedAt)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+// ── PAGE ──────────────────────────────────────────────────────────────────────
 export default function EmployesPage() {
   const router  = useRouter();
+
   const [users,   setUsers]   = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [search,  setSearch]  = useState('');
+
+  // Modal historique
+  const [histUser,    setHistUser]    = useState<User | null>(null);
+  const [histTab,     setHistTab]     = useState<Tab>('missions');
+  const [histLoading, setHistLoading] = useState(false);
+  const [histData, setHistData] = useState<{ missions: any[]; km: any[]; incidents: any[]; connexions: any[] }>({
+    missions: [], km: [], incidents: [], connexions: [],
+  });
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
     fetch(`${API_URL}/auth/users`, { headers: { Authorization: `Bearer ${auth.getToken()}` } })
       .then(r => r.ok ? r.json() : [])
-      .then(data => { setUsers(Array.isArray(data) ? data : []); })
+      .then(data => setUsers(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (!histUser) return;
+    setHistLoading(true);
+    setHistTab('missions');
+    const t = auth.getToken();
+    Promise.all([
+      safeFetch(`${API_URL}/missions?userId=${histUser.id}`, t),
+      safeFetch(`${API_URL}/vehicles/logs?userId=${histUser.id}`, t),
+      safeFetch(`${API_URL}/pda/incidents?userId=${histUser.id}`, t),
+      safeFetch(`${API_URL}/pda/sessions?userId=${histUser.id}`, t),
+    ]).then(([missions, km, incidents, connexions]) => {
+      setHistData({ missions, km, incidents, connexions });
+    }).finally(() => setHistLoading(false));
+  }, [histUser]);
+
   const filtered = users.filter(u =>
-    search === '' ||
+    !search ||
     u.lastName.toLowerCase().includes(search.toLowerCase()) ||
     u.firstName.toLowerCase().includes(search.toLowerCase()) ||
     u.email.toLowerCase().includes(search.toLowerCase()) ||
     u.role.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Résumé par rôle
-  const byRole = users.reduce<Record<string, number>>((acc, u) => {
-    acc[u.role] = (acc[u.role] ?? 0) + 1;
-    return acc;
-  }, {});
-
+  const byRole      = users.reduce<Record<string, number>>((a, u) => { a[u.role] = (a[u.role] ?? 0) + 1; return a; }, {});
   const operationnels = (byRole['AMBULANCIER'] ?? 0) + (byRole['REGULATEUR'] ?? 0);
+
+  const tabDataMap: Record<Tab, any[]> = {
+    missions:   histData.missions,
+    km:         histData.km,
+    incidents:  histData.incidents,
+    connexions: histData.connexions,
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: '#07090F', display: 'flex', fontFamily: 'DM Sans, sans-serif', color: '#E8ECF5' }}>
@@ -100,8 +287,7 @@ export default function EmployesPage() {
       {/* CONTENU */}
       <div style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
 
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
-          style={{ marginBottom: '32px' }}>
+        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: '32px' }}>
           <h1 style={{ fontSize: '22px', fontWeight: '800', margin: '0 0 4px' }}>👥 Employés</h1>
           <p style={{ color: '#6B7A99', fontSize: '13px', margin: 0 }}>Annuaire et répartition des rôles</p>
         </motion.div>
@@ -109,10 +295,10 @@ export default function EmployesPage() {
         {/* RÉSUMÉ */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '32px' }}>
           {[
-            { label: 'Total employés',    value: users.length,            color: '#14B8A6', icon: '👥' },
-            { label: 'Opérationnels',     value: operationnels,           color: '#22C55E', icon: '🚑' },
-            { label: 'Ambulanciers',      value: byRole['AMBULANCIER'] ?? 0, color: '#3B82F6', icon: '🩺' },
-            { label: 'Régulateurs',       value: byRole['REGULATEUR']  ?? 0, color: '#8B5CF6', icon: '🎛️' },
+            { label: 'Total employés', value: users.length,               color: '#14B8A6', icon: '👥' },
+            { label: 'Opérationnels',  value: operationnels,              color: '#22C55E', icon: '🚑' },
+            { label: 'Ambulanciers',   value: byRole['AMBULANCIER'] ?? 0, color: '#3B82F6', icon: '🩺' },
+            { label: 'Régulateurs',    value: byRole['REGULATEUR']  ?? 0, color: '#8B5CF6', icon: '🎛️' },
           ].map((s, i) => (
             <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} whileHover={{ y: -4 }}
               style={{ background: '#0D1017', border: `1px solid ${s.color}20`, borderRadius: '14px', padding: '20px' }}>
@@ -130,59 +316,130 @@ export default function EmployesPage() {
         {/* TABLEAU */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
           style={{ background: '#0D1017', borderRadius: '14px', border: '1px solid #1E2535', overflow: 'hidden' }}>
-
           <div style={{ padding: '16px 20px', borderBottom: '1px solid #1E2535', display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '14px', fontWeight: '600' }}>Annuaire</span>
             <span style={{ fontSize: '12px', color: '#6B7A99' }}>({filtered.length})</span>
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher..."
-              style={{ marginLeft: 'auto', background: '#111622', border: '1px solid #2A3348', borderRadius: '8px', color: '#E8ECF5', padding: '6px 12px', fontSize: '13px', outline: 'none', width: '200px' }}
-            />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
+              style={{ marginLeft: 'auto', background: '#111622', border: '1px solid #2A3348', borderRadius: '8px', color: '#E8ECF5', padding: '6px 12px', fontSize: '13px', outline: 'none', width: '200px' }} />
           </div>
-
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #1E2535' }}>
-                {['Photo', 'Nom', 'Prénom', 'Email', 'Rôle', 'H/semaine'].map(h => (
-                  <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#6B7A99', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' }}>{h}</th>
+                {['Photo', 'Nom', 'Prénom', 'Email', 'Rôle', 'H/semaine', 'Actions'].map(h => (
+                  <th key={h} style={thStyle}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#6B7A99' }}>Chargement...</td></tr>
+                <tr><td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: '#6B7A99' }}>Chargement...</td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: '#6B7A99' }}>Aucun résultat</td></tr>
+                <tr><td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: '#6B7A99' }}>Aucun résultat</td></tr>
               ) : filtered.map(u => (
                 <tr key={u.id} style={{ borderBottom: '1px solid #111622' }}>
                   <td style={{ padding: '10px 16px' }}>
                     {u.avatar
                       ? <img src={u.avatar} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '2px solid #1E2535' }} />
                       : <div style={{ width: 40, height: 40, borderRadius: '50%', background: (ROLE_COLOR[u.role] ?? '#6B7A99') + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', border: `1px solid ${(ROLE_COLOR[u.role] ?? '#6B7A99')}30` }}>
-                          {u.role === 'AMBULANCIER' ? '🩺' : u.role === 'REGULATEUR' ? '🎛️' : u.role === 'ADMIN' ? '⚙️' : '👤'}
+                          {ROLE_ICON[u.role] ?? '👤'}
                         </div>
                     }
                   </td>
-                  <td style={{ padding: '12px 16px', fontWeight: '600', color: '#E8ECF5', fontSize: '13px' }}>{u.lastName}</td>
-                  <td style={{ padding: '12px 16px', color: '#E8ECF5', fontSize: '13px' }}>{u.firstName}</td>
-                  <td style={{ padding: '12px 16px', color: '#6B7A99', fontSize: '12px', fontFamily: 'monospace' }}>{u.email}</td>
-                  <td style={{ padding: '12px 16px' }}>
-                    <span style={{
-                      background: (ROLE_COLOR[u.role] ?? '#6B7A99') + '20',
-                      color:       ROLE_COLOR[u.role] ?? '#6B7A99',
-                      border:     `1px solid ${(ROLE_COLOR[u.role] ?? '#6B7A99')}40`,
-                      padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '600',
-                    }}>{u.role}</span>
+                  <td style={{ ...tdStyle, fontWeight: '600' }}>{u.lastName}</td>
+                  <td style={tdStyle}>{u.firstName}</td>
+                  <td style={{ ...tdStyle, color: '#6B7A99', fontSize: '12px', fontFamily: 'monospace' }}>{u.email}</td>
+                  <td style={tdStyle}>
+                    <span style={{ background: (ROLE_COLOR[u.role] ?? '#6B7A99') + '20', color: ROLE_COLOR[u.role] ?? '#6B7A99', border: `1px solid ${(ROLE_COLOR[u.role] ?? '#6B7A99')}40`, padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '600' }}>
+                      {u.role}
+                    </span>
                   </td>
-                  <td style={{ padding: '12px 16px', color: '#6B7A99', fontSize: '13px', fontFamily: 'monospace' }}>—</td>
+                  <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#6B7A99' }}>—</td>
+                  <td style={{ padding: '10px 16px' }}>
+                    <button onClick={() => setHistUser(u)}
+                      style={{ background: '#3B82F620', color: '#3B82F6', border: '1px solid #3B82F640', borderRadius: '6px', padding: '5px 12px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>
+                      📋 Voir historique
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </motion.div>
       </div>
+
+      {/* ── MODAL HISTORIQUE ─────────────────────────────────────────── */}
+      <AnimatePresence>
+        {histUser && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={() => setHistUser(null)}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '24px' }}>
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: 'spring', damping: 25 }}
+              onClick={e => e.stopPropagation()}
+              style={{ background: '#07090F', border: '1px solid #1E2535', borderRadius: '20px', width: '90vw', maxWidth: '900px', maxHeight: '85vh', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
+              {/* Header modal */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px', padding: '24px 28px', borderBottom: '1px solid #1E2535', flexShrink: 0 }}>
+                {histUser.avatar
+                  ? <img src={histUser.avatar} alt="" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', border: '2px solid #1E2535' }} />
+                  : <div style={{ width: 48, height: 48, borderRadius: '50%', background: (ROLE_COLOR[histUser.role] ?? '#6B7A99') + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+                      {ROLE_ICON[histUser.role] ?? '👤'}
+                    </div>
+                }
+                <div>
+                  <div style={{ fontSize: '17px', fontWeight: '800' }}>{histUser.firstName} {histUser.lastName}</div>
+                  <div style={{ fontSize: '12px', color: '#6B7A99', fontFamily: 'monospace' }}>{histUser.email}</div>
+                </div>
+                <span style={{ marginLeft: '8px', background: (ROLE_COLOR[histUser.role] ?? '#6B7A99') + '20', color: ROLE_COLOR[histUser.role] ?? '#6B7A99', border: `1px solid ${(ROLE_COLOR[histUser.role] ?? '#6B7A99')}40`, padding: '4px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '600' }}>
+                  {histUser.role}
+                </span>
+                <button onClick={() => setHistUser(null)} style={{ marginLeft: 'auto', background: 'transparent', border: '1px solid #1E2535', borderRadius: '8px', color: '#6B7A99', padding: '6px 12px', cursor: 'pointer', fontSize: '13px' }}>✕ Fermer</button>
+              </div>
+
+              {/* Onglets */}
+              <div style={{ display: 'flex', borderBottom: '1px solid #1E2535', flexShrink: 0, background: '#0D1017' }}>
+                {TABS.map(t => (
+                  <button key={t.key} onClick={() => setHistTab(t.key)}
+                    style={{ flex: 1, padding: '14px', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', fontWeight: histTab === t.key ? '700' : '400', color: histTab === t.key ? '#14B8A6' : '#6B7A99', borderBottom: histTab === t.key ? '2px solid #14B8A6' : '2px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'DM Sans, sans-serif' }}>
+                    <span>{t.icon}</span> {t.label}
+                    {tabDataMap[t.key].length > 0 && (
+                      <span style={{ background: '#14B8A620', color: '#14B8A6', borderRadius: '10px', padding: '1px 6px', fontSize: '11px', fontWeight: '700' }}>
+                        {tabDataMap[t.key].length}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* Contenu onglet */}
+              <div style={{ flex: 1, overflowY: 'auto', background: '#07090F' }}>
+                {histLoading ? (
+                  <div style={{ textAlign: 'center', padding: '48px', color: '#6B7A99', fontSize: '13px' }}>Chargement...</div>
+                ) : (
+                  <AnimatePresence mode="wait">
+                    <motion.div key={histTab} initial={{ opacity: 0, x: 8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -8 }} transition={{ duration: 0.15 }}>
+                      {histTab === 'missions'   && <MissionsTab   data={histData.missions}   />}
+                      {histTab === 'km'         && <KmTab         data={histData.km}         />}
+                      {histTab === 'incidents'  && <IncidentsTab  data={histData.incidents}  />}
+                      {histTab === 'connexions' && <ConnexionsTab data={histData.connexions} />}
+                    </motion.div>
+                  </AnimatePresence>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+
+const thStyle: React.CSSProperties = {
+  padding: '10px 16px', textAlign: 'left', color: '#6B7A99', fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', whiteSpace: 'nowrap',
+};
+const tdStyle: React.CSSProperties = {
+  padding: '10px 16px', color: '#E8ECF5', fontSize: '13px',
+};
