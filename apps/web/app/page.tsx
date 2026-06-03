@@ -111,10 +111,9 @@ export default function HomePage() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [liveStats, setLiveStats] = useState([
-    { label: 'Véhicules actifs',     value: '—',  icon: '🚑', color: '#14B8A6' },
+    { label: 'Véhicules actifs',     value: '—', icon: '🚑', color: '#14B8A6' },
     { label: 'Missions aujourd\'hui', value: '—', icon: '📋', color: '#3B82F6' },
-    { label: 'Salariés',             value: '23', icon: '👥', color: '#F59E0B' },
-    { label: 'Ponctualité',          value: '—',  icon: '⏱️', color: '#22C55E' },
+    { label: 'Ponctualité',          value: '—', icon: '⏱️', color: '#22C55E' },
   ]);
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 300], [0, -50]);
@@ -166,10 +165,9 @@ export default function HomePage() {
         const ponctualite = m.length > 0 ? Math.round((completed / m.length) * 100) : 0;
 
         setLiveStats([
-          { label: 'Véhicules actifs',     value: actifs > 0 ? String(actifs) : '—',          icon: '🚑', color: '#14B8A6' },
-          { label: 'Missions aujourd\'hui', value: m.length > 0 ? String(m.length) : '—',      icon: '📋', color: '#3B82F6' },
-          { label: 'Salariés',             value: '23',                                          icon: '👥', color: '#F59E0B' },
-          { label: 'Ponctualité',          value: m.length > 0 ? `${ponctualite}%` : '—',      icon: '⏱️', color: '#22C55E' },
+          { label: 'Véhicules actifs',     value: actifs > 0 ? String(actifs) : '—',         icon: '🚑', color: '#14B8A6' },
+          { label: 'Missions aujourd\'hui', value: m.length > 0 ? String(m.length) : '—',     icon: '📋', color: '#3B82F6' },
+          { label: 'Ponctualité',          value: m.length > 0 ? `${ponctualite}%` : '—',     icon: '⏱️', color: '#22C55E' },
         ]);
       } catch {
         // garde les valeurs '—' par défaut
@@ -349,7 +347,7 @@ export default function HomePage() {
                 letterSpacing: '-0.03em',
               }}
             >
-              La régulation ambulance
+              Le transport sanitaire
               <br />
               <span style={{
                 background: 'linear-gradient(135deg, #14B8A6 0%, #3B82F6 50%, #8B5CF6 100%)',
@@ -383,7 +381,7 @@ export default function HomePage() {
               transition={{ delay: 0.6 }}
               style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
+                gridTemplateColumns: 'repeat(3, 1fr)',
                 gap: '12px',
                 marginBottom: '80px',
               }}
