@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { auth } from '../../lib/auth';
 
@@ -27,7 +27,7 @@ function LogoViesionnaire({ height = 36, onClick }: { height?: number; onClick?:
   );
 }
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
@@ -206,5 +206,13 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#07090f' }} />}>
+      <LoginContent />
+    </Suspense>
   );
 }
