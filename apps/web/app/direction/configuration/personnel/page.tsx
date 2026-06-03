@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { auth } from '../../../../lib/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL       = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/drcipztzo/image/upload';
+const UPLOAD_PRESET  = 'HoldingBSC';
 
 const INITIAL_FORM = {
   lastName: '', firstName: '', email: '',
@@ -21,24 +23,40 @@ function validatePassword(pwd: string, confirm: string): string[] {
   return errors;
 }
 
-type User = { id: string; firstName: string; lastName: string; email: string; role: string };
+async function uploadToCloudinary(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error('Upload Cloudinary échoué');
+  const data = await res.json();
+  return data.secure_url as string;
+}
+
+type User = { id: string; firstName: string; lastName: string; email: string; role: string; avatar?: string };
+
+const ROLE_COLOR: Record<string, string> = {
+  SUPER_ADMIN: '#EF4444', ADMIN: '#F59E0B', REGULATEUR: '#3B82F6',
+  AMBULANCIER: '#14B8A6', COMPTABLE: '#8B5CF6', PATIENT: '#6B7A99',
+};
 
 export default function PersonnelPage() {
-  const [users,       setUsers]       = useState<User[]>([]);
+  const [users,        setUsers]        = useState<User[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
-  const [form,        setForm]        = useState(INITIAL_FORM);
-  const [pwdErrors,   setPwdErrors]   = useState<string[]>([]);
-  const [status,      setStatus]      = useState<{ ok: boolean; msg: string } | null>(null);
-  const [submitting,  setSubmitting]  = useState(false);
+  const [form,         setForm]         = useState(INITIAL_FORM);
+  const [photo,        setPhoto]        = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [pwdErrors,    setPwdErrors]    = useState<string[]>([]);
+  const [status,       setStatus]       = useState<{ ok: boolean; msg: string } | null>(null);
+  const [submitting,   setSubmitting]   = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const token = () => auth.getToken();
 
   const loadUsers = async () => {
     setLoadingUsers(true);
     try {
-      const res = await fetch(`${API_URL}/auth/users`, {
-        headers: { Authorization: `Bearer ${token()}` },
-      });
+      const res = await fetch(`${API_URL}/auth/users`, { headers: { Authorization: `Bearer ${token()}` } });
       if (res.ok) setUsers(await res.json());
     } finally {
       setLoadingUsers(false);
@@ -49,12 +67,15 @@ export default function PersonnelPage() {
 
   const set = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setPhoto(file);
+    setPhotoPreview(file ? URL.createObjectURL(file) : null);
+  };
+
   const handleDelete = async (u: User) => {
     if (!confirm(`Supprimer ${u.firstName} ${u.lastName} ?`)) return;
-    await fetch(`${API_URL}/auth/users/${u.id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token()}` },
-    });
+    await fetch(`${API_URL}/auth/users/${u.id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token()}` } });
     loadUsers();
   };
 
@@ -69,20 +90,28 @@ export default function PersonnelPage() {
     }
     setSubmitting(true);
     try {
+      let avatar: string | undefined;
+      if (photo) {
+        try { avatar = await uploadToCloudinary(photo); }
+        catch { setStatus({ ok: false, msg: 'Erreur upload photo.' }); setSubmitting(false); return; }
+      }
+
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token()}` },
         body: JSON.stringify({
-          firstName: form.firstName,
-          lastName:  form.lastName,
-          email:     form.email,
-          password:  form.password,
-          role:      form.role,
+          firstName: form.firstName, lastName: form.lastName,
+          email: form.email, password: form.password,
+          role: form.role, ...(avatar ? { avatar } : {}),
         }),
       });
+
       if (res.ok) {
         setStatus({ ok: true, msg: `Compte créé pour ${form.firstName} ${form.lastName}.` });
         setForm(INITIAL_FORM);
+        setPhoto(null);
+        setPhotoPreview(null);
+        if (fileRef.current) fileRef.current.value = '';
         setPwdErrors([]);
         loadUsers();
       } else {
@@ -95,15 +124,6 @@ export default function PersonnelPage() {
     setSubmitting(false);
   };
 
-  const ROLE_COLOR: Record<string, string> = {
-    SUPER_ADMIN:  '#EF4444',
-    ADMIN:        '#F59E0B',
-    REGULATEUR:   '#3B82F6',
-    AMBULANCIER:  '#14B8A6',
-    COMPTABLE:    '#8B5CF6',
-    PATIENT:      '#6B7A99',
-  };
-
   return (
     <div>
       <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>👥 Personnel</h2>
@@ -111,7 +131,7 @@ export default function PersonnelPage() {
         Consultez les comptes existants et créez de nouveaux employés.
       </p>
 
-      {/* TABLEAU EMPLOYÉS */}
+      {/* TABLEAU */}
       <div style={{ background: '#0D1017', borderRadius: '12px', border: '1px solid #1E2535', overflow: 'hidden', marginBottom: '32px' }}>
         <div style={{ padding: '16px 20px', borderBottom: '1px solid #1E2535' }}>
           <span style={{ fontSize: '14px', fontWeight: '600', color: '#E8ECF5' }}>Comptes existants</span>
@@ -120,35 +140,40 @@ export default function PersonnelPage() {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ borderBottom: '1px solid #1E2535' }}>
-              {['Nom', 'Prénom', 'Email', 'Rôle', 'Actions'].map(h => (
+              {['Photo', 'Nom', 'Prénom', 'Email', 'Rôle', 'Actions'].map(h => (
                 <th key={h} style={{ padding: '12px 16px', textAlign: 'left', color: '#6B7A99', fontSize: '12px', fontWeight: '600', textTransform: 'uppercase' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {loadingUsers ? (
-              <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: '#6B7A99', fontSize: '13px' }}>Chargement...</td></tr>
+              <tr><td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#6B7A99', fontSize: '13px' }}>Chargement...</td></tr>
             ) : users.length === 0 ? (
-              <tr><td colSpan={5} style={{ padding: '24px', textAlign: 'center', color: '#6B7A99', fontSize: '13px' }}>Aucun compte</td></tr>
+              <tr><td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: '#6B7A99', fontSize: '13px' }}>Aucun compte</td></tr>
             ) : users.map(u => (
               <tr key={u.id} style={{ borderBottom: '1px solid #1E2535' }}>
+                <td style={{ padding: '10px 16px' }}>
+                  {u.avatar
+                    ? <img src={u.avatar} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '2px solid #1E2535' }} />
+                    : <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#1E2535', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>👤</div>
+                  }
+                </td>
                 <td style={{ padding: '12px 16px', color: '#E8ECF5', fontSize: '13px', fontWeight: '600' }}>{u.lastName}</td>
                 <td style={{ padding: '12px 16px', color: '#E8ECF5', fontSize: '13px' }}>{u.firstName}</td>
                 <td style={{ padding: '12px 16px', color: '#6B7A99', fontSize: '13px', fontFamily: 'monospace' }}>{u.email}</td>
                 <td style={{ padding: '12px 16px' }}>
                   <span style={{
                     background: (ROLE_COLOR[u.role] ?? '#6B7A99') + '20',
-                    color:       ROLE_COLOR[u.role] ?? '#6B7A99',
-                    border:     `1px solid ${(ROLE_COLOR[u.role] ?? '#6B7A99')}40`,
+                    color: ROLE_COLOR[u.role] ?? '#6B7A99',
+                    border: `1px solid ${(ROLE_COLOR[u.role] ?? '#6B7A99')}40`,
                     padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '600',
                   }}>{u.role}</span>
                 </td>
                 <td style={{ padding: '12px 16px' }}>
                   {u.role !== 'SUPER_ADMIN' && (
-                    <button
-                      onClick={() => handleDelete(u)}
-                      style={{ background: '#EF444420', color: '#EF4444', border: '1px solid #EF444440', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontSize: '12px' }}
-                    >Supprimer</button>
+                    <button onClick={() => handleDelete(u)} style={{ background: '#EF444420', color: '#EF4444', border: '1px solid #EF444440', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', fontSize: '12px' }}>
+                      Supprimer
+                    </button>
                   )}
                 </td>
               </tr>
@@ -157,9 +182,21 @@ export default function PersonnelPage() {
         </table>
       </div>
 
-      {/* FORMULAIRE CRÉATION */}
+      {/* FORMULAIRE */}
       <div style={{ fontSize: '15px', fontWeight: '700', marginBottom: '16px', color: '#E8ECF5' }}>+ Nouvel employé</div>
       <div style={{ background: '#0D1017', borderRadius: '12px', border: '1px solid #1E2535', padding: '24px', maxWidth: '640px' }}>
+
+        {/* Photo */}
+        <div style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {photoPreview
+            ? <img src={photoPreview} alt="" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '2px solid #14B8A6' }} />
+            : <div style={{ width: 80, height: 80, borderRadius: '50%', background: '#111622', border: '2px dashed #2A3348', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '28px' }}>👤</div>
+          }
+          <div>
+            <label style={labelStyle}>Photo (optionnel)</label>
+            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhotoChange} style={{ color: '#E8ECF5', fontSize: '13px' }} />
+          </div>
+        </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
           <div>
@@ -216,8 +253,7 @@ export default function PersonnelPage() {
             <input
               value={form.password}
               onChange={e => { set('password', e.target.value); setPwdErrors(validatePassword(e.target.value, form.confirmPassword)); }}
-              placeholder="Minimum 8 caractères"
-              type="password"
+              placeholder="Minimum 8 caractères" type="password"
               style={{ ...inputStyle, borderColor: pwdErrors.length > 0 ? '#EF4444' : '#2A3348' }}
             />
           </div>
@@ -226,8 +262,7 @@ export default function PersonnelPage() {
             <input
               value={form.confirmPassword}
               onChange={e => { set('confirmPassword', e.target.value); setPwdErrors(validatePassword(form.password, e.target.value)); }}
-              placeholder="Répéter le mot de passe"
-              type="password"
+              placeholder="Répéter le mot de passe" type="password"
               style={{ ...inputStyle, borderColor: pwdErrors.some(e => e.includes('correspondent')) ? '#EF4444' : '#2A3348' }}
             />
           </div>
@@ -246,9 +281,7 @@ export default function PersonnelPage() {
             border: `1px solid ${status.ok ? '#22C55E30' : '#EF444430'}`,
             borderRadius: '8px', padding: '10px 14px',
             fontSize: '13px', color: status.ok ? '#22C55E' : '#EF4444',
-          }}>
-            {status.msg}
-          </div>
+          }}>{status.msg}</div>
         )}
 
         <button

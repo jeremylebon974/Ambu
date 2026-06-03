@@ -24,7 +24,7 @@ export class VehiclesController {
         plate:          body.numero,
         model:          body.type,
         type:           body.type,
-        metadata:       { diplomeRequis: body.diplomeRequis, equipements: body.equipements },
+        metadata:       { diplomeRequis: body.diplomeRequis, equipements: body.equipements, ...(body.imageUrl ? { imageUrl: body.imageUrl } : {}) },
         organizationId: req.user.organizationId,
       },
       select: { id: true, plate: true, type: true, status: true, metadata: true },
