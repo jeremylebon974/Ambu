@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { auth } from '../../../../lib/auth';
 
@@ -33,10 +33,8 @@ export default function VehiculesPage() {
   const [loading,     setLoading]     = useState(true);
   const [newV,        setNewV]        = useState(INITIAL_NEW);
   const [photo,       setPhoto]       = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [adding,      setAdding]      = useState(false);
   const [qrVehicle,   setQrVehicle]   = useState<Vehicle | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const headers = () => ({
     'Content-Type': 'application/json',
@@ -54,12 +52,6 @@ export default function VehiculesPage() {
   };
 
   useEffect(() => { loadVehicles(); }, []);
-
-  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] ?? null;
-    setPhoto(file);
-    setPhotoPreview(file ? URL.createObjectURL(file) : null);
-  };
 
   const handleAdd = async () => {
     if (!newV.numero) return;
@@ -81,8 +73,6 @@ export default function VehiculesPage() {
         setVehicles(v => [...v, created]);
         setNewV(INITIAL_NEW);
         setPhoto(null);
-        setPhotoPreview(null);
-        if (fileRef.current) fileRef.current.value = '';
       }
     } finally {
       setAdding(false);
@@ -177,14 +167,17 @@ export default function VehiculesPage() {
 
         {/* Photo véhicule */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-          {photoPreview
-            ? <img src={photoPreview} alt="" style={{ width: 120, height: 80, objectFit: 'cover', borderRadius: '8px', border: '2px solid #14B8A6' }} />
-            : <div style={{ width: 120, height: 80, background: '#111622', borderRadius: '8px', border: '2px dashed #2A3348', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>🚑</div>
-          }
-          <div>
-            <div style={{ color: '#6B7A99', fontSize: '12px', marginBottom: '4px' }}>Photo du véhicule (optionnel)</div>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhotoChange} style={{ color: '#E8ECF5', fontSize: '13px' }} />
-          </div>
+          <label style={{ cursor: 'pointer', display: 'block' }}>
+            <div style={{ width: '120px', height: '80px', background: '#111622', border: '2px dashed #2A3348', borderRadius: '8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#6B7A99', fontSize: '12px', gap: '4px', overflow: 'hidden' }}>
+              {photo ? (
+                <img src={URL.createObjectURL(photo)} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
+              ) : (
+                <><span style={{ fontSize: '24px' }}>🚑</span><span>Ajouter photo</span></>
+              )}
+            </div>
+            <input type="file" accept="image/*" style={{ display: 'none' }} onChange={e => setPhoto(e.target.files?.[0] || null)} />
+          </label>
+          <div style={{ color: '#6B7A99', fontSize: '12px' }}>Photo du véhicule (optionnel)</div>
         </div>
 
         <button
