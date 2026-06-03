@@ -191,19 +191,6 @@ function LoginContent() {
           </button>
         </form>
 
-        <div style={{
-          marginTop: '24px',
-          padding: '14px',
-          background: '#111622',
-          borderRadius: '10px',
-          fontSize: '11px',
-          color: '#6b7a99',
-          fontFamily: 'DM Mono, monospace',
-        }}>
-          <div style={{ marginBottom: '4px', color: '#3a4560' }}>Comptes de test :</div>
-          <div>admin@viesionnaire.fr / Admin1234!</div>
-          <div>regulateur@viesionnaire.fr / Regul1234!</div>
-        </div>
       </div>
     </div>
   );
