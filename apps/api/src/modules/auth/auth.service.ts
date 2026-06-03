@@ -45,6 +45,7 @@ export class AuthService {
         lastName: dto.lastName,
         role: (dto.role ?? 'PATIENT') as any,
         organizationId: org.id,
+        ...(dto.avatar ? { avatar: dto.avatar } : {}),
       },
     });
 
@@ -81,7 +82,7 @@ export class AuthService {
   async listUsers(organizationId: string) {
     return this.prisma.user.findMany({
       where: { organizationId, isActive: true },
-      select: { id: true, firstName: true, lastName: true, role: true, email: true },
+      select: { id: true, firstName: true, lastName: true, role: true, email: true, avatar: true },
       orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
     });
   }

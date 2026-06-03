@@ -87,6 +87,7 @@ let AuthService = AuthService_1 = class AuthService {
                 lastName: dto.lastName,
                 role: (dto.role ?? 'PATIENT'),
                 organizationId: org.id,
+                ...(dto.avatar ? { avatar: dto.avatar } : {}),
             },
         });
         const tokens = await this.generateTokens(user);
@@ -121,7 +122,7 @@ let AuthService = AuthService_1 = class AuthService {
     async listUsers(organizationId) {
         return this.prisma.user.findMany({
             where: { organizationId, isActive: true },
-            select: { id: true, firstName: true, lastName: true, role: true, email: true },
+            select: { id: true, firstName: true, lastName: true, role: true, email: true, avatar: true },
             orderBy: [{ lastName: 'asc' }, { firstName: 'asc' }],
         });
     }

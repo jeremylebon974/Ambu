@@ -7,7 +7,7 @@ import { auth } from '../../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
-type User = { id: string; firstName: string; lastName: string; email: string; role: string; avatar?: string };
+type User = { id: string; firstName: string; lastName: string; email: string; role: string; avatar?: string; metadata?: { diplome?: string; contrat?: string; heuresSemaine?: number } };
 type Tab  = 'missions' | 'km' | 'incidents' | 'connexions';
 
 const ROLE_COLOR: Record<string, string> = {
@@ -313,58 +313,79 @@ export default function EmployesPage() {
           ))}
         </div>
 
-        {/* TABLEAU */}
+        {/* BARRE RECHERCHE */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
-          style={{ background: '#0D1017', borderRadius: '14px', border: '1px solid #1E2535', overflow: 'hidden' }}>
-          <div style={{ padding: '16px 20px', borderBottom: '1px solid #1E2535', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <span style={{ fontSize: '14px', fontWeight: '600' }}>Annuaire</span>
-            <span style={{ fontSize: '12px', color: '#6B7A99' }}>({filtered.length})</span>
-            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher..."
-              style={{ marginLeft: 'auto', background: '#111622', border: '1px solid #2A3348', borderRadius: '8px', color: '#E8ECF5', padding: '6px 12px', fontSize: '13px', outline: 'none', width: '200px' }} />
-          </div>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid #1E2535' }}>
-                {['Photo', 'Nom', 'Prénom', 'Email', 'Rôle', 'H/semaine', 'Actions'].map(h => (
-                  <th key={h} style={thStyle}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: '#6B7A99' }}>Chargement...</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={7} style={{ padding: '32px', textAlign: 'center', color: '#6B7A99' }}>Aucun résultat</td></tr>
-              ) : filtered.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid #111622' }}>
-                  <td style={{ padding: '10px 16px' }}>
-                    {u.avatar
-                      ? <img src={u.avatar} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', border: '2px solid #1E2535' }} />
-                      : <div style={{ width: 40, height: 40, borderRadius: '50%', background: (ROLE_COLOR[u.role] ?? '#6B7A99') + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px', border: `1px solid ${(ROLE_COLOR[u.role] ?? '#6B7A99')}30` }}>
-                          {ROLE_ICON[u.role] ?? '👤'}
-                        </div>
-                    }
-                  </td>
-                  <td style={{ ...tdStyle, fontWeight: '600' }}>{u.lastName}</td>
-                  <td style={tdStyle}>{u.firstName}</td>
-                  <td style={{ ...tdStyle, color: '#6B7A99', fontSize: '12px', fontFamily: 'monospace' }}>{u.email}</td>
-                  <td style={tdStyle}>
+          style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+          <span style={{ fontSize: '14px', fontWeight: '600' }}>Annuaire</span>
+          <span style={{ fontSize: '12px', color: '#6B7A99' }}>({filtered.length})</span>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher par nom, email, rôle..."
+            style={{ marginLeft: 'auto', background: '#0D1017', border: '1px solid #1E2535', borderRadius: '10px', color: '#E8ECF5', padding: '8px 14px', fontSize: '13px', outline: 'none', width: '260px' }} />
+        </motion.div>
+
+        {/* GRILLE CARTES */}
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '48px', color: '#6B7A99' }}>Chargement...</div>
+        ) : filtered.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '48px', color: '#6B7A99' }}>Aucun résultat</div>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+            {filtered.map((u, i) => (
+              <motion.div key={u.id}
+                initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }}
+                whileHover={{ y: -4, boxShadow: '0 8px 32px rgba(0,0,0,0.4)' }}
+                style={{ background: '#0D1017', border: '1px solid #1E2535', borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+                {/* Ligne photo + identité */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  {u.avatar
+                    ? <img src={u.avatar} alt="" style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '2px solid #1E2535', flexShrink: 0 }} />
+                    : <div style={{ width: 80, height: 80, borderRadius: '50%', background: (ROLE_COLOR[u.role] ?? '#6B7A99') + '20', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px', border: `1px solid ${(ROLE_COLOR[u.role] ?? '#6B7A99')}30`, flexShrink: 0 }}>
+                        {ROLE_ICON[u.role] ?? '👤'}
+                      </div>
+                  }
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontSize: '16px', fontWeight: '700', lineHeight: 1.2, marginBottom: '4px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {u.firstName} {u.lastName}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#6B7A99', fontFamily: 'monospace', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginBottom: '6px' }}>
+                      {u.email}
+                    </div>
                     <span style={{ background: (ROLE_COLOR[u.role] ?? '#6B7A99') + '20', color: ROLE_COLOR[u.role] ?? '#6B7A99', border: `1px solid ${(ROLE_COLOR[u.role] ?? '#6B7A99')}40`, padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '600' }}>
                       {u.role}
                     </span>
-                  </td>
-                  <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#6B7A99' }}>—</td>
-                  <td style={{ padding: '10px 16px' }}>
-                    <button onClick={() => setHistUser(u)}
-                      style={{ background: '#3B82F620', color: '#3B82F6', border: '1px solid #3B82F640', borderRadius: '6px', padding: '5px 12px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', whiteSpace: 'nowrap' }}>
-                      📋 Voir historique
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </motion.div>
+                  </div>
+                </div>
+
+                {/* Méta */}
+                {(u.metadata?.diplome || u.metadata?.contrat || u.metadata?.heuresSemaine) && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {u.metadata?.diplome && (
+                      <span style={{ background: '#3B82F610', color: '#3B82F6', border: '1px solid #3B82F620', padding: '2px 8px', borderRadius: '6px', fontSize: '11px' }}>
+                        🎓 {u.metadata.diplome}
+                      </span>
+                    )}
+                    {u.metadata?.contrat && (
+                      <span style={{ background: '#8B5CF610', color: '#8B5CF6', border: '1px solid #8B5CF620', padding: '2px 8px', borderRadius: '6px', fontSize: '11px' }}>
+                        📄 {u.metadata.contrat}
+                      </span>
+                    )}
+                    {u.metadata?.heuresSemaine && (
+                      <span style={{ background: '#F59E0B10', color: '#F59E0B', border: '1px solid #F59E0B20', padding: '2px 8px', borderRadius: '6px', fontSize: '11px' }}>
+                        ⏱️ {u.metadata.heuresSemaine}h/sem
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {/* Bouton historique */}
+                <button onClick={() => setHistUser(u)}
+                  style={{ width: '100%', background: '#14B8A620', color: '#14B8A6', border: '1px solid #14B8A640', borderRadius: '10px', padding: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', marginTop: 'auto' }}>
+                  📋 Historique
+                </button>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* ── MODAL HISTORIQUE ─────────────────────────────────────────── */}

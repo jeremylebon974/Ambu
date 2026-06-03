@@ -61,9 +61,17 @@ export declare class AuthService {
     listUsers(organizationId: string): Promise<{
         id: string;
         email: string;
+        passwordHash: string;
         firstName: string;
         lastName: string;
         role: import("../../../generated/prisma/enums").UserRole;
+        isActive: boolean;
+        refreshToken: string | null;
+        lastLoginAt: Date | null;
+        phone: string | null;
+        organizationId: string;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
     updateUser(id: string, dto: {
         firstName?: string;
