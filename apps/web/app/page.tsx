@@ -110,6 +110,7 @@ export default function HomePage() {
   const [mounted, setMounted] = useState(false);
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
   const [liveStats, setLiveStats] = useState([
     { label: 'Véhicules actifs',     value: '—', icon: '🚑', color: '#14B8A6' },
     { label: 'Missions aujourd\'hui', value: '—', icon: '📋', color: '#3B82F6' },
@@ -144,8 +145,14 @@ export default function HomePage() {
 
   useEffect(() => {
     setMounted(true);
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
     const timer = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('resize', checkMobile);
+    };
   }, []);
 
   useEffect(() => {
@@ -176,6 +183,132 @@ export default function HomePage() {
     fetchStats();
   }, []);
 
+  if (isMobile) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#03050A', fontFamily: '"DM Sans", sans-serif', color: '#E8ECF5' }}>
+        {/* Header mobile */}
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100,
+          background: 'rgba(3, 5, 10, 0.95)', backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(20, 184, 166, 0.1)',
+          padding: '0 16px', height: '56px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <LogoViesionnaire height={32} onClick={() => router.push('/')} />
+        </div>
+
+        <div style={{ paddingTop: '56px' }}>
+          {/* Hero mobile */}
+          <div style={{ padding: '32px 16px 24px', textAlign: 'center' }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              background: 'rgba(20, 184, 166, 0.08)', color: '#14B8A6',
+              border: '1px solid rgba(20, 184, 166, 0.2)', borderRadius: '20px',
+              padding: '5px 12px', fontSize: '10px', fontWeight: '600',
+              marginBottom: '20px', letterSpacing: '0.06em', textTransform: 'uppercase' as const,
+            }}>
+              <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#14B8A6' }} />
+              Intelligence Artificielle
+            </div>
+
+            <h1 style={{ fontSize: '28px', fontWeight: '900', marginBottom: '16px', lineHeight: '1.2', letterSpacing: '-0.02em' }}>
+              Le transport sanitaire
+              <br />
+              <span style={{
+                background: 'linear-gradient(135deg, #14B8A6 0%, #3B82F6 50%, #8B5CF6 100%)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+              }}>
+                réinventé par l'IA
+              </span>
+            </h1>
+
+            <p style={{ color: '#6B7A99', fontSize: '14px', lineHeight: '1.6', marginBottom: '24px' }}>
+              Dispatch intelligent, planning automatique et suivi terrain en temps réel.
+            </p>
+
+            {/* Stats mobile */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '32px' }}>
+              {liveStats.map(s => (
+                <div key={s.label} style={{
+                  background: 'rgba(13, 16, 23, 0.8)', border: `1px solid ${s.color}20`,
+                  borderRadius: '12px', padding: '14px 8px',
+                }}>
+                  <div style={{ fontSize: '18px', marginBottom: '4px' }}>{s.icon}</div>
+                  <div style={{ fontSize: '22px', fontWeight: '800', fontFamily: '"DM Mono", monospace', color: s.color }}>
+                    {s.value}
+                  </div>
+                  <div style={{ fontSize: '9px', color: '#6B7A99', marginTop: '2px' }}>{s.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Portails mobile */}
+          <div style={{ padding: '0 16px 32px' }}>
+            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+              <div style={{ fontSize: '10px', color: '#3A4560', textTransform: 'uppercase' as const, letterSpacing: '0.15em', fontWeight: '600', marginBottom: '6px' }}>
+                Accès par profil
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: '700', color: '#E8ECF5' }}>Choisissez votre espace</div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {portails.map(p => (
+                <div key={p.id} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <button
+                    onClick={() => router.push(p.path)}
+                    style={{
+                      background: 'rgba(13, 16, 23, 0.9)', border: `1px solid ${p.couleur}30`,
+                      borderRadius: '16px', padding: '20px', cursor: 'pointer',
+                      textAlign: 'left' as const, width: '100%',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '10px' }}>
+                      <div style={{
+                        width: '48px', height: '48px', background: p.couleur + '15',
+                        border: `1px solid ${p.couleur}30`, borderRadius: '14px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', flexShrink: 0,
+                      }}>{p.emoji}</div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: '800', fontSize: '18px', color: '#E8ECF5' }}>{p.titre}</div>
+                        <div style={{ fontSize: '11px', color: p.couleur, fontWeight: '600' }}>{p.sousTitre}</div>
+                      </div>
+                      <div style={{ color: p.couleur, fontSize: '18px' }}>→</div>
+                    </div>
+                    <p style={{ color: '#6B7A99', fontSize: '13px', lineHeight: '1.5', margin: '0 0 12px' }}>{p.description}</p>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' as const }}>
+                      {p.features.map(f => (
+                        <span key={f} style={{
+                          background: p.couleur + '10', color: p.couleur, border: `1px solid ${p.couleur}25`,
+                          borderRadius: '6px', padding: '3px 8px', fontSize: '11px', fontWeight: '600',
+                        }}>{f}</span>
+                      ))}
+                    </div>
+                  </button>
+                  {p.id === 'patient' && (
+                    <button
+                      onClick={() => router.push('/register')}
+                      style={{
+                        background: 'transparent', border: 'none', color: '#22C55E',
+                        cursor: 'pointer', fontSize: '13px', fontWeight: '600',
+                        textAlign: 'center', padding: '6px', fontFamily: 'DM Sans, sans-serif',
+                      }}
+                    >Pas encore de compte ? S'inscrire →</button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer mobile */}
+          <div style={{ borderTop: '1px solid #0D1017', padding: '16px', textAlign: 'center', color: '#3A4560', fontSize: '11px' }}>
+            © 2026 VIEsionnaire — Médical • Innovation • Humanité
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       ref={containerRef}
@@ -189,10 +322,10 @@ export default function HomePage() {
       }}
     >
       {/* LOGOS COINS */}
-      <img src="/AMBULANCES TAMATAVE.jpg"         alt="" style={{ position: 'fixed', top: '120px',    left: '20px',  width: '160px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
-      <img src="/AMBULANCES PAILLE EN QUEUE.jpg"  alt="" style={{ position: 'fixed', top: '120px',    right: '20px', width: '160px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
-      <img src="/AMBULANCES BRAS DE PONTHO.jpg"   alt="" style={{ position: 'fixed', bottom: '60px',  left: '20px',  width: '160px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
-      <img src="/AMBULANCES MASCAREIGNE.jpg"      alt="" style={{ position: 'fixed', bottom: '60px',  right: '20px', width: '160px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
+      <img src="/AMBULANCES TAMATAVE.jpg"         alt="" style={{ position: 'fixed', top: '120px',    left: '20px',  width: '220px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
+      <img src="/AMBULANCES PAILLE EN QUEUE.jpg"  alt="" style={{ position: 'fixed', top: '120px',    right: '20px', width: '220px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
+      <img src="/AMBULANCES BRAS DE PONTHO.jpg"   alt="" style={{ position: 'fixed', bottom: '60px',  left: '20px',  width: '220px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
+      <img src="/AMBULANCES MASCAREIGNE.jpg"      alt="" style={{ position: 'fixed', bottom: '60px',  right: '20px', width: '220px', opacity: 0.12, borderRadius: '8px', zIndex: 0, pointerEvents: 'none' }} />
 
       {/* FOND ANIMÉ */}
       <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
