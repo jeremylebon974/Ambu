@@ -5,31 +5,37 @@ import { auth } from '../../../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+const INITIAL_FORM = {
+  lastName: '', firstName: '', email: '',
+  diplome: 'DEA', contrat: 'CDI', heures: '35',
+  role: 'AMBULANCIER', password: '', confirmPassword: '',
+};
+
+function validatePassword(pwd: string, confirm: string): string[] {
+  const errors: string[] = [];
+  if (pwd.length < 8)            errors.push('8 caractères minimum');
+  if (!/[A-Z]/.test(pwd))        errors.push('1 majuscule requise');
+  if (!/[0-9]/.test(pwd))        errors.push('1 chiffre requis');
+  if (!/[@!#$%&*]/.test(pwd))    errors.push('1 caractère spécial requis (@!#$%&*)');
+  if (confirm && pwd !== confirm) errors.push('Les mots de passe ne correspondent pas');
+  return errors;
+}
+
 export default function PersonnelPage() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName,  setLastName]  = useState('');
-  const [access, setAccess] = useState({ email: '', password: '', confirmPassword: '', role: 'AMBULANCIER' });
-  const [pwdErrors,    setPwdErrors]    = useState<string[]>([]);
-  const [accessStatus, setAccessStatus] = useState<{ ok: boolean; msg: string } | null>(null);
-  const [submitting,   setSubmitting]   = useState(false);
+  const [form, setForm]           = useState(INITIAL_FORM);
+  const [pwdErrors, setPwdErrors] = useState<string[]>([]);
+  const [status, setStatus]       = useState<{ ok: boolean; msg: string } | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const validatePassword = (pwd: string, confirm: string): string[] => {
-    const errors: string[] = [];
-    if (pwd.length < 8)            errors.push('8 caractères minimum');
-    if (!/[A-Z]/.test(pwd))        errors.push('1 majuscule requise');
-    if (!/[0-9]/.test(pwd))        errors.push('1 chiffre requis');
-    if (!/[@!#$%&*]/.test(pwd))    errors.push('1 caractère spécial requis (@!#$%&*)');
-    if (confirm && pwd !== confirm) errors.push('Les mots de passe ne correspondent pas');
-    return errors;
-  };
+  const set = (field: string, value: string) => setForm(f => ({ ...f, [field]: value }));
 
-  const handleCreateAccess = async () => {
-    setAccessStatus(null);
-    const errors = validatePassword(access.password, access.confirmPassword);
+  const handleSubmit = async () => {
+    setStatus(null);
+    const errors = validatePassword(form.password, form.confirmPassword);
     setPwdErrors(errors);
     if (errors.length > 0) return;
-    if (!access.email || !firstName || !lastName) {
-      setAccessStatus({ ok: false, msg: 'Veuillez renseigner Nom, Prénom et Email.' });
+    if (!form.lastName || !form.firstName || !form.email) {
+      setStatus({ ok: false, msg: 'Veuillez renseigner Nom, Prénom et Email.' });
       return;
     }
     setSubmitting(true);
@@ -38,142 +44,155 @@ export default function PersonnelPage() {
       const res = await fetch(`${API_URL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ email: access.email, password: access.password, firstName, lastName, role: access.role }),
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName:  form.lastName,
+          email:     form.email,
+          password:  form.password,
+          role:      form.role,
+        }),
       });
       if (res.ok) {
-        setAccessStatus({ ok: true, msg: `Compte créé pour ${firstName} ${lastName}.` });
-        setAccess({ email: '', password: '', confirmPassword: '', role: 'AMBULANCIER' });
+        setStatus({ ok: true, msg: `Compte créé pour ${form.firstName} ${form.lastName}.` });
+        setForm(INITIAL_FORM);
         setPwdErrors([]);
       } else {
         const data = await res.json();
-        setAccessStatus({ ok: false, msg: data.message || 'Erreur lors de la création.' });
+        setStatus({ ok: false, msg: data.message || 'Erreur lors de la création.' });
       }
     } catch {
-      setAccessStatus({ ok: false, msg: 'Erreur réseau.' });
+      setStatus({ ok: false, msg: 'Erreur réseau.' });
     }
     setSubmitting(false);
   };
 
   return (
     <div>
-      <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>👥 Personnel</h2>
+      <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '8px' }}>👥 Nouvel employé</h2>
       <p style={{ color: '#6B7A99', fontSize: '13px', marginBottom: '24px' }}>
-        Importez ou saisissez votre liste de personnel avec leurs diplômes et contrats.
+        Créez le dossier et l'accès plateforme en une seule étape.
       </p>
 
-      {/* IMPORT */}
-      <div style={{ background: '#0D1017', borderRadius: '12px', border: '1px solid #1E2535', padding: '24px', marginBottom: '16px', textAlign: 'center' }}>
-        <div style={{ fontSize: '40px', marginBottom: '12px' }}>📤</div>
-        <div style={{ color: '#E8ECF5', fontSize: '15px', fontWeight: '600', marginBottom: '8px' }}>Importer votre liste personnel</div>
-        <div style={{ color: '#6B7A99', fontSize: '13px', marginBottom: '16px' }}>Format Excel ou CSV accepté — colonnes : Nom, Prénom, Diplôme, Contrat, Heures/semaine</div>
-        <button style={{ background: '#14B8A6', color: 'white', border: 'none', borderRadius: '8px', padding: '10px 24px', cursor: 'pointer', fontWeight: '600' }}>
-          📁 Importer fichier Excel
-        </button>
-      </div>
+      <div style={{ background: '#0D1017', borderRadius: '12px', border: '1px solid #1E2535', padding: '24px', maxWidth: '640px' }}>
 
-      {/* SAISIE MANUELLE */}
-      <div style={{ background: '#0D1017', borderRadius: '12px', border: '1px solid #1E2535', padding: '20px', marginBottom: '16px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '16px', color: '#6B7A99' }}>OU SAISIE MANUELLE</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
+        {/* Ligne 1 : Nom / Prénom */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
           <div>
-            <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Nom</label>
-            <input value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Dupont" style={inputStyle} />
+            <label style={labelStyle}>Nom</label>
+            <input value={form.lastName}  onChange={e => set('lastName', e.target.value)}  placeholder="Dupont" style={inputStyle} />
           </div>
           <div>
-            <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Prénom</label>
-            <input value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="Jean" style={inputStyle} />
+            <label style={labelStyle}>Prénom</label>
+            <input value={form.firstName} onChange={e => set('firstName', e.target.value)} placeholder="Jean"   style={inputStyle} />
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-          <div>
-            <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Diplôme</label>
-            <select style={selectStyle}>
-              <option>DEA</option>
-              <option>Auxiliaire Ambulancier</option>
-              <option>VSL</option>
-              <option>Taxi conventionné</option>
-            </select>
-          </div>
-          <div>
-            <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Contrat</label>
-            <select style={selectStyle}>
-              <option>CDI</option>
-              <option>CDD</option>
-              <option>Temps partiel</option>
-              <option>Intérim</option>
-            </select>
-          </div>
-          <div>
-            <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>H/semaine</label>
-            <input placeholder="35" type="number" style={inputStyle} />
-          </div>
-        </div>
-        <button style={{ background: '#14B8A6', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 20px', cursor: 'pointer', fontWeight: '600', fontSize: '13px' }}>
-          + Ajouter ce salarié
-        </button>
-      </div>
 
-      {/* ACCÈS PLATEFORME */}
-      <div style={{ background: '#0D1017', borderRadius: '12px', border: '1px solid #3B82F630', padding: '20px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px', color: '#3B82F6' }}>🔑 Accès plateforme</h3>
-        <p style={{ color: '#6B7A99', fontSize: '12px', marginBottom: '16px' }}>
-          Crée un compte pour {firstName || 'cet employé'} {lastName || ''}. Utilise le Nom et Prénom saisis ci-dessus.
-        </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* Email */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={labelStyle}>Email</label>
+          <input value={form.email} onChange={e => set('email', e.target.value)} placeholder="jean.dupont@viesionnaire.fr" type="email" style={inputStyle} />
+        </div>
+
+        {/* Diplôme / Contrat / H/semaine */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
           <div>
-            <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Email</label>
-            <input value={access.email} onChange={e => setAccess(a => ({ ...a, email: e.target.value }))} placeholder="jean.dupont@viesionnaire.fr" type="email" style={inputStyle} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Mot de passe</label>
-              <input
-                value={access.password}
-                onChange={e => { const p = e.target.value; setAccess(a => ({ ...a, password: p })); setPwdErrors(validatePassword(p, access.confirmPassword)); }}
-                placeholder="Minimum 8 caractères"
-                type="password"
-                style={{ ...inputStyle, borderColor: pwdErrors.length > 0 ? '#EF4444' : '#2A3348' }}
-              />
-            </div>
-            <div>
-              <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Confirmer mot de passe</label>
-              <input
-                value={access.confirmPassword}
-                onChange={e => { const c = e.target.value; setAccess(a => ({ ...a, confirmPassword: c })); setPwdErrors(validatePassword(access.password, c)); }}
-                placeholder="Répéter le mot de passe"
-                type="password"
-                style={{ ...inputStyle, borderColor: pwdErrors.some(e => e.includes('correspondent')) ? '#EF4444' : '#2A3348' }}
-              />
-            </div>
-          </div>
-          {pwdErrors.length > 0 && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-              {pwdErrors.map(e => <div key={e} style={{ fontSize: '11px', color: '#EF4444' }}>✕ {e}</div>)}
-            </div>
-          )}
-          <div>
-            <label style={{ color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px' }}>Rôle</label>
-            <select value={access.role} onChange={e => setAccess(a => ({ ...a, role: e.target.value }))} style={selectStyle}>
-              <option value="AMBULANCIER">AMBULANCIER</option>
-              <option value="REGULATEUR">REGULATEUR</option>
-              <option value="ADMIN">ADMIN</option>
+            <label style={labelStyle}>Diplôme</label>
+            <select value={form.diplome} onChange={e => set('diplome', e.target.value)} style={selectStyle}>
+              <option value="DEA">DEA</option>
+              <option value="AA">Auxiliaire Ambulancier</option>
+              <option value="VSL">VSL</option>
+              <option value="TAXI">Taxi conventionné</option>
             </select>
           </div>
-          {accessStatus && (
-            <div style={{ background: accessStatus.ok ? '#22C55E15' : '#EF444415', border: `1px solid ${accessStatus.ok ? '#22C55E30' : '#EF444430'}`, borderRadius: '8px', padding: '10px 14px', fontSize: '13px', color: accessStatus.ok ? '#22C55E' : '#EF4444' }}>
-              {accessStatus.msg}
-            </div>
-          )}
-          <button
-            onClick={handleCreateAccess}
-            disabled={submitting}
-            style={{ background: submitting ? '#1E2535' : 'linear-gradient(135deg, #3B82F6, #8B5CF6)', color: submitting ? '#6B7A99' : 'white', border: 'none', borderRadius: '8px', padding: '10px 20px', cursor: submitting ? 'not-allowed' : 'pointer', fontWeight: '600', fontSize: '13px', alignSelf: 'flex-start' }}
-          >{submitting ? 'Création...' : '🔑 Créer l\'accès'}</button>
+          <div>
+            <label style={labelStyle}>Contrat</label>
+            <select value={form.contrat} onChange={e => set('contrat', e.target.value)} style={selectStyle}>
+              <option value="CDI">CDI</option>
+              <option value="CDD">CDD</option>
+              <option value="INTERIM">Intérim</option>
+            </select>
+          </div>
+          <div>
+            <label style={labelStyle}>H/semaine</label>
+            <input value={form.heures} onChange={e => set('heures', e.target.value)} type="number" placeholder="35" style={inputStyle} />
+          </div>
         </div>
+
+        {/* Rôle plateforme */}
+        <div style={{ marginBottom: '16px' }}>
+          <label style={labelStyle}>Rôle plateforme</label>
+          <select value={form.role} onChange={e => set('role', e.target.value)} style={selectStyle}>
+            <option value="AMBULANCIER">AMBULANCIER</option>
+            <option value="REGULATEUR">REGULATEUR</option>
+            <option value="ADMIN">ADMIN</option>
+          </select>
+        </div>
+
+        {/* Mot de passe / Confirmer */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: pwdErrors.length > 0 ? '8px' : '24px' }}>
+          <div>
+            <label style={labelStyle}>Mot de passe</label>
+            <input
+              value={form.password}
+              onChange={e => { set('password', e.target.value); setPwdErrors(validatePassword(e.target.value, form.confirmPassword)); }}
+              placeholder="Minimum 8 caractères"
+              type="password"
+              style={{ ...inputStyle, borderColor: pwdErrors.length > 0 ? '#EF4444' : '#2A3348' }}
+            />
+          </div>
+          <div>
+            <label style={labelStyle}>Confirmer mot de passe</label>
+            <input
+              value={form.confirmPassword}
+              onChange={e => { set('confirmPassword', e.target.value); setPwdErrors(validatePassword(form.password, e.target.value)); }}
+              placeholder="Répéter le mot de passe"
+              type="password"
+              style={{ ...inputStyle, borderColor: pwdErrors.some(e => e.includes('correspondent')) ? '#EF4444' : '#2A3348' }}
+            />
+          </div>
+        </div>
+
+        {/* Erreurs mot de passe */}
+        {pwdErrors.length > 0 && (
+          <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+            {pwdErrors.map(e => <div key={e} style={{ fontSize: '11px', color: '#EF4444' }}>✕ {e}</div>)}
+          </div>
+        )}
+
+        {/* Feedback */}
+        {status && (
+          <div style={{
+            marginBottom: '16px',
+            background: status.ok ? '#22C55E15' : '#EF444415',
+            border: `1px solid ${status.ok ? '#22C55E30' : '#EF444430'}`,
+            borderRadius: '8px', padding: '10px 14px',
+            fontSize: '13px', color: status.ok ? '#22C55E' : '#EF4444',
+          }}>
+            {status.msg}
+          </div>
+        )}
+
+        {/* Bouton */}
+        <button
+          onClick={handleSubmit}
+          disabled={submitting}
+          style={{
+            width: '100%',
+            background: submitting ? '#1E2535' : 'linear-gradient(135deg, #14B8A6, #3B82F6)',
+            color: submitting ? '#6B7A99' : 'white',
+            border: 'none', borderRadius: '10px',
+            padding: '12px 24px', cursor: submitting ? 'not-allowed' : 'pointer',
+            fontWeight: '700', fontSize: '14px',
+          }}
+        >{submitting ? 'Création en cours...' : '+ Créer l\'employé'}</button>
       </div>
     </div>
   );
 }
+
+const labelStyle: React.CSSProperties = {
+  color: '#6B7A99', fontSize: '12px', display: 'block', marginBottom: '4px',
+};
 
 const inputStyle: React.CSSProperties = {
   background: '#111622', border: '1px solid #2A3348', borderRadius: '6px',
