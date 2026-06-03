@@ -50,6 +50,48 @@ export class VehiclesController {
     });
   }
 
+  @Post('logs')
+  @HttpCode(HttpStatus.CREATED)
+  async createLog(@Body() body: any, @Request() req: any) {
+    // Resolve vehicleId from plate if not provided directly
+    let vehicleId = body.vehicleId;
+    if (!vehicleId && body.plate) {
+      const v = await this.prisma.vehicle.findFirst({
+        where: { plate: body.plate, organizationId: req.user.organizationId },
+      });
+      vehicleId = v?.id;
+    }
+    if (!vehicleId) return { error: 'Véhicule introuvable' };
+
+    // Always update vehicle kmActuel
+    const kmToSet = body.kmArrivee !== undefined ? Number(body.kmArrivee) : (body.kmDepart !== undefined ? Number(body.kmDepart) : undefined);
+    if (kmToSet !== undefined) {
+      const vehicle = await this.prisma.vehicle.findFirst({ where: { id: vehicleId, organizationId: req.user.organizationId } });
+      if (vehicle) {
+        const currentMeta = (vehicle.metadata as Record<string, any>) ?? {};
+        await this.prisma.vehicle.update({
+          where: { id: vehicleId },
+          data: { metadata: { ...currentMeta, kmActuel: kmToSet } },
+        });
+      }
+    }
+
+    // Create log (requires migration add_vehicle_logs_entretiens)
+    try {
+      return await (this.prisma as any).vehicleLog.create({
+        data: {
+          vehicleId,
+          userId:    req.user.id,
+          kmDepart:  Number(body.kmDepart ?? 0),
+          kmArrivee: body.kmArrivee !== undefined ? Number(body.kmArrivee) : null,
+          statut:    body.statut ?? (body.kmArrivee !== undefined ? 'TERMINE' : 'EN_COURS'),
+        },
+      });
+    } catch {
+      return { vehicleId, kmActuel: kmToSet, message: 'Km mis à jour (migration VehicleLog en attente)' };
+    }
+  }
+
   @Get('entretiens')
   async getEntretiens(@Request() req: any) {
     try {

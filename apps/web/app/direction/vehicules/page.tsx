@@ -63,13 +63,20 @@ export default function VehiculesDirectionPage() {
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
-    Promise.all([
-      fetch(`${API_URL}/vehicles`, { headers: headers() }).then(r => r.ok ? r.json() : []),
-      fetch(`${API_URL}/vehicles/entretiens`, { headers: headers() }).then(r => r.ok ? r.json() : []),
-    ]).then(([v, e]) => {
-      setVehicles(Array.isArray(v) ? v : []);
-      setEntretiens(Array.isArray(e) ? e : []);
-    }).finally(() => setLoading(false));
+
+    const load = () => {
+      Promise.all([
+        fetch(`${API_URL}/vehicles`, { headers: headers() }).then(r => r.ok ? r.json() : []),
+        fetch(`${API_URL}/vehicles/entretiens`, { headers: headers() }).then(r => r.ok ? r.json() : []),
+      ]).then(([v, e]) => {
+        setVehicles(Array.isArray(v) ? v : []);
+        setEntretiens(Array.isArray(e) ? e : []);
+      }).finally(() => setLoading(false));
+    };
+
+    load();
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const openKmModal = (v: Vehicle) => {

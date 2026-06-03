@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useRef, useState } from 'react';
 import { auth } from '../../../lib/auth';
 
@@ -18,8 +18,110 @@ interface PatientData {
   confidence?: number;
 }
 
-export default function PdaScanPage() {
+// ── VEHICLE KM FORM ──────────────────────────────────────────────────────────
+function VehicleKmForm({ plate }: { plate: string }) {
   const router = useRouter();
+  const [mode,    setMode]    = useState<'DEPART' | 'ARRIVEE'>('DEPART');
+  const [km,      setKm]      = useState('');
+  const [saving,  setSaving]  = useState(false);
+  const [done,    setDone]    = useState(false);
+  const [error,   setError]   = useState('');
+
+  const handleSubmit = async () => {
+    if (!km) { setError('Saisissez le kilométrage'); return; }
+    setSaving(true);
+    setError('');
+    try {
+      const token = auth.getToken() ?? '';
+      const body  = mode === 'DEPART'
+        ? { plate, kmDepart: Number(km), statut: 'EN_COURS' }
+        : { plate, kmArrivee: Number(km), statut: 'TERMINE' };
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/vehicles/logs`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error();
+      setDone(true);
+      setTimeout(() => router.push('/pda'), 2000);
+    } catch {
+      setError('Erreur — vérifiez votre connexion');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#03050A', fontFamily: 'DM Sans, sans-serif', color: '#E8ECF5', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ background: '#0D1017', borderBottom: '1px solid #1E2535', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <button onClick={() => router.back()} style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '20px', lineHeight: 1 }}>←</button>
+        <span style={{ fontWeight: '700', fontSize: '15px' }}>🚑 Relevé kilométrique</span>
+      </div>
+
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', gap: '24px' }}>
+
+        {/* Plaque */}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '12px', color: '#6B7A99', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>Véhicule identifié</div>
+          <div style={{ fontSize: '32px', fontWeight: '900', fontFamily: 'DM Mono, monospace', color: '#14B8A6', background: '#14B8A610', border: '2px solid #14B8A640', borderRadius: '12px', padding: '12px 28px', letterSpacing: '0.1em' }}>
+            {plate}
+          </div>
+        </div>
+
+        {/* Sélecteur Départ / Arrivée */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', width: '100%', maxWidth: '360px' }}>
+          {(['DEPART', 'ARRIVEE'] as const).map(m => (
+            <button key={m} onClick={() => setMode(m)}
+              style={{ padding: '20px', borderRadius: '14px', border: `2px solid ${mode === m ? (m === 'DEPART' ? '#22C55E' : '#3B82F6') : '#1E2535'}`, background: mode === m ? (m === 'DEPART' ? '#22C55E15' : '#3B82F615') : '#0D1017', color: mode === m ? (m === 'DEPART' ? '#22C55E' : '#3B82F6') : '#6B7A99', cursor: 'pointer', fontSize: '15px', fontWeight: '700', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontSize: '28px' }}>{m === 'DEPART' ? '🟢' : '🔴'}</span>
+              {m === 'DEPART' ? 'Départ' : 'Arrivée'}
+            </button>
+          ))}
+        </div>
+
+        {/* Champ km */}
+        <div style={{ width: '100%', maxWidth: '360px' }}>
+          <div style={{ fontSize: '12px', color: '#6B7A99', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            Kilométrage {mode === 'DEPART' ? 'de départ' : 'd\'arrivée'}
+          </div>
+          <input
+            type="number"
+            value={km}
+            onChange={e => setKm(e.target.value)}
+            placeholder="Ex : 145 230"
+            inputMode="numeric"
+            style={{ width: '100%', boxSizing: 'border-box', background: '#111622', border: '2px solid #2A3348', borderRadius: '12px', color: '#E8ECF5', padding: '18px 16px', fontSize: '22px', fontWeight: '700', fontFamily: 'DM Mono, monospace', outline: 'none', textAlign: 'center' }}
+          />
+        </div>
+
+        {error && (
+          <div style={{ background: '#EF444415', border: '1px solid #EF444440', borderRadius: '10px', padding: '12px 16px', color: '#EF4444', fontSize: '13px', width: '100%', maxWidth: '360px', textAlign: 'center' }}>
+            ⚠️ {error}
+          </div>
+        )}
+
+        {/* Bouton Valider */}
+        <motion.button
+          whileTap={{ scale: 0.97 }}
+          onClick={handleSubmit}
+          disabled={saving || done}
+          style={{ width: '100%', maxWidth: '360px', padding: '20px', borderRadius: '14px', border: 'none', background: done ? '#22C55E' : saving ? '#1E2535' : 'linear-gradient(135deg, #14B8A6, #3B82F6)', color: done || saving ? (done ? 'white' : '#6B7A99') : 'white', fontSize: '16px', fontWeight: '800', cursor: saving || done ? 'not-allowed' : 'pointer' }}>
+          {done ? '✅ Enregistré !' : saving ? '⏳ Enregistrement...' : '✓ Valider le kilométrage'}
+        </motion.button>
+
+      </div>
+    </div>
+  );
+}
+
+// ── PAGE ─────────────────────────────────────────────────────────────────────
+export default function PdaScanPage() {
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+  const vehiclePlate = searchParams.get('vehicle');
+
+  if (vehiclePlate) return <VehicleKmForm plate={vehiclePlate} />;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [scanning, setScanning] = useState(false);
