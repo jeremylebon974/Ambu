@@ -16,6 +16,7 @@
     "strictNullChecks": false,
     "noImplicitAny": false,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "ignoreDeprecations": "6.0"
   }
 }
