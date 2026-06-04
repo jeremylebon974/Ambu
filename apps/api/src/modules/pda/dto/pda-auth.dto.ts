@@ -33,20 +33,23 @@ export class PdaStatusDto {
 }
 
 export class PdaGpsDto {
-  @IsString()
-  lat: string;
+  lat: string | number;
+  lng: string | number;
 
-  @IsString()
-  lng: string;
+  @IsOptional()
+  speed?: string | number;
 
-  @IsString()
-  speed: string;
+  @IsOptional()
+  heading?: string | number;
 
-  @IsString()
-  heading: string;
+  @IsOptional()
+  vehicleId?: string;
 
-  @IsString()
-  vehicleId: string;
+  @IsOptional()
+  vehiclePlate?: string;
+
+  @IsOptional()
+  timestamp?: number;
 }
 
 export class PdaSignatureDto {

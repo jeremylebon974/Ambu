@@ -59,13 +59,13 @@ export default function MapDirectionPage() {
 
       const DEPOT: [number, number] = [55.6182, -21.3647];
       const vehiclesWithGPS = vArray.map((v: any, i: number) => {
-        const angle = (i / Math.max(vArray.length, 1)) * 2 * Math.PI;
+        const meta = v.metadata ?? {};
+        if (meta.lastLat && meta.lastLng) {
+          return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng) };
+        }
+        const angle  = (i / Math.max(vArray.length, 1)) * 2 * Math.PI;
         const radius = 0.01 + Math.random() * 0.05;
-        return {
-          ...v,
-          lat: DEPOT[1] + radius * Math.sin(angle),
-          lng: DEPOT[0] + radius * Math.cos(angle),
-        };
+        return { ...v, lat: DEPOT[1] + radius * Math.sin(angle), lng: DEPOT[0] + radius * Math.cos(angle) };
       });
 
       setVehicles(vehiclesWithGPS);

@@ -91,8 +91,11 @@ export default function MapRegulateurPage() {
       loadData();
     });
 
+    const interval = setInterval(loadData, 30000);
+
     return () => {
       animationFrames.current.forEach(id => cancelAnimationFrame(id));
+      clearInterval(interval);
     };
   }, []);
 
@@ -112,18 +115,16 @@ export default function MapRegulateurPage() {
       const vArray = Array.isArray(vehiclesData) ? vehiclesData : [];
       const mArray = Array.isArray(missionsData) ? missionsData : [];
 
-      // Ajouter positions GPS simulées autour de Saint-Joseph
       const DEPOT: [number, number] = [55.6182, -21.3647];
       const vehiclesWithGPS = vArray.map((v: Vehicle, i: number) => {
-        const angle = (i / Math.max(vArray.length, 1)) * 2 * Math.PI;
+        const meta = (v as any).metadata ?? {};
+        if (meta.lastLat && meta.lastLng) {
+          return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng), heading: meta.lastHeading ?? 0, speed: meta.lastSpeed ?? 0 };
+        }
+        // Position simulée si pas de données GPS réelles
+        const angle  = (i / Math.max(vArray.length, 1)) * 2 * Math.PI;
         const radius = 0.01 + Math.random() * 0.03;
-        return {
-          ...v,
-          lat: DEPOT[1] + radius * Math.sin(angle),
-          lng: DEPOT[0] + radius * Math.cos(angle),
-          heading: Math.random() * 360,
-          speed: v.status === 'ON_MISSION' ? 40 + Math.random() * 40 : 0,
-        };
+        return { ...v, lat: DEPOT[1] + radius * Math.sin(angle), lng: DEPOT[0] + radius * Math.cos(angle), heading: Math.random() * 360, speed: v.status === 'ON_MISSION' ? 40 + Math.random() * 40 : 0 };
       });
 
       setVehicles(vehiclesWithGPS);

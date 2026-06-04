@@ -3,9 +3,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../lib/auth';
-import { api } from '../../lib/api-client';
 import { DirectionBadge } from '../../components/DirectionBadge';
 import mapboxgl from 'mapbox-gl';
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
@@ -99,14 +100,21 @@ export default function RegulateurPage() {
     const token = auth.getToken();
     if (!token) return;
     try {
-      const [missionsData, vehiclesData, statsData] = await Promise.all([
-        api.getMissions(token),
-        api.getDispatchVehicles(token),
-        api.getDispatchStats(token),
+      const headers = { Authorization: `Bearer ${token}` };
+      const [mRes, vRes] = await Promise.all([
+        fetch(`${API_URL}/missions`, { headers }),
+        fetch(`${API_URL}/vehicles`, { headers }),
       ]);
-      setMissions(missionsData);
-      setVehicles(vehiclesData);
-      setStats(statsData);
+      const mArray: Mission[]  = mRes.ok ? await mRes.json() : [];
+      const vArray: Vehicle[]  = vRes.ok ? await vRes.json() : [];
+      setMissions(Array.isArray(mArray) ? mArray : []);
+      setVehicles(Array.isArray(vArray) ? vArray : []);
+      setStats({
+        total:          vArray.length,
+        available:      vArray.filter(v => v.status === 'AVAILABLE').length,
+        onMission:      vArray.filter(v => v.status === 'ON_MISSION').length,
+        activeMissions: mArray.filter(m => !['COMPLETED', 'CANCELLED'].includes(m.status)).length,
+      });
     } catch (err) {
       console.error(err);
     } finally {
@@ -127,7 +135,7 @@ export default function RegulateurPage() {
     map.current.on('load', async () => {
       try {
         const token = auth.getToken();
-        const res = await fetch('http://localhost:3001/vehicles', {
+        const res = await fetch(`${API_URL}/vehicles`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const data = await res.json();

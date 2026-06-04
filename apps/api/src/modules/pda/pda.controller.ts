@@ -33,7 +33,7 @@ export class PdaController {
   @UseGuards(JwtAuthGuard)
   @Post('gps')
   async updateGps(@Body() dto: PdaGpsDto, @Request() req: any) {
-    return this.pdaService.updateGps(dto, req.user.organizationId);
+    return this.pdaService.updateGps(dto, req.user.id, req.user.organizationId);
   }
 
   // POST /pda/signature — signature patient

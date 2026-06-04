@@ -127,16 +127,48 @@ export class PdaService {
 
   // ── GPS LIVE ──────────────────────────────────────────
 
-  async updateGps(dto: PdaGpsDto, organizationId: string) {
-    await this.prisma.gpsTrack.create({
-      data: {
-        vehicleId: dto.vehicleId,
-        latitude: parseFloat(dto.lat),
-        longitude: parseFloat(dto.lng),
-        speed: parseFloat(dto.speed),
-        heading: parseFloat(dto.heading),
-      },
-    });
+  async updateGps(dto: PdaGpsDto, userId: string, organizationId: string) {
+    const lat = parseFloat(String(dto.lat));
+    const lng = parseFloat(String(dto.lng));
+
+    // Résoudre vehicleId depuis vehiclePlate si nécessaire
+    let vehicleId = dto.vehicleId;
+    if (!vehicleId && dto.vehiclePlate) {
+      const v = await this.prisma.vehicle.findFirst({ where: { plate: dto.vehiclePlate, organizationId } });
+      vehicleId = v?.id;
+    }
+
+    // Sauvegarder le track GPS si vehicleId connu
+    if (vehicleId) {
+      await this.prisma.gpsTrack.create({
+        data: {
+          vehicleId,
+          latitude:  lat,
+          longitude: lng,
+          speed:     dto.speed   ? parseFloat(String(dto.speed))   : 0,
+          heading:   dto.heading ? parseFloat(String(dto.heading)) : 0,
+        },
+      });
+
+      // Mettre à jour lastLat/lastLng dans vehicle.metadata
+      const vehicle = await this.prisma.vehicle.findUnique({ where: { id: vehicleId } });
+      if (vehicle) {
+        const currentMeta = (vehicle.metadata as Record<string, any>) ?? {};
+        await this.prisma.vehicle.update({
+          where: { id: vehicleId },
+          data: {
+            metadata: {
+              ...currentMeta,
+              lastLat:     lat,
+              lastLng:     lng,
+              lastHeading: dto.heading ? parseFloat(String(dto.heading)) : (currentMeta.lastHeading ?? 0),
+              lastSpeed:   dto.speed   ? parseFloat(String(dto.speed))   : (currentMeta.lastSpeed   ?? 0),
+              lastGpsAt:   new Date().toISOString(),
+            },
+          },
+        });
+      }
+    }
 
     return { success: true };
   }
