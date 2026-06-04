@@ -422,7 +422,6 @@ export default function AmbulanciePage() {
             <LogoViesionnaire height={24} />
             <span style={{ fontSize: '14px', fontWeight: '700', color: '#E8ECF5' }}>
               {user?.firstName ?? ''}
-              {gpsPermission === 'denied' && <span style={{ fontSize: '10px', color: '#F59E0B', marginLeft: '6px', fontWeight: '400' }}>⚠️ GPS désactivé</span>}
             </span>
             <button onClick={() => { auth.logout(); router.push('/'); }}
               style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>⏻</button>
@@ -430,6 +429,35 @@ export default function AmbulanciePage() {
 
           {/* Zone scrollable */}
           <div style={{ paddingTop: '60px', paddingBottom: '80px', minHeight: '100vh' }}>
+
+            {/* Card GPS désactivé */}
+            {gpsPermission === 'denied' && (
+              <div style={{ margin: '12px 16px 0', background: '#F59E0B10', border: '2px solid #F59E0B60', borderRadius: '14px', padding: '16px' }}>
+                <div style={{ fontSize: '15px', fontWeight: '800', color: '#F59E0B', marginBottom: '8px' }}>⚠️ GPS désactivé</div>
+                <div style={{ fontSize: '13px', color: '#E8ECF5', lineHeight: 1.6, marginBottom: '12px' }}>
+                  Pour que la régulation puisse vous localiser, activez la localisation dans les paramètres de votre téléphone.
+                </div>
+                <div style={{ background: '#0D1017', borderRadius: '8px', padding: '10px 12px', marginBottom: '8px', fontSize: '12px', color: '#6B7A99', lineHeight: 1.6 }}>
+                  <div style={{ color: '#22C55E', fontWeight: '700', marginBottom: '4px' }}>🤖 Android</div>
+                  Paramètres → Applications → Chrome → Autorisations → Localisation → Autoriser
+                </div>
+                <div style={{ background: '#0D1017', borderRadius: '8px', padding: '10px 12px', marginBottom: '12px', fontSize: '12px', color: '#6B7A99', lineHeight: 1.6 }}>
+                  <div style={{ color: '#E8ECF5', fontWeight: '700', marginBottom: '4px' }}>🍎 iPhone</div>
+                  Réglages → Safari → Localisation → Autoriser
+                </div>
+                <button
+                  onClick={() => {
+                    navigator.geolocation.getCurrentPosition(
+                      () => { window.location.reload(); },
+                      () => {},
+                      { enableHighAccuracy: false, timeout: 5000 },
+                    );
+                  }}
+                  style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid #F59E0B60', background: '#F59E0B20', color: '#F59E0B', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+                  🔄 Réessayer
+                </button>
+              </div>
+            )}
 
             {/* ── Accueil ── */}
             {onglet === 'accueil' && (
