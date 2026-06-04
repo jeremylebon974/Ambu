@@ -56,7 +56,7 @@ function LoginContent() {
       const destination =
         userRole === 'ADMIN' || userRole === 'SUPER_ADMIN' ? '/direction' :
         userRole === 'REGULATEUR' ? '/regulateur' :
-        userRole === 'AMBULANCIER' ? '/ambulancier' :
+        userRole === 'AMBULANCIER' ? '/employe' :
         userRole === 'PATIENT' ? '/patient' :
         '/dashboard';
       router.push(destination);

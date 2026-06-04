@@ -34,7 +34,7 @@ const portails = [
     emoji: '🚑',
     description: 'Missions, navigation, signatures, statuts temps réel, communication régulation.',
     couleur: '#3B82F6',
-    path: '/login?role=ambulancier',
+    path: '/login?role=employe',
     features: ['Mes missions', 'GPS live', 'Signature patient'],
   },
   {

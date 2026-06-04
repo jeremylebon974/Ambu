@@ -32,7 +32,7 @@ export default function AmbulancierDocumentsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!auth.isAuthenticated()) { router.push('/login?role=ambulancier'); return; }
+    if (!auth.isAuthenticated()) { router.push('/login?role=employe'); return; }
   }, [router]);
 
   return (
@@ -52,7 +52,7 @@ export default function AmbulancierDocumentsPage() {
         }}
       >
         <button onClick={() => router.back()} style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '18px' }}>←</button>
-        <LogoViesionnaire height={26} onClick={() => router.push('/ambulancier')} />
+        <LogoViesionnaire height={26} onClick={() => router.push('/employe')} />
       </motion.div>
 
       <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>

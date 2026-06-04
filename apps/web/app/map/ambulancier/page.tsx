@@ -43,7 +43,7 @@ export default function MapAmbulanciePage() {
   };
 
   useEffect(() => {
-    if (!auth.isAuthenticated()) { router.push('/login?role=ambulancier'); return; }
+    if (!auth.isAuthenticated()) { router.push('/login?role=employe'); return; }
     if (map.current || !mapContainer.current) return;
 
     map.current = new mapboxgl.Map({

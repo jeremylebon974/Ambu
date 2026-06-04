@@ -49,7 +49,7 @@ export default function AmbulancierIncidentPage() {
   const [envoi, setEnvoi] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   useEffect(() => {
-    if (!auth.isAuthenticated()) { router.push('/login?role=ambulancier'); return; }
+    if (!auth.isAuthenticated()) { router.push('/login?role=employe'); return; }
     navigator.geolocation?.getCurrentPosition(
       pos => { setLatitude(pos.coords.latitude); setLongitude(pos.coords.longitude); },
       () => {}
@@ -103,7 +103,7 @@ export default function AmbulancierIncidentPage() {
         }}
       >
         <button onClick={() => router.back()} style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '18px' }}>←</button>
-        <LogoViesionnaire height={26} onClick={() => router.push('/ambulancier')} />
+        <LogoViesionnaire height={26} onClick={() => router.push('/employe')} />
       </motion.div>
 
       <div style={{ padding: '24px', maxWidth: '600px', margin: '0 auto' }}>
@@ -136,7 +136,7 @@ export default function AmbulancierIncidentPage() {
               La régulation a été notifiée et prend en charge votre signalement.
             </div>
             <button
-              onClick={() => router.push('/ambulancier')}
+              onClick={() => router.push('/employe')}
               style={{
                 background: '#22C55E',
                 border: 'none',
