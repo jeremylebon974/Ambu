@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { auth } from '../../../lib/auth';
@@ -34,24 +34,6 @@ interface Vehicle {
   crew?: { firstName: string; lastName: string }[];
 }
 
-// Interpolation fluide GPS style Uber
-function interpolatePosition(
-  from: [number, number],
-  to: [number, number],
-  progress: number
-): [number, number] {
-  return [
-    from[0] + (to[0] - from[0]) * progress,
-    from[1] + (to[1] - from[1]) * progress,
-  ];
-}
-
-// Calcul heading entre deux points
-function calculateHeading(from: [number, number], to: [number, number]): number {
-  const dx = to[0] - from[0];
-  const dy = to[1] - from[1];
-  return (Math.atan2(dx, dy) * 180) / Math.PI;
-}
 
 export default function MapRegulateurPage() {
   const router = useRouter();
@@ -59,7 +41,6 @@ export default function MapRegulateurPage() {
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const vehiclePositions = useRef<Map<string, [number, number]>>(new Map());
-  const animationFrames = useRef<Map<string, number>>(new Map());
 
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [missions, setMissions] = useState<any[]>([]);
@@ -94,7 +75,6 @@ export default function MapRegulateurPage() {
     const interval = setInterval(loadData, 30000);
 
     return () => {
-      animationFrames.current.forEach(id => cancelAnimationFrame(id));
       clearInterval(interval);
     };
   }, []);
@@ -144,8 +124,7 @@ export default function MapRegulateurPage() {
         if (v.lat && v.lng) placeVehicleMarker(v);
       });
 
-      // Simulation mouvement temps réel
-      startLiveSimulation(vehiclesWithGPS);
+      // Pas de simulation — positions réelles depuis metadata.lastLat/lastLng
 
     } catch (err) {
       console.error('Erreur chargement données:', err);
@@ -236,68 +215,6 @@ export default function MapRegulateurPage() {
 
     markers.current.set(vehicle.id, marker);
     vehiclePositions.current.set(vehicle.id, [vehicle.lng, vehicle.lat]);
-  };
-
-  // Simulation mouvement fluide style Uber
-  const startLiveSimulation = (vehiclesList: Vehicle[]) => {
-    vehiclesList.forEach(vehicle => {
-      if (vehicle.status !== 'ON_MISSION' && vehicle.status !== 'EN_ROUTE') return;
-
-      const moveVehicle = () => {
-        const currentPos = vehiclePositions.current.get(vehicle.id);
-        if (!currentPos) return;
-
-        // Déplacement aléatoire réaliste
-        const speed = 0.00005 + Math.random() * 0.00005;
-        const heading = (vehicle.heading || 0) + (Math.random() - 0.5) * 20;
-        const newLng = currentPos[0] + speed * Math.cos(heading * Math.PI / 180);
-        const newLat = currentPos[1] + speed * Math.sin(heading * Math.PI / 180);
-
-        const marker = markers.current.get(vehicle.id);
-        if (marker) {
-          // Animation fluide interpolée
-          animateMarkerTo(vehicle.id, marker, currentPos, [newLng, newLat], heading);
-        }
-
-        setTimeout(moveVehicle, 3000 + Math.random() * 2000);
-      };
-
-      setTimeout(moveVehicle, Math.random() * 3000);
-    });
-  };
-
-  const animateMarkerTo = (
-    vehicleId: string,
-    marker: mapboxgl.Marker,
-    from: [number, number],
-    to: [number, number],
-    heading: number
-  ) => {
-    const start = performance.now();
-    const duration = 2500;
-
-    const cancelId = animationFrames.current.get(vehicleId);
-    if (cancelId) cancelAnimationFrame(cancelId);
-
-    const animate = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-
-      const pos = interpolatePosition(from, to, eased);
-      marker.setLngLat(pos);
-      marker.setRotation(heading);
-
-      vehiclePositions.current.set(vehicleId, pos);
-
-      if (progress < 1) {
-        const frameId = requestAnimationFrame(animate);
-        animationFrames.current.set(vehicleId, frameId);
-      }
-    };
-
-    const frameId = requestAnimationFrame(animate);
-    animationFrames.current.set(vehicleId, frameId);
   };
 
   const flyToVehicle = (vehicle: Vehicle) => {
