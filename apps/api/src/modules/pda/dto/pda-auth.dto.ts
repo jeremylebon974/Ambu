@@ -1,4 +1,4 @@
-import { IsString, IsEmail, MinLength } from 'class-validator';
+import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class PdaLoginDto {
   @IsEmail()
@@ -68,8 +68,6 @@ export class PdaSignatureDto {
   @IsString()
   lng: string;
 }
-
-import { IsOptional } from 'class-validator';
 
 export class PdaIncidentDto {
   @IsOptional()
