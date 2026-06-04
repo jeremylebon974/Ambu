@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, HttpCode, HttpStatus, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus, Request, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -89,6 +89,30 @@ export class VehiclesController {
       });
     } catch {
       return { vehicleId, kmActuel: kmToSet, message: 'Km mis à jour (migration VehicleLog en attente)' };
+    }
+  }
+
+  @Get('logs')
+  async getLogs(@Request() req: any, @Query('userId') userId?: string) {
+    try {
+      const vehicles = await this.prisma.vehicle.findMany({
+        where: { organizationId: req.user.organizationId },
+        select: { id: true },
+      });
+      const vehicleIds = vehicles.map((v: any) => v.id);
+      return await (this.prisma as any).vehicleLog.findMany({
+        where: {
+          vehicleId: { in: vehicleIds },
+          ...(userId ? { userId } : {}),
+        },
+        include: {
+          vehicle: { select: { plate: true, type: true } },
+          user:    { select: { firstName: true, lastName: true } },
+        },
+        orderBy: { date: 'desc' },
+      });
+    } catch {
+      return [];
     }
   }
 
