@@ -39,6 +39,9 @@ export default function MapDirectionPage() {
       setLoading(false);
       loadData();
     });
+
+    const interval = setInterval(loadData, 30000);
+    return () => { clearInterval(interval); map.current?.remove(); };
   }, []);
 
   const loadData = async () => {
@@ -61,6 +64,7 @@ export default function MapDirectionPage() {
       const vehiclesWithGPS = vArray.map((v: any, i: number) => {
         const meta = v.metadata ?? {};
         if (meta.lastLat && meta.lastLng) {
+          console.log(`[Direction GPS réel] ${v.plate} → ${meta.lastLat}, ${meta.lastLng}`);
           return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng) };
         }
         const angle  = (i / Math.max(vArray.length, 1)) * 2 * Math.PI;

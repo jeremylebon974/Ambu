@@ -205,25 +205,52 @@ function IncidentsTab({ data }: { data: any[] }) {
   );
 }
 
+function buildSessionPairs(records: any[]) {
+  const sorted = [...records].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const logins  = sorted.filter(r => r.action === 'LOGIN');
+  const logouts = sorted.filter(r => r.action === 'LOGOUT');
+  return logins.map(login => {
+    const loginTime    = new Date(login.createdAt).getTime();
+    const matchLogout  = logouts.find(lo => new Date(lo.createdAt).getTime() > loginTime);
+    const d            = (login.newData as any) ?? {};
+    const dlo          = (matchLogout?.newData as any) ?? {};
+    return {
+      id:           login.id,
+      loginAt:      login.createdAt,
+      logoutAt:     matchLogout?.createdAt ?? null,
+      vehiclePlate: d.vehiclePlate ?? dlo.vehiclePlate ?? null,
+      lat:          d.lat ?? null,
+      lng:          d.lng ?? null,
+    };
+  }).sort((a, b) => new Date(b.loginAt).getTime() - new Date(a.loginAt).getTime());
+}
+
 function ConnexionsTab({ data }: { data: any[] }) {
   if (!data.length) return <EmptyState />;
+  const sessions = buildSessionPairs(data);
+  if (!sessions.length) return <EmptyState />;
   return (
     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
       <thead>
         <tr style={{ borderBottom: '1px solid #1E2535' }}>
-          {['Date', 'Connexion', 'Déconnexion', 'Véhicule', 'Durée session'].map(h => (
+          {['Date', 'Connexion', 'Déconnexion', 'Durée', 'Véhicule', 'Position GPS'].map(h => (
             <th key={h} style={thStyle}>{h}</th>
           ))}
         </tr>
       </thead>
       <tbody>
-        {data.map((s, i) => (
-          <tr key={s.id ?? i} style={{ borderBottom: '1px solid #111622' }}>
-            <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{fmt(s.connectedAt ?? s.createdAt, 'date')}</td>
-            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#22C55E' }}>{fmt(s.connectedAt ?? s.createdAt, 'time')}</td>
-            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#EF4444' }}>{s.disconnectedAt ? fmt(s.disconnectedAt, 'time') : <span style={{ color: '#22C55E', fontSize: '11px' }}>● En ligne</span>}</td>
-            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#14B8A6', fontWeight: '700' }}>{s.vehicle?.plate ?? s.vehicleId ?? '—'}</td>
-            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#6B7A99' }}>{duration(s.connectedAt ?? s.createdAt, s.disconnectedAt)}</td>
+        {sessions.map((s) => (
+          <tr key={s.id} style={{ borderBottom: '1px solid #111622' }}>
+            <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{fmt(s.loginAt, 'date')}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#22C55E' }}>{fmt(s.loginAt, 'time')}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#EF4444' }}>
+              {s.logoutAt ? fmt(s.logoutAt, 'time') : <span style={{ color: '#22C55E', fontSize: '11px' }}>● En cours</span>}
+            </td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#6B7A99' }}>{duration(s.loginAt, s.logoutAt ?? undefined)}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#14B8A6', fontWeight: '700' }}>{s.vehiclePlate ?? '—'}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '11px', color: '#6B7A99' }}>
+              {s.lat && s.lng ? `${Number(s.lat).toFixed(4)}, ${Number(s.lng).toFixed(4)}` : '—'}
+            </td>
           </tr>
         ))}
       </tbody>

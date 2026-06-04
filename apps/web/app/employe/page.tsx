@@ -57,6 +57,7 @@ export default function AmbulanciePage() {
   const [incDesc,      setIncDesc]      = useState('');
   const [sendingInc,   setSendingInc]   = useState(false);
   const [incSent,      setIncSent]      = useState(false);
+  const [gpsPermission, setGpsPermission] = useState<'pending' | 'granted' | 'denied'>('pending');
 
   // Détection mobile
   useEffect(() => {
@@ -70,11 +71,26 @@ export default function AmbulanciePage() {
     if (!auth.isAuthenticated()) { router.push('/login?role=employe'); return; }
     setVehicleActuel(localStorage.getItem('vehicleActuel'));
     loadData();
+    // Session login avec position GPS si disponible
+    const vehiclePlate = localStorage.getItem('vehicleActuel') ?? undefined;
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          postSession('LOGIN', { lat: pos.coords.latitude, lng: pos.coords.longitude }, vehiclePlate);
+        },
+        () => { postSession('LOGIN', undefined, vehiclePlate); },
+      );
+    } else {
+      postSession('LOGIN', undefined, vehiclePlate);
+    }
   }, [router]);
 
-  // GPS tracker silencieux toutes les 30 secondes
+  // GPS tracker toutes les 30 secondes
   useEffect(() => {
-    if (typeof navigator === 'undefined' || !navigator.geolocation) return;
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setGpsPermission('denied');
+      return;
+    }
     let lastMoveTime = Date.now();
     let lastPos: { lat: number; lng: number } | null = null;
     const calcDist = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
@@ -84,37 +100,51 @@ export default function AmbulanciePage() {
       const aa = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLon / 2) ** 2;
       return R * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
     };
-    const interval = setInterval(() => {
-      navigator.geolocation.getCurrentPosition(async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        const timestamp = Date.now();
-        try {
-          const token = auth.getToken() ?? '';
-          await fetch(`${API_URL}/pda/gps`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ lat, lng, timestamp }),
-          });
-        } catch {}
-        const current = { lat, lng };
-        if (lastPos) {
-          if (calcDist(lastPos, current) >= 50) lastMoveTime = timestamp;
-          if (timestamp - lastMoveTime > 15 * 60 * 1000) {
-            try {
-              const token = auth.getToken() ?? '';
-              await fetch(`${API_URL}/pda/incident`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ type: 'GPS_IMMOBILE', gravite: 'ALERTE', description: 'Véhicule immobile depuis 15 minutes' }),
-              });
-              lastMoveTime = timestamp;
-            } catch {}
+    const sendGps = () => {
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          setGpsPermission('granted');
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          const timestamp = Date.now();
+          console.log('[GPS] Position obtenue :', lat, lng, '— envoi /pda/gps');
+          try {
+            const token = auth.getToken() ?? '';
+            const res = await fetch(`${API_URL}/pda/gps`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+              body: JSON.stringify({ lat, lng, timestamp }),
+            });
+            console.log('[GPS] Réponse /pda/gps :', res.status);
+          } catch (e) {
+            console.warn('[GPS] Erreur envoi /pda/gps :', e);
           }
-        }
-        lastPos = current;
-      }, () => {}, { enableHighAccuracy: false, timeout: 10000 });
-    }, 30000);
+          const current = { lat, lng };
+          if (lastPos) {
+            if (calcDist(lastPos, current) >= 50) lastMoveTime = timestamp;
+            if (timestamp - lastMoveTime > 15 * 60 * 1000) {
+              try {
+                const token = auth.getToken() ?? '';
+                await fetch(`${API_URL}/pda/incident`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                  body: JSON.stringify({ type: 'GPS_IMMOBILE', gravite: 'ALERTE', description: 'Véhicule immobile depuis 15 minutes' }),
+                });
+                lastMoveTime = timestamp;
+              } catch {}
+            }
+          }
+          lastPos = current;
+        },
+        (err) => {
+          setGpsPermission('denied');
+          console.warn('[GPS] Permission refusée ou erreur :', err.code, err.message);
+        },
+        { enableHighAccuracy: false, timeout: 10000 },
+      );
+    };
+    sendGps(); // premier envoi immédiat
+    const interval = setInterval(sendGps, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -190,11 +220,31 @@ export default function AmbulanciePage() {
     } catch {}
   };
 
+  const postSession = async (action: 'LOGIN' | 'LOGOUT', position?: { lat: number; lng: number }, vehiclePlate?: string) => {
+    try {
+      const token = auth.getToken() ?? '';
+      await fetch(`${API_URL}/auth/sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          action,
+          timestamp:    new Date().toISOString(),
+          vehiclePlate: vehiclePlate ?? localStorage.getItem('vehicleActuel') ?? undefined,
+          ...(position ? { lat: position.lat, lng: position.lng } : {}),
+        }),
+      });
+    } catch (e) {
+      console.warn('[Session] Erreur POST /auth/sessions :', e);
+    }
+  };
+
   const handleEndOfService = () => {
     if (!window.confirm('Terminer votre service ?')) return;
-    localStorage.removeItem('vehicleActuel');
-    auth.logout();
-    router.push('/');
+    postSession('LOGOUT').finally(() => {
+      localStorage.removeItem('vehicleActuel');
+      auth.logout();
+      router.push('/');
+    });
   };
 
   const handleKmSubmit = async () => {
@@ -370,7 +420,10 @@ export default function AmbulanciePage() {
           {/* Header fixe 60px */}
           <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '60px', background: '#0D1017', borderBottom: '1px solid #1E2535', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', zIndex: 100 }}>
             <LogoViesionnaire height={24} />
-            <span style={{ fontSize: '14px', fontWeight: '700', color: '#E8ECF5' }}>{user?.firstName ?? ''}</span>
+            <span style={{ fontSize: '14px', fontWeight: '700', color: '#E8ECF5' }}>
+              {user?.firstName ?? ''}
+              {gpsPermission === 'denied' && <span style={{ fontSize: '10px', color: '#F59E0B', marginLeft: '6px', fontWeight: '400' }}>⚠️ GPS désactivé</span>}
+            </span>
             <button onClick={() => { auth.logout(); router.push('/'); }}
               style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '22px', lineHeight: 1 }}>⏻</button>
           </div>

@@ -99,7 +99,8 @@ export default function MapRegulateurPage() {
       const vehiclesWithGPS = vArray.map((v: Vehicle, i: number) => {
         const meta = (v as any).metadata ?? {};
         if (meta.lastLat && meta.lastLng) {
-          return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng), heading: meta.lastHeading ?? 0, speed: meta.lastSpeed ?? 0 };
+          console.log(`[GPS réel] ${v.plate} → ${meta.lastLat}, ${meta.lastLng} (maj: ${meta.lastGpsAt ?? '?'})`);
+          return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng), heading: meta.lastHeading ?? 0, speed: meta.lastSpeed ?? 0, _gpsReel: true };
         }
         // Position simulée si pas de données GPS réelles
         const angle  = (i / Math.max(vArray.length, 1)) * 2 * Math.PI;
@@ -119,12 +120,13 @@ export default function MapRegulateurPage() {
         saturation: Math.round((onMission / Math.max(vehiclesWithGPS.length, 1)) * 100),
       });
 
+      const avecGPS = vehiclesWithGPS.filter((v: Vehicle) => (v as any)._gpsReel).length;
+      console.log(`[Regulateur] ${vehiclesWithGPS.length} véhicules — ${avecGPS} avec GPS réel, ${vehiclesWithGPS.length - avecGPS} simulés`);
+
       // Placer markers sur la carte
       vehiclesWithGPS.forEach((v: Vehicle) => {
         if (v.lat && v.lng) placeVehicleMarker(v);
       });
-
-      // Pas de simulation — positions réelles depuis metadata.lastLat/lastLng
 
     } catch (err) {
       console.error('Erreur chargement données:', err);
