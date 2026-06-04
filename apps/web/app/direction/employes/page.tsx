@@ -113,8 +113,39 @@ function MissionsTab({ data }: { data: any[] }) {
   );
 }
 
+function buildTrajets(data: any[]) {
+  const groups: Record<string, { plate: string; date: string; departs: any[]; arrivees: any[] }> = {};
+  data.forEach(log => {
+    const day   = new Date(log.date ?? log.createdAt).toISOString().slice(0, 10);
+    const plate = log.vehicle?.plate ?? log.vehicleId ?? 'inconnu';
+    const key   = `${plate}_${day}`;
+    if (!groups[key]) groups[key] = { plate, date: log.date ?? log.createdAt, departs: [], arrivees: [] };
+    if (log.kmArrivee)       groups[key].arrivees.push(log);
+    else if (log.kmDepart)   groups[key].departs.push(log);
+  });
+  const trajets: any[] = [];
+  Object.values(groups).forEach(g => {
+    const maxLen = Math.max(g.departs.length, g.arrivees.length, 1);
+    for (let i = 0; i < maxLen; i++) {
+      const dep = g.departs[i];
+      const arr = g.arrivees[i];
+      trajets.push({
+        key:       `${g.plate}_${g.date}_${i}`,
+        date:      dep?.date ?? arr?.date ?? g.date,
+        plate:     g.plate,
+        kmDepart:  dep?.kmDepart  ?? null,
+        kmArrivee: arr?.kmArrivee ?? null,
+        parcourus: dep?.kmDepart && arr?.kmArrivee ? arr.kmArrivee - dep.kmDepart : null,
+        enCours:   !arr,
+      });
+    }
+  });
+  return trajets.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
 function KmTab({ data }: { data: any[] }) {
   if (!data.length) return <EmptyState />;
+  const trajets = buildTrajets(data);
   return (
     <table style={{ width: '100%', borderCollapse: 'collapse' }}>
       <thead>
@@ -125,25 +156,22 @@ function KmTab({ data }: { data: any[] }) {
         </tr>
       </thead>
       <tbody>
-        {data.map((l, i) => {
-          const parcourus = l.kmArrivee && l.kmDepart ? l.kmArrivee - l.kmDepart : null;
-          return (
-            <tr key={l.id ?? i} style={{ borderBottom: '1px solid #111622' }}>
-              <td style={tdStyle}>{fmt(l.date ?? l.createdAt, 'datetime')}</td>
-              <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#14B8A6', fontWeight: '700' }}>{l.vehicle?.plate ?? l.vehicleId ?? '—'}</td>
-              <td style={{ ...tdStyle, fontFamily: 'monospace' }}>{l.kmDepart?.toLocaleString('fr-FR') ?? '—'}</td>
-              <td style={{ ...tdStyle, fontFamily: 'monospace' }}>{l.kmArrivee?.toLocaleString('fr-FR') ?? '—'}</td>
-              <td style={{ ...tdStyle, fontFamily: 'monospace', color: parcourus ? '#22C55E' : '#6B7A99', fontWeight: '700' }}>
-                {parcourus !== null ? `+${parcourus.toLocaleString('fr-FR')} km` : '—'}
-              </td>
-              <td style={tdStyle}>
-                <span style={{ background: l.statut === 'TERMINE' ? '#22C55E20' : '#F59E0B20', color: l.statut === 'TERMINE' ? '#22C55E' : '#F59E0B', border: `1px solid ${l.statut === 'TERMINE' ? '#22C55E' : '#F59E0B'}40`, padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
-                  {l.statut ?? 'EN_COURS'}
-                </span>
-              </td>
-            </tr>
-          );
-        })}
+        {trajets.map(t => (
+          <tr key={t.key} style={{ borderBottom: '1px solid #111622' }}>
+            <td style={tdStyle}>{fmt(t.date, 'date')}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: '#14B8A6', fontWeight: '700' }}>{t.plate}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace' }}>{t.kmDepart?.toLocaleString('fr-FR') ?? '—'}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace' }}>{t.kmArrivee?.toLocaleString('fr-FR') ?? '—'}</td>
+            <td style={{ ...tdStyle, fontFamily: 'monospace', color: t.parcourus ? '#22C55E' : '#6B7A99', fontWeight: '700' }}>
+              {t.parcourus !== null ? `+${t.parcourus.toLocaleString('fr-FR')} km` : '—'}
+            </td>
+            <td style={tdStyle}>
+              <span style={{ background: t.enCours ? '#F59E0B20' : '#22C55E20', color: t.enCours ? '#F59E0B' : '#22C55E', border: `1px solid ${t.enCours ? '#F59E0B' : '#22C55E'}40`, padding: '2px 6px', borderRadius: '4px', fontSize: '11px' }}>
+                {t.enCours ? 'En cours' : 'Terminé'}
+              </span>
+            </td>
+          </tr>
+        ))}
       </tbody>
     </table>
   );

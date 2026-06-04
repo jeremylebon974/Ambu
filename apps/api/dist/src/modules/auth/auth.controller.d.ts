@@ -78,6 +78,35 @@ export declare class AuthController {
         lastName: string;
         role: import("../../../generated/prisma/enums").UserRole;
     }>;
+    createSession(body: {
+        action: string;
+        vehiclePlate?: string;
+    }, req: any): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        action: string;
+        entity: string;
+        entityId: string | null;
+        oldData: import("@prisma/client/runtime/client").JsonValue | null;
+        newData: import("@prisma/client/runtime/client").JsonValue | null;
+        ipAddress: string | null;
+        userAgent: string | null;
+        userId: string | null;
+    }>;
+    getSessions(userId: string, req: any): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        action: string;
+        entity: string;
+        entityId: string | null;
+        oldData: import("@prisma/client/runtime/client").JsonValue | null;
+        newData: import("@prisma/client/runtime/client").JsonValue | null;
+        ipAddress: string | null;
+        userAgent: string | null;
+        userId: string | null;
+    }[]>;
     deleteUser(id: string, req: any): Promise<{
         message: string;
     }>;

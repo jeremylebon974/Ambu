@@ -85,6 +85,32 @@ export declare class AuthService {
         lastName: string;
         role: import("../../../generated/prisma/enums").UserRole;
     }>;
+    createSession(userId: string, action: string, vehiclePlate?: string, organizationId?: string): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        action: string;
+        entity: string;
+        entityId: string | null;
+        oldData: import("@prisma/client/runtime/client").JsonValue | null;
+        newData: import("@prisma/client/runtime/client").JsonValue | null;
+        ipAddress: string | null;
+        userAgent: string | null;
+        userId: string | null;
+    }>;
+    getSessions(userId: string): Promise<{
+        id: string;
+        organizationId: string | null;
+        createdAt: Date;
+        action: string;
+        entity: string;
+        entityId: string | null;
+        oldData: import("@prisma/client/runtime/client").JsonValue | null;
+        newData: import("@prisma/client/runtime/client").JsonValue | null;
+        ipAddress: string | null;
+        userAgent: string | null;
+        userId: string | null;
+    }[]>;
     deleteUser(id: string, requesterId: string): Promise<{
         message: string;
     }>;

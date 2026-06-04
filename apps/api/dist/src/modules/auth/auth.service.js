@@ -142,6 +142,24 @@ let AuthService = AuthService_1 = class AuthService {
         });
         return updated;
     }
+    async createSession(userId, action, vehiclePlate, organizationId) {
+        return this.prisma.auditLog.create({
+            data: {
+                action,
+                entity: 'Session',
+                userId,
+                organizationId,
+                ...(vehiclePlate ? { newData: { vehiclePlate } } : {}),
+            },
+        });
+    }
+    async getSessions(userId) {
+        return this.prisma.auditLog.findMany({
+            where: { entity: 'Session', userId },
+            orderBy: { createdAt: 'desc' },
+            take: 50,
+        });
+    }
     async deleteUser(id, requesterId) {
         const target = await this.prisma.user.findUnique({ where: { id } });
         if (!target)

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Get, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -59,6 +59,19 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async updateUser(@Param('id') id: string, @Body() body: any) {
     return this.authService.updateUser(id, body);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('sessions')
+  @HttpCode(HttpStatus.CREATED)
+  async createSession(@Body() body: { action: string; vehiclePlate?: string }, @Request() req: any) {
+    return this.authService.createSession(req.user.id, body.action, body.vehiclePlate, req.user.organizationId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('sessions')
+  async getSessions(@Query('userId') userId: string, @Request() req: any) {
+    return this.authService.getSessions(userId ?? req.user.id);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)

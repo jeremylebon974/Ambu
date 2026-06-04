@@ -103,6 +103,26 @@ export class AuthService {
     return updated;
   }
 
+  async createSession(userId: string, action: string, vehiclePlate?: string, organizationId?: string) {
+    return this.prisma.auditLog.create({
+      data: {
+        action,
+        entity: 'Session',
+        userId,
+        organizationId,
+        ...(vehiclePlate ? { newData: { vehiclePlate } } : {}),
+      },
+    });
+  }
+
+  async getSessions(userId: string) {
+    return this.prisma.auditLog.findMany({
+      where: { entity: 'Session', userId },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+  }
+
   async deleteUser(id: string, requesterId: string) {
     const target = await this.prisma.user.findUnique({ where: { id } });
     if (!target) throw new NotFoundException('Utilisateur introuvable');

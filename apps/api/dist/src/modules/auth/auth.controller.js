@@ -47,6 +47,12 @@ let AuthController = class AuthController {
     async updateUser(id, body) {
         return this.authService.updateUser(id, body);
     }
+    async createSession(body, req) {
+        return this.authService.createSession(req.user.id, body.action, body.vehiclePlate, req.user.organizationId);
+    }
+    async getSessions(userId, req) {
+        return this.authService.getSessions(userId ?? req.user.id);
+    }
     async deleteUser(id, req) {
         return this.authService.deleteUser(id, req.user.id);
     }
@@ -116,6 +122,25 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "updateUser", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Post)('sessions'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.CREATED),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "createSession", null);
+__decorate([
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    (0, common_1.Get)('sessions'),
+    __param(0, (0, common_1.Query)('userId')),
+    __param(1, (0, common_1.Request)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getSessions", null);
 __decorate([
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     (0, roles_decorator_1.Roles)('ADMIN', 'SUPER_ADMIN'),
