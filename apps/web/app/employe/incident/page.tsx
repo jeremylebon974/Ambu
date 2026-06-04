@@ -5,7 +5,19 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { auth } from '../../../lib/auth';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const API_URL          = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const CLOUDINARY_URL   = 'https://api.cloudinary.com/v1_1/drcipztzo/image/upload';
+const UPLOAD_PRESET    = 'HoldingBSC';
+
+async function uploadToCloudinary(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', UPLOAD_PRESET);
+  const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error('Upload Cloudinary échoué');
+  const data = await res.json();
+  return data.secure_url as string;
+}
 
 function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
   return (
@@ -44,9 +56,11 @@ export default function AmbulancierIncidentPage() {
   const [type, setType] = useState('');
   const [gravite, setGravite] = useState('');
   const [description, setDescription] = useState('');
-  const [latitude, setLatitude] = useState(-21.3647);
-  const [longitude, setLongitude] = useState(55.6182);
-  const [envoi, setEnvoi] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [latitude,     setLatitude]     = useState(-21.3647);
+  const [longitude,    setLongitude]    = useState(55.6182);
+  const [envoi,        setEnvoi]        = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [photo,        setPhoto]        = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=employe'); return; }
@@ -60,11 +74,18 @@ export default function AmbulancierIncidentPage() {
     if (!type || !gravite || !description.trim()) return;
     setEnvoi('loading');
     try {
-      const token = auth.getToken();
+      let photoUrl: string | undefined;
+      if (photo) {
+        try { photoUrl = await uploadToCloudinary(photo); }
+        catch { setEnvoi('error'); return; }
+      }
+      const token        = auth.getToken();
+      const u            = auth.getUser();
+      const vehiclePlate = typeof window !== 'undefined' ? (localStorage.getItem('vehicleActuel') ?? undefined) : undefined;
       const res = await fetch(`${API_URL}/pda/incident`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify({ type, gravite, description, latitude, longitude }),
+        body: JSON.stringify({ type, gravite, description, latitude, longitude, photoUrl, vehiclePlate, userId: u?.id }),
       });
       if (!res.ok) throw new Error();
       setEnvoi('success');
@@ -212,6 +233,35 @@ export default function AmbulancierIncidentPage() {
                 rows={4}
                 style={{ ...inputStyle, resize: 'none' }}
               />
+            </div>
+
+            {/* Photo */}
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ fontSize: '12px', color: '#6B7A99', textTransform: 'uppercase', letterSpacing: '0.06em', display: 'block', marginBottom: '8px' }}>
+                Photo (optionnel)
+              </label>
+              <label style={{ cursor: 'pointer', display: 'block' }}>
+                {photoPreview ? (
+                  <div style={{ position: 'relative' }}>
+                    <img src={photoPreview} alt="Aperçu" style={{ width: '100%', maxHeight: '300px', objectFit: 'cover', borderRadius: '12px', border: '2px solid #14B8A640' }} />
+                    <div style={{ position: 'absolute', top: '8px', right: '8px', background: 'rgba(0,0,0,0.6)', borderRadius: '6px', padding: '4px 8px', fontSize: '11px', color: '#E8ECF5' }}>
+                      Toucher pour changer
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ width: '100%', background: '#111622', border: '2px dashed #2A3348', borderRadius: '12px', padding: '28px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', color: '#6B7A99' }}>
+                    <span style={{ fontSize: '32px' }}>📷</span>
+                    <span style={{ fontSize: '13px', fontWeight: '600' }}>Prendre une photo</span>
+                    <span style={{ fontSize: '11px' }}>Caméra arrière activée</span>
+                  </div>
+                )}
+                <input type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
+                  onChange={e => {
+                    const file = e.target.files?.[0] || null;
+                    setPhoto(file);
+                    setPhotoPreview(file ? URL.createObjectURL(file) : null);
+                  }} />
+              </label>
             </div>
 
             {/* Position GPS */}

@@ -164,23 +164,42 @@ export class PdaService {
   // ── INCIDENT ──────────────────────────────────────────
 
   async reportIncident(dto: PdaIncidentDto, userId: string, organizationId: string) {
-    await this.prisma.missionEvent.create({
+    await this.prisma.auditLog.create({
       data: {
-        missionId: dto.missionId,
-        type: 'INCIDENT' as any,
-        data: {
-          type: dto.type,
-          description: dto.description,
-          lat: dto.lat,
-          lng: dto.lng,
-          reportedBy: userId,
-          timestamp: new Date().toISOString(),
+        action:        dto.type,
+        entity:        'Incident',
+        userId,
+        organizationId,
+        newData: {
+          type:         dto.type,
+          gravite:      dto.gravite ?? null,
+          description:  dto.description,
+          photoUrl:     dto.photoUrl ?? null,
+          vehiclePlate: dto.vehiclePlate ?? null,
+          latitude:     dto.latitude ?? dto.lat ?? null,
+          longitude:    dto.longitude ?? dto.lng ?? null,
+          timestamp:    new Date().toISOString(),
         },
       },
     });
 
-    this.logger.log(`Incident signalé — mission ${dto.missionId} | type: ${dto.type}`);
+    this.logger.log(`Incident signalé par ${userId} | type: ${dto.type}`);
     return { success: true };
+  }
+
+  async getIncidents(organizationId: string, userId?: string) {
+    const incidents = await this.prisma.auditLog.findMany({
+      where: { entity: 'Incident', organizationId, ...(userId ? { userId } : {}) },
+      orderBy: { createdAt: 'desc' },
+      take: 100,
+    });
+    const userIds = [...new Set(incidents.map(i => i.userId).filter(Boolean))] as string[];
+    const users   = await this.prisma.user.findMany({
+      where: { id: { in: userIds } },
+      select: { id: true, firstName: true, lastName: true },
+    });
+    const userMap = Object.fromEntries(users.map(u => [u.id, u]));
+    return incidents.map(inc => ({ ...inc, user: inc.userId ? (userMap[inc.userId] ?? null) : null }));
   }
 
   // ── CHECKLIST ─────────────────────────────────────────

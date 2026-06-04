@@ -31,6 +31,7 @@ const menuItems = [
   { label: 'Facturation', icon: '💶', path: '/direction/facturation' },
   { label: 'Véhicules', icon: '🚑', path: '/direction/vehicules' },
   { label: 'Employés', icon: '👥', path: '/direction/employes' },
+  { label: 'Incidents', icon: '⚠️', path: '/direction/incidents' },
   { label: 'Configuration', icon: '⚙️', path: '/direction/configuration' },
 ];
 

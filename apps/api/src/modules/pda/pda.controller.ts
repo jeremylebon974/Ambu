@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Request, UseGuards, Patch } from '@nestjs/common';
+import { Controller, Post, Get, Body, Request, Query, UseGuards, Patch } from '@nestjs/common';
 import { PdaService } from './pda.service';
 import { PdaLoginDto, PdaStatusDto, PdaGpsDto, PdaSignatureDto, PdaIncidentDto } from './dto/pda-auth.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -48,6 +48,13 @@ export class PdaController {
   @Post('incident')
   async reportIncident(@Body() dto: PdaIncidentDto, @Request() req: any) {
     return this.pdaService.reportIncident(dto, req.user.id, req.user.organizationId);
+  }
+
+  // GET /pda/incidents — tous les incidents de l'organisation
+  @UseGuards(JwtAuthGuard)
+  @Get('incidents')
+  async getIncidents(@Request() req: any, @Query('userId') userId?: string) {
+    return this.pdaService.getIncidents(req.user.organizationId, userId);
   }
 
   // POST /pda/checklist — valider checklist

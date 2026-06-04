@@ -66,9 +66,12 @@ export class PdaSignatureDto {
   lng: string;
 }
 
+import { IsOptional } from 'class-validator';
+
 export class PdaIncidentDto {
+  @IsOptional()
   @IsString()
-  missionId: string;
+  missionId?: string;
 
   @IsString()
   type: string;
@@ -76,9 +79,27 @@ export class PdaIncidentDto {
   @IsString()
   description: string;
 
+  @IsOptional()
   @IsString()
-  lat: string;
+  gravite?: string;
 
+  @IsOptional()
   @IsString()
-  lng: string;
+  photoUrl?: string;
+
+  @IsOptional()
+  @IsString()
+  vehiclePlate?: string;
+
+  @IsOptional()
+  lat?: string | number;
+
+  @IsOptional()
+  lng?: string | number;
+
+  @IsOptional()
+  latitude?: string | number;
+
+  @IsOptional()
+  longitude?: string | number;
 }
