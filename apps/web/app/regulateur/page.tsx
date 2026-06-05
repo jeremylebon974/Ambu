@@ -92,7 +92,7 @@ export default function RegulateurPage() {
   const [time, setTime] = useState(new Date());
   const [allVehicles,    setAllVehicles]    = useState<Vehicle[]>([]);
   const [showNewMission, setShowNewMission] = useState(false);
-  const [missionForm,    setMissionForm]    = useState({ adresseDepart: '', adresseArrivee: '', vehicleId: '', typeTransport: 'Ambulance', priorite: 'Normale', patientNom: '' });
+  const [missionForm,    setMissionForm]    = useState<{ adresseDepart: string; adresseArrivee: string; vehicleId: string; typeTransport: string; priorite: string; patientNom: string; coordDepart: [number, number] | null; coordArrivee: [number, number] | null }>({ adresseDepart: '', adresseArrivee: '', vehicleId: '', typeTransport: 'Ambulance', priorite: 'Normale', patientNom: '', coordDepart: null, coordArrivee: null });
   const [missionLoading, setMissionLoading] = useState(false);
   const [missionSuccess, setMissionSuccess] = useState(false);
   const [suggestionsDepart,  setSuggestionsDepart]  = useState<any[]>([]);
@@ -101,6 +101,10 @@ export default function RegulateurPage() {
   const [showSugArrivee, setShowSugArrivee] = useState(false);
   const debounceDepart  = useRef<ReturnType<typeof setTimeout> | null>(null);
   const debounceArrivee = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [routeModal,        setRouteModal]        = useState(false);
+  const [routes,            setRoutes]            = useState<any[]>([]);
+  const [createdMissionId,  setCreatedMissionId]  = useState<string | null>(null);
+  const [routeConfirmed,    setRouteConfirmed]    = useState(false);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) {
@@ -255,6 +259,8 @@ export default function RegulateurPage() {
     }, 350);
   };
 
+  const FORM_RESET = { adresseDepart: '', adresseArrivee: '', vehicleId: '', typeTransport: 'Ambulance', priorite: 'Normale', patientNom: '', coordDepart: null as null, coordArrivee: null as null };
+
   const createMission = async () => {
     if (!missionForm.adresseDepart || !missionForm.adresseArrivee) return;
     setMissionLoading(true);
@@ -274,12 +280,44 @@ export default function RegulateurPage() {
         }),
       });
       if (res.ok) {
-        setMissionSuccess(true);
-        setMissionForm({ adresseDepart: '', adresseArrivee: '', vehicleId: '', typeTransport: 'Ambulance', priorite: 'Normale', patientNom: '' });
-        setTimeout(() => { setMissionSuccess(false); setShowNewMission(false); }, 2000);
+        const created = await res.json();
+        setCreatedMissionId(created.id ?? null);
         loadData();
+
+        if (missionForm.coordDepart && missionForm.coordArrivee) {
+          const [lngD, latD] = missionForm.coordDepart;
+          const [lngA, latA] = missionForm.coordArrivee;
+          try {
+            const dirRes = await fetch(
+              `https://api.mapbox.com/directions/v5/mapbox/driving/${lngD},${latD};${lngA},${latA}?alternatives=true&geometries=geojson&steps=true&language=fr&access_token=${MAPBOX_TOKEN}`
+            );
+            const dirData = await dirRes.json();
+            setRoutes(dirData.routes ?? []);
+            setRouteModal(true);
+          } catch {
+            setMissionSuccess(true);
+            setTimeout(() => { setMissionSuccess(false); setShowNewMission(false); }, 2000);
+          }
+        } else {
+          setMissionSuccess(true);
+          setTimeout(() => { setMissionSuccess(false); setShowNewMission(false); }, 2000);
+        }
+        setMissionForm(FORM_RESET);
       }
     } catch {} finally { setMissionLoading(false); }
+  };
+
+  const selectRoute = async (routeIndex: number) => {
+    if (!createdMissionId) return;
+    const token = auth.getToken() ?? '';
+    await fetch(`${API_URL}/missions/${createdMissionId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ selectedRoute: routeIndex }),
+    }).catch(() => {});
+    setRouteModal(false);
+    setRouteConfirmed(true);
+    setTimeout(() => { setRouteConfirmed(false); setShowNewMission(false); }, 2500);
   };
 
   const cancelMission = async (id: string) => {
@@ -458,7 +496,7 @@ export default function RegulateurPage() {
                       {showSugDepart && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0D1017', border: '1px solid #2A3348', borderRadius: '8px', zIndex: 100, maxHeight: '160px', overflowY: 'auto' }}>
                           {suggestionsDepart.map((s: any) => (
-                            <div key={s.id} onMouseDown={() => { setMissionForm(f => ({ ...f, adresseDepart: s.place_name })); setShowSugDepart(false); }}
+                            <div key={s.id} onMouseDown={() => { setMissionForm(f => ({ ...f, adresseDepart: s.place_name, coordDepart: s.geometry?.coordinates as [number, number] ?? null })); setShowSugDepart(false); }}
                               style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '12px', color: '#E8ECF5', borderBottom: '1px solid #1E2535' }}
                               onMouseEnter={e => (e.currentTarget.style.background = '#1A2235')}
                               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
@@ -478,7 +516,7 @@ export default function RegulateurPage() {
                       {showSugArrivee && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0D1017', border: '1px solid #2A3348', borderRadius: '8px', zIndex: 100, maxHeight: '160px', overflowY: 'auto' }}>
                           {suggestionsArrivee.map((s: any) => (
-                            <div key={s.id} onMouseDown={() => { setMissionForm(f => ({ ...f, adresseArrivee: s.place_name })); setShowSugArrivee(false); }}
+                            <div key={s.id} onMouseDown={() => { setMissionForm(f => ({ ...f, adresseArrivee: s.place_name, coordArrivee: s.geometry?.coordinates as [number, number] ?? null })); setShowSugArrivee(false); }}
                               style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '12px', color: '#E8ECF5', borderBottom: '1px solid #1E2535' }}
                               onMouseEnter={e => (e.currentTarget.style.background = '#1A2235')}
                               onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
@@ -689,6 +727,67 @@ export default function RegulateurPage() {
             )}
           </div>
         </div>
+
+        {/* MODAL ITINÉRAIRES */}
+        {routeModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: '20px' }}>
+            <div style={{ background: '#07090F', border: '1px solid #1E2535', borderRadius: '20px', width: '100%', maxWidth: '480px', overflow: 'hidden' }}>
+              <div style={{ padding: '20px 24px', borderBottom: '1px solid #1E2535', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <div style={{ fontSize: '15px', fontWeight: '800', color: '#E8ECF5' }}>🗺️ Choisir un itinéraire</div>
+                  <div style={{ fontSize: '12px', color: '#6B7A99', marginTop: '2px' }}>{routes.length} option{routes.length > 1 ? 's' : ''} disponible{routes.length > 1 ? 's' : ''}</div>
+                </div>
+                <button onClick={() => { setRouteModal(false); setShowNewMission(false); }}
+                  style={{ background: 'transparent', border: '1px solid #1E2535', borderRadius: '8px', color: '#6B7A99', padding: '6px 12px', cursor: 'pointer', fontSize: '12px' }}>
+                  Ignorer
+                </button>
+              </div>
+              <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '10px', maxHeight: '60vh', overflowY: 'auto' }}>
+                {routes.length === 0 && (
+                  <div style={{ textAlign: 'center', color: '#6B7A99', padding: '24px', fontSize: '13px' }}>Aucun itinéraire disponible</div>
+                )}
+                {routes.map((route: any, i: number) => {
+                  const minutes = Math.round(route.duration / 60);
+                  const km      = (route.distance / 1000).toFixed(1);
+                  const summary = route.legs?.[0]?.summary || `Via ${route.legs?.[0]?.steps?.[1]?.maneuver?.instruction ?? `itinéraire ${i + 1}`}`;
+                  return (
+                    <div key={i} onClick={() => selectRoute(i)}
+                      style={{ background: '#0D1017', border: `1px solid ${i === 0 ? '#14B8A640' : '#1E2535'}`, borderRadius: '12px', padding: '14px 16px', cursor: 'pointer' }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = '#14B8A6'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = i === 0 ? '#14B8A640' : '#1E2535'}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <span style={{ background: i === 0 ? '#14B8A620' : '#3B82F620', color: i === 0 ? '#14B8A6' : '#3B82F6', border: `1px solid ${i === 0 ? '#14B8A640' : '#3B82F640'}`, borderRadius: '6px', padding: '2px 8px', fontSize: '11px', fontWeight: '700' }}>
+                          {i === 0 ? '⚡ Recommandé' : `Itinéraire ${i + 1}`}
+                        </span>
+                        <button style={{ background: 'linear-gradient(135deg, #14B8A6, #3B82F6)', border: 'none', borderRadius: '8px', color: 'white', padding: '5px 12px', cursor: 'pointer', fontSize: '12px', fontWeight: '600', pointerEvents: 'none' }}>
+                          Choisir →
+                        </button>
+                      </div>
+                      <div style={{ display: 'flex', gap: '24px', marginBottom: '6px' }}>
+                        <div>
+                          <div style={{ fontSize: '26px', fontWeight: '800', color: '#E8ECF5', fontFamily: 'DM Mono, monospace', lineHeight: 1 }}>{minutes}</div>
+                          <div style={{ fontSize: '11px', color: '#6B7A99' }}>minutes</div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: '26px', fontWeight: '800', color: '#E8ECF5', fontFamily: 'DM Mono, monospace', lineHeight: 1 }}>{km}</div>
+                          <div style={{ fontSize: '11px', color: '#6B7A99' }}>km</div>
+                        </div>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#6B7A99', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>📍 {summary}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CONFIRMATION ITINÉRAIRE */}
+        {routeConfirmed && (
+          <div style={{ position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)', background: '#22C55E', borderRadius: '12px', padding: '12px 24px', color: 'white', fontSize: '14px', fontWeight: '700', zIndex: 2001, boxShadow: '0 4px 20px rgba(34,197,94,0.4)' }}>
+            ✅ Mission confirmée — itinéraire sélectionné
+          </div>
+        )}
 
         {/* CARTE CENTRALE */}
         <div ref={mapContainer} style={{ flex: 1, position: 'relative' }}>
