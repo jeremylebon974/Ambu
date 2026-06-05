@@ -86,7 +86,7 @@ export default function MapDirectionPage() {
         onMission,
         maintenance,
         total: vArray.length,
-        saturation: Math.round((onMission / Math.max(vehiclesWithGPS.length, 1)) * 100),
+        saturation: Math.round((onMission / Math.max(vArray.length, 1)) * 100),
         caJour: `${mArray
           .filter((m: any) => m.status === 'COMPLETED' || m.status === 'VALIDATED')
           .reduce((sum: number, m: any) => sum + (MONTANT[m.priority] ?? 85), 0)

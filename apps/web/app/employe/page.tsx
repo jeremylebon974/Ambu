@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { auth } from '../../lib/auth';
 import { DirectionBadge } from '../../components/DirectionBadge';
 
@@ -59,6 +59,7 @@ export default function AmbulanciePage() {
   const [incSent,      setIncSent]      = useState(false);
   const [gpsPermission, setGpsPermission] = useState<'pending' | 'granted' | 'denied'>('pending');
   const [lastGpsPos,    setLastGpsPos]    = useState<{ lat: number; lng: number } | null>(null);
+  const gpsIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Détection mobile
   useEffect(() => {
@@ -102,6 +103,11 @@ export default function AmbulanciePage() {
       return R * 2 * Math.atan2(Math.sqrt(aa), Math.sqrt(1 - aa));
     };
     const sendGps = () => {
+      // GPS uniquement si un véhicule est affecté
+      if (!localStorage.getItem('vehicleActuel')) {
+        console.log('[GPS] Aucun véhicule scanné — tracker en pause');
+        return;
+      }
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           setGpsPermission('granted');
@@ -149,9 +155,10 @@ export default function AmbulanciePage() {
         { enableHighAccuracy: false, timeout: 10000 },
       );
     };
-    sendGps(); // premier envoi immédiat
+    sendGps(); // premier envoi immédiat (no-op si pas de véhicule)
     const interval = setInterval(sendGps, 30000);
-    return () => clearInterval(interval);
+    gpsIntervalRef.current = interval;
+    return () => { clearInterval(interval); gpsIntervalRef.current = null; };
   }, []);
 
   // QR scanner — import dynamique pour éviter SSR
@@ -246,6 +253,8 @@ export default function AmbulanciePage() {
 
   const handleEndOfService = () => {
     if (!window.confirm('Terminer votre service ?')) return;
+    // Arrêt explicite du GPS tracker
+    if (gpsIntervalRef.current) { clearInterval(gpsIntervalRef.current); gpsIntervalRef.current = null; }
     postSession('LOGOUT').finally(() => {
       localStorage.removeItem('vehicleActuel');
       auth.logout();
