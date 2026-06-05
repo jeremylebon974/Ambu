@@ -53,11 +53,21 @@ interface FleetStats {
 }
 
 const PRIORITY_COLORS: Record<string, string> = {
-  P1: '#EF4444',
-  P2: '#F59E0B',
-  P3: '#14B8A6',
-  P4: '#6B7A99',
+  P1: '#EF4444', P2: '#F59E0B', P3: '#14B8A6', P4: '#6B7A99',
+  URGENTE: '#EF4444', NORMALE: '#F59E0B', PROGRAMMEE: '#14B8A6',
 };
+
+const MISSION_STATUS: Record<string, { color: string; label: string }> = {
+  PENDING:      { color: '#F59E0B', label: 'En attente' },
+  ASSIGNED:     { color: '#3B82F6', label: 'Assignée' },
+  EN_ROUTE:     { color: '#8B5CF6', label: 'En route' },
+  ON_SCENE:     { color: '#14B8A6', label: 'Sur place' },
+  TRANSPORTING: { color: '#06B6D4', label: 'Transport' },
+  COMPLETED:    { color: '#22C55E', label: 'Terminée' },
+  CANCELLED:    { color: '#EF4444', label: 'Annulée' },
+};
+
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
 const STATUS_COLORS: Record<string, string> = {
   AVAILABLE: '#14B8A6',
@@ -80,6 +90,17 @@ export default function RegulateurPage() {
   const [aiResult, setAiResult] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'missions' | 'vehicles' | 'ai'>('missions');
   const [time, setTime] = useState(new Date());
+  const [allVehicles,    setAllVehicles]    = useState<Vehicle[]>([]);
+  const [showNewMission, setShowNewMission] = useState(false);
+  const [missionForm,    setMissionForm]    = useState({ adresseDepart: '', adresseArrivee: '', vehicleId: '', typeTransport: 'Ambulance', priorite: 'Normale', patientNom: '' });
+  const [missionLoading, setMissionLoading] = useState(false);
+  const [missionSuccess, setMissionSuccess] = useState(false);
+  const [suggestionsDepart,  setSuggestionsDepart]  = useState<any[]>([]);
+  const [suggestionsArrivee, setSuggestionsArrivee] = useState<any[]>([]);
+  const [showSugDepart,  setShowSugDepart]  = useState(false);
+  const [showSugArrivee, setShowSugArrivee] = useState(false);
+  const debounceDepart  = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debounceArrivee = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!auth.isAuthenticated()) {
@@ -111,6 +132,7 @@ export default function RegulateurPage() {
       const vArray: Vehicle[] = vRes.ok ? await vRes.json() : [];
 
       setMissions(Array.isArray(mArray) ? mArray : []);
+      setAllVehicles(Array.isArray(vArray) ? vArray : []);
       setStats({
         total:          vArray.length,
         available:      vArray.filter(v => v.status === 'AVAILABLE').length,
@@ -202,6 +224,72 @@ export default function RegulateurPage() {
     } finally {
       setAiLoading(false);
     }
+  };
+
+  const geocode = async (query: string): Promise<any[]> => {
+    if (!query.trim() || query.length < 3) return [];
+    try {
+      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&country=RE&language=fr`);
+      const data = await res.json();
+      return data.features ?? [];
+    } catch { return []; }
+  };
+
+  const handleDepartChange = (value: string) => {
+    setMissionForm(f => ({ ...f, adresseDepart: value }));
+    if (debounceDepart.current) clearTimeout(debounceDepart.current);
+    debounceDepart.current = setTimeout(async () => {
+      const results = await geocode(value);
+      setSuggestionsDepart(results);
+      setShowSugDepart(results.length > 0);
+    }, 350);
+  };
+
+  const handleArriveeChange = (value: string) => {
+    setMissionForm(f => ({ ...f, adresseArrivee: value }));
+    if (debounceArrivee.current) clearTimeout(debounceArrivee.current);
+    debounceArrivee.current = setTimeout(async () => {
+      const results = await geocode(value);
+      setSuggestionsArrivee(results);
+      setShowSugArrivee(results.length > 0);
+    }, 350);
+  };
+
+  const createMission = async () => {
+    if (!missionForm.adresseDepart || !missionForm.adresseArrivee) return;
+    setMissionLoading(true);
+    try {
+      const token = auth.getToken() ?? '';
+      const priorityMap: Record<string, string> = { Urgente: 'P1', Normale: 'P2', Programmée: 'P3' };
+      const res = await fetch(`${API_URL}/missions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          address:       missionForm.adresseDepart,
+          destination:   missionForm.adresseArrivee,
+          vehicleId:     missionForm.vehicleId || undefined,
+          priority:      priorityMap[missionForm.priorite] ?? 'P2',
+          patientName:   missionForm.patientNom,
+          transportType: missionForm.typeTransport,
+        }),
+      });
+      if (res.ok) {
+        setMissionSuccess(true);
+        setMissionForm({ adresseDepart: '', adresseArrivee: '', vehicleId: '', typeTransport: 'Ambulance', priorite: 'Normale', patientNom: '' });
+        setTimeout(() => { setMissionSuccess(false); setShowNewMission(false); }, 2000);
+        loadData();
+      }
+    } catch {} finally { setMissionLoading(false); }
+  };
+
+  const cancelMission = async (id: string) => {
+    const token = auth.getToken() ?? '';
+    await fetch(`${API_URL}/missions/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status: 'CANCELLED' }),
+    }).catch(() => {});
+    loadData();
   };
 
   const getSaturationColor = () => {
@@ -347,41 +435,128 @@ export default function RegulateurPage() {
             {/* MISSIONS TAB */}
             {activeTab === 'missions' && (
               <div>
+                {/* Bouton + formulaire */}
+                <button onClick={() => setShowNewMission(v => !v)}
+                  style={{ width: '100%', marginBottom: '10px', padding: '9px', background: showNewMission ? '#1E2535' : 'linear-gradient(135deg, #14B8A6, #3B82F6)', border: 'none', borderRadius: '8px', color: 'white', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>
+                  {showNewMission ? '✕ Annuler' : '+ Nouvelle mission'}
+                </button>
+
+                {showNewMission && (
+                  <div style={{ background: '#111622', border: '1px solid #2A3348', borderRadius: '12px', padding: '14px', marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {missionSuccess && (
+                      <div style={{ background: '#22C55E15', border: '1px solid #22C55E40', borderRadius: '8px', padding: '8px 12px', color: '#22C55E', fontSize: '12px', fontWeight: '600' }}>
+                        ✅ Mission créée avec succès
+                      </div>
+                    )}
+
+                    {/* Adresse départ */}
+                    <div style={{ position: 'relative' }}>
+                      <label style={labelSt}>Adresse départ</label>
+                      <input value={missionForm.adresseDepart} onChange={e => handleDepartChange(e.target.value)}
+                        onBlur={() => setTimeout(() => setShowSugDepart(false), 200)}
+                        placeholder="Ex: 12 rue de la Paix, Saint-Joseph" style={inputSt} />
+                      {showSugDepart && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0D1017', border: '1px solid #2A3348', borderRadius: '8px', zIndex: 100, maxHeight: '160px', overflowY: 'auto' }}>
+                          {suggestionsDepart.map((s: any) => (
+                            <div key={s.id} onMouseDown={() => { setMissionForm(f => ({ ...f, adresseDepart: s.place_name })); setShowSugDepart(false); }}
+                              style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '12px', color: '#E8ECF5', borderBottom: '1px solid #1E2535' }}
+                              onMouseEnter={e => (e.currentTarget.style.background = '#1A2235')}
+                              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                              📍 {s.place_name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Adresse arrivée */}
+                    <div style={{ position: 'relative' }}>
+                      <label style={labelSt}>Adresse arrivée</label>
+                      <input value={missionForm.adresseArrivee} onChange={e => handleArriveeChange(e.target.value)}
+                        onBlur={() => setTimeout(() => setShowSugArrivee(false), 200)}
+                        placeholder="Ex: CHU Saint-Pierre" style={inputSt} />
+                      {showSugArrivee && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: '#0D1017', border: '1px solid #2A3348', borderRadius: '8px', zIndex: 100, maxHeight: '160px', overflowY: 'auto' }}>
+                          {suggestionsArrivee.map((s: any) => (
+                            <div key={s.id} onMouseDown={() => { setMissionForm(f => ({ ...f, adresseArrivee: s.place_name })); setShowSugArrivee(false); }}
+                              style={{ padding: '8px 12px', cursor: 'pointer', fontSize: '12px', color: '#E8ECF5', borderBottom: '1px solid #1E2535' }}
+                              onMouseEnter={e => (e.currentTarget.style.background = '#1A2235')}
+                              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                              🏥 {s.place_name}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Véhicule */}
+                    <div>
+                      <label style={labelSt}>Véhicule</label>
+                      <select value={missionForm.vehicleId} onChange={e => setMissionForm(f => ({ ...f, vehicleId: e.target.value }))} style={selectSt}>
+                        <option value="">— Sélectionner (optionnel)</option>
+                        {allVehicles.filter(v => v.status === 'AVAILABLE').map(v => (
+                          <option key={v.id} value={v.id}>{v.plate} — {v.type}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Type + Priorité */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={labelSt}>Type</label>
+                        <select value={missionForm.typeTransport} onChange={e => setMissionForm(f => ({ ...f, typeTransport: e.target.value }))} style={selectSt}>
+                          {['Ambulance', 'VSL', 'Taxi'].map(t => <option key={t} value={t}>{t}</option>)}
+                        </select>
+                      </div>
+                      <div>
+                        <label style={labelSt}>Priorité</label>
+                        <select value={missionForm.priorite} onChange={e => setMissionForm(f => ({ ...f, priorite: e.target.value }))} style={selectSt}>
+                          {['Urgente', 'Normale', 'Programmée'].map(p => <option key={p} value={p}>{p}</option>)}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Patient */}
+                    <div>
+                      <label style={labelSt}>Patient (nom prénom)</label>
+                      <input value={missionForm.patientNom} onChange={e => setMissionForm(f => ({ ...f, patientNom: e.target.value }))}
+                        placeholder="Ex: Dupont Jean" style={inputSt} />
+                    </div>
+
+                    <button onClick={createMission} disabled={missionLoading || !missionForm.adresseDepart || !missionForm.adresseArrivee}
+                      style={{ padding: '10px', background: missionLoading ? '#1E2535' : 'linear-gradient(135deg, #14B8A6, #3B82F6)', border: 'none', borderRadius: '8px', color: 'white', fontSize: '13px', fontWeight: '700', cursor: missionLoading || !missionForm.adresseDepart || !missionForm.adresseArrivee ? 'not-allowed' : 'pointer' }}>
+                      {missionLoading ? '⏳ Création...' : '🚑 Créer la mission'}
+                    </button>
+                  </div>
+                )}
+
+                {/* Liste missions */}
                 {loading ? (
                   <div style={{ color: '#6B7A99', textAlign: 'center', padding: '20px', fontSize: '13px' }}>Chargement...</div>
                 ) : missions.length === 0 ? (
                   <div style={{ color: '#6B7A99', textAlign: 'center', padding: '20px', fontSize: '13px' }}>Aucune mission</div>
-                ) : missions.map(m => (
-                  <div key={m.id} style={{
-                    padding: '12px',
-                    borderRadius: '10px',
-                    marginBottom: '8px',
-                    background: '#111622',
-                    border: '1px solid #1E2535',
-                  }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                      <span style={{ color: '#6B7A99', fontSize: '11px', fontFamily: 'monospace' }}>
-                        {m.id.slice(-6).toUpperCase()}
-                      </span>
-                      <span style={{
-                        padding: '2px 8px',
-                        borderRadius: '20px',
-                        fontSize: '11px',
-                        background: `${PRIORITY_COLORS[m.priority] || '#6B7A99'}20`,
-                        color: PRIORITY_COLORS[m.priority] || '#6B7A99',
-                        border: `1px solid ${PRIORITY_COLORS[m.priority] || '#6B7A99'}40`,
-                      }}>
-                        {m.priority}
-                      </span>
-                    </div>
-                    <div style={{ color: '#E8ECF5', fontSize: '13px', marginBottom: '4px' }}>{m.address}</div>
-                    {m.patient && (
-                      <div style={{ color: '#6B7A99', fontSize: '12px' }}>
-                        👤 {m.patient.lastName} {m.patient.firstName}
+                ) : missions.map(m => {
+                  const ms = MISSION_STATUS[m.status] ?? { color: '#6B7A99', label: m.status };
+                  return (
+                    <div key={m.id} style={{ padding: '12px', borderRadius: '10px', marginBottom: '8px', background: '#111622', border: `1px solid ${ms.color}20` }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                        <span style={{ color: '#6B7A99', fontSize: '11px', fontFamily: 'monospace' }}>{m.id.slice(-6).toUpperCase()}</span>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <span style={{ padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: '700', background: `${PRIORITY_COLORS[m.priority] || '#6B7A99'}20`, color: PRIORITY_COLORS[m.priority] || '#6B7A99', border: `1px solid ${PRIORITY_COLORS[m.priority] || '#6B7A99'}40` }}>{m.priority}</span>
+                          <span style={{ padding: '2px 7px', borderRadius: '20px', fontSize: '10px', fontWeight: '700', background: ms.color + '20', color: ms.color, border: `1px solid ${ms.color}40` }}>{ms.label}</span>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+                      <div style={{ color: '#E8ECF5', fontSize: '12px', marginBottom: '3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.address}</div>
+                      {m.patient && <div style={{ color: '#6B7A99', fontSize: '11px', marginBottom: '8px' }}>👤 {m.patient.lastName} {m.patient.firstName}</div>}
+                      {!['COMPLETED', 'CANCELLED'].includes(m.status) && (
+                        <button onClick={() => cancelMission(m.id)}
+                          style={{ padding: '4px 10px', background: '#EF444415', border: '1px solid #EF444440', borderRadius: '6px', color: '#EF4444', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}>
+                          ✕ Annuler
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
 
@@ -550,3 +725,16 @@ export default function RegulateurPage() {
     </div>
   );
 }
+
+const labelSt: React.CSSProperties = {
+  display: 'block', fontSize: '11px', color: '#6B7A99', textTransform: 'uppercase',
+  letterSpacing: '0.05em', marginBottom: '4px',
+};
+const inputSt: React.CSSProperties = {
+  width: '100%', background: '#07090F', border: '1px solid #2A3348', borderRadius: '6px',
+  color: '#E8ECF5', padding: '7px 10px', fontSize: '12px', outline: 'none', boxSizing: 'border-box',
+};
+const selectSt: React.CSSProperties = {
+  width: '100%', background: '#07090F', border: '1px solid #2A3348', borderRadius: '6px',
+  color: '#E8ECF5', padding: '7px 10px', fontSize: '12px', outline: 'none', cursor: 'pointer',
+};
