@@ -1,5 +1,7 @@
 import { Controller, Get, Post, Patch, Delete, Body, Param, Query, HttpCode, HttpStatus, Request, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { PrismaService } from '../prisma/prisma.service';
 
 @UseGuards(JwtAuthGuard)
@@ -150,6 +152,28 @@ export class VehiclesController {
     } catch {
       return { error: 'Migration non appliquée — relancez npx prisma migrate dev' };
     }
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('SUPER_ADMIN')
+  @Delete('gps-reset')
+  @HttpCode(HttpStatus.OK)
+  async resetGps(@Request() req: any) {
+    const vehicles = await this.prisma.vehicle.findMany({
+      where: { organizationId: req.user.organizationId },
+      select: { id: true, metadata: true },
+    });
+
+    await Promise.all(vehicles.map(v => {
+      const currentMeta = (v.metadata as Record<string, any>) ?? {};
+      const { lastLat, lastLng, lastGpsAt, lastHeading, lastSpeed, lastGpsAt: _a, ...rest } = currentMeta;
+      return this.prisma.vehicle.update({
+        where: { id: v.id },
+        data: { metadata: { ...rest, lastLat: null, lastLng: null, lastGpsAt: null, lastHeading: null, lastSpeed: null } },
+      });
+    }));
+
+    return { message: `GPS réinitialisé pour ${vehicles.length} véhicule(s)`, count: vehicles.length };
   }
 
   @Delete(':id')
