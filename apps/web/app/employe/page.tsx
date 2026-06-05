@@ -58,6 +58,7 @@ export default function AmbulanciePage() {
   const [sendingInc,   setSendingInc]   = useState(false);
   const [incSent,      setIncSent]      = useState(false);
   const [gpsPermission, setGpsPermission] = useState<'pending' | 'granted' | 'denied'>('pending');
+  const [lastGpsPos,    setLastGpsPos]    = useState<{ lat: number; lng: number } | null>(null);
 
   // Détection mobile
   useEffect(() => {
@@ -109,6 +110,7 @@ export default function AmbulanciePage() {
           const timestamp     = Date.now();
           const timestampISO  = new Date(timestamp).toISOString();
           const vehiclePlate  = localStorage.getItem('vehicleActuel');
+          setLastGpsPos({ lat, lng });
           console.log('[GPS] Position obtenue :', lat, lng, vehiclePlate ? `véhicule: ${vehiclePlate}` : '(pas de véhicule)', '— envoi /pda/gps');
           try {
             const token      = auth.getToken() ?? '';
@@ -495,6 +497,22 @@ export default function AmbulanciePage() {
                   )}
                 </div>
 
+                {/* Bouton Google Maps */}
+                <button
+                  onClick={() => {
+                    if (lastGpsPos) {
+                      window.open(`https://www.google.com/maps?q=${lastGpsPos.lat},${lastGpsPos.lng}`, '_blank');
+                    } else {
+                      navigator.geolocation?.getCurrentPosition(
+                        (pos) => window.open(`https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`, '_blank'),
+                        () => window.open('https://www.google.com/maps', '_blank'),
+                      );
+                    }
+                  }}
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: '1px solid #14B8A640', background: '#14B8A615', color: '#14B8A6', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+                  🗺️ Ouvrir ma position dans Maps
+                </button>
+
                 {/* SOS */}
                 <button onClick={envoyerSOS} disabled={sosEnvoye}
                   style={{ width: '100%', padding: '18px', borderRadius: '14px', border: 'none', background: sosEnvoye ? '#22C55E' : 'linear-gradient(135deg, #EF4444, #DC2626)', color: 'white', fontSize: '16px', fontWeight: '800', cursor: sosEnvoye ? 'not-allowed' : 'pointer', letterSpacing: '0.05em' }}>
@@ -688,7 +706,7 @@ export default function AmbulanciePage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 {[
                   { label: 'Mon planning',     icon: '📅', color: '#3B82F6', path: '/planning' },
-                  { label: 'Carte GPS',        icon: '🗺️', color: '#14B8A6', path: '/map/ambulancier' },
+                  { label: 'Carte GPS',        icon: '🗺️', color: '#14B8A6', path: '/map/ambulancier' }, // desktop uniquement
                   { label: 'Mes documents',    icon: '📄', color: '#8B5CF6', path: '/employe/documents' },
                   { label: 'Signaler incident',icon: '⚠️', color: '#EF4444', path: '/employe/incident' },
                 ].map(a => (

@@ -30,6 +30,9 @@ export default function MapAmbulanciePage() {
   const [eta,         setEta]         = useState<number | null>(null);
   const [myPos,       setMyPos]       = useState<{ lat: number; lng: number } | null>(null);
   const [gpsError,    setGpsError]    = useState(false);
+  const [isMobile,    setIsMobile]    = useState(false);
+
+  useEffect(() => { setIsMobile(window.innerWidth < 768); }, []);
 
   // Position fixe du patient (sera remplacée par les données de la mission)
   const patientPos = { lat: -21.3600, lng: 55.6300 };
@@ -201,6 +204,70 @@ export default function MapAmbulanciePage() {
 
   const current = stepConfig.find(s => s.key === step)!;
 
+  // ── VUE MOBILE — pas de carte Mapbox ──────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#07090F', fontFamily: 'DM Sans, sans-serif', color: '#E8ECF5', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ background: '#0D1017', borderBottom: '1px solid #1E2535', padding: '14px 20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <button onClick={() => router.back()} style={{ background: 'transparent', border: 'none', color: '#6B7A99', cursor: 'pointer', fontSize: '18px' }}>←</button>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: '13px', fontWeight: '700' }}><span style={{ color: '#EF4444' }}>VIE</span>sionnaire — Ma mission</div>
+            <div style={{ fontSize: '11px', color: '#6B7A99' }}>Vue mobile</div>
+          </div>
+          <span style={{ background: current.color + '20', border: `1px solid ${current.color}50`, borderRadius: '12px', padding: '4px 10px', color: current.color, fontSize: '11px', fontWeight: '700' }}>
+            {current.icon} {current.label}
+          </span>
+        </div>
+
+        <div style={{ flex: 1, padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {/* Position GPS */}
+          <div style={{ background: '#0D1017', border: '1px solid #1E2535', borderRadius: '14px', padding: '20px' }}>
+            <div style={{ fontSize: '12px', color: '#6B7A99', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>📍 Ma position GPS</div>
+            {myPos ? (
+              <>
+                <div style={{ fontFamily: 'DM Mono, monospace', fontSize: '14px', color: '#14B8A6', marginBottom: '12px' }}>
+                  {myPos.lat.toFixed(6)}, {myPos.lng.toFixed(6)}
+                </div>
+                <button
+                  onClick={() => window.open(`https://www.google.com/maps?q=${myPos.lat},${myPos.lng}`, '_blank')}
+                  style={{ width: '100%', padding: '14px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #14B8A6, #3B82F6)', color: 'white', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+                  🗺️ Ouvrir dans Google Maps
+                </button>
+              </>
+            ) : (
+              <div style={{ color: '#6B7A99', fontSize: '13px' }}>
+                {gpsError ? '⚠️ GPS non disponible' : '⏳ Acquisition GPS...'}
+              </div>
+            )}
+          </div>
+
+          {/* Statut mission */}
+          <div style={{ background: '#0D1017', border: '1px solid #1E2535', borderRadius: '14px', padding: '20px' }}>
+            <div style={{ fontSize: '12px', color: '#6B7A99', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px' }}>Statut mission</div>
+            <div style={{ display: 'flex', gap: '8px', flexDirection: 'column' }}>
+              {stepConfig.map(s => (
+                <button key={s.key} onClick={() => updateMissionStatus(s.key)}
+                  style={{ padding: '14px', borderRadius: '10px', border: `1px solid ${step === s.key ? s.color : '#1E2535'}`, background: step === s.key ? s.color + '20' : '#111622', color: step === s.key ? s.color : '#6B7A99', fontSize: '13px', fontWeight: step === s.key ? '700' : '400', cursor: 'pointer', textAlign: 'left' }}>
+                  {s.icon} {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Info patient */}
+          <div style={{ background: '#0D1017', border: '1px solid #1E2535', borderRadius: '14px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{ width: 40, height: 40, background: '#EF444420', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>👤</div>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '700' }}>{patientName}</div>
+              <div style={{ fontSize: '12px', color: '#6B7A99' }}>Patient en attente</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── VUE DESKTOP — carte Mapbox complète ───────────────────────────────────
   return (
     <div style={{ height: '100vh', width: '100vw', fontFamily: 'DM Sans, sans-serif', position: 'relative', overflow: 'hidden', background: '#07090F' }}>
       <DirectionBadge />

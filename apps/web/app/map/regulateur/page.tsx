@@ -95,37 +95,41 @@ export default function MapRegulateurPage() {
       const vArray = Array.isArray(vehiclesData) ? vehiclesData : [];
       const mArray = Array.isArray(missionsData) ? missionsData : [];
 
-      const DEPOT: [number, number] = [55.6182, -21.3647];
-      const vehiclesWithGPS = vArray.map((v: Vehicle, i: number) => {
+      // Seulement les véhicules avec GPS frais (< 2h)
+      const TWO_HOURS = 2 * 60 * 60 * 1000;
+      const vehiclesWithGPS = vArray.filter((v: Vehicle) => {
         const meta = (v as any).metadata ?? {};
-        if (meta.lastLat && meta.lastLng) {
-          console.log(`[GPS réel] ${v.plate} → ${meta.lastLat}, ${meta.lastLng} (maj: ${meta.lastGpsAt ?? '?'})`);
-          return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng), heading: meta.lastHeading ?? 0, speed: meta.lastSpeed ?? 0, _gpsReel: true };
-        }
-        // Position simulée si pas de données GPS réelles
-        const angle  = (i / Math.max(vArray.length, 1)) * 2 * Math.PI;
-        const radius = 0.01 + Math.random() * 0.03;
-        return { ...v, lat: DEPOT[1] + radius * Math.sin(angle), lng: DEPOT[0] + radius * Math.cos(angle), heading: Math.random() * 360, speed: v.status === 'ON_MISSION' ? 40 + Math.random() * 40 : 0 };
+        return meta.lastLat && meta.lastLng && meta.lastGpsAt
+          && (Date.now() - new Date(meta.lastGpsAt).getTime() < TWO_HOURS);
+      }).map((v: Vehicle) => {
+        const meta = (v as any).metadata ?? {};
+        console.log(`[Regulateur GPS réel] ${v.plate} → ${meta.lastLat}, ${meta.lastLng} (maj: ${meta.lastGpsAt})`);
+        return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng), heading: meta.lastHeading ?? 0, speed: meta.lastSpeed ?? 0 };
       });
 
       setVehicles(vehiclesWithGPS);
       setMissions(mArray);
+      console.log(`[Regulateur] ${vArray.length} véhicules total — ${vehiclesWithGPS.length} avec GPS frais affichés`);
 
-      const available = vehiclesWithGPS.filter((v: Vehicle) => v.status === 'AVAILABLE').length;
-      const onMission = vehiclesWithGPS.filter((v: Vehicle) => v.status === 'ON_MISSION').length;
+      const available = vArray.filter((v: Vehicle) => v.status === 'AVAILABLE').length;
+      const onMission = vArray.filter((v: Vehicle) => v.status === 'ON_MISSION').length;
       setStats({
         available,
         onMission,
-        total: vehiclesWithGPS.length,
-        saturation: Math.round((onMission / Math.max(vehiclesWithGPS.length, 1)) * 100),
+        total: vArray.length,
+        saturation: Math.round((onMission / Math.max(vArray.length, 1)) * 100),
       });
 
-      const avecGPS = vehiclesWithGPS.filter((v: Vehicle) => (v as any)._gpsReel).length;
-      console.log(`[Regulateur] ${vehiclesWithGPS.length} véhicules — ${avecGPS} avec GPS réel, ${vehiclesWithGPS.length - avecGPS} simulés`);
-
-      // Placer markers sur la carte
+      // Supprimer markers obsolètes, mettre à jour existants
+      const freshIds = new Set(vehiclesWithGPS.map((v: Vehicle) => v.id));
+      markers.current.forEach((marker, id) => {
+        if (!freshIds.has(id)) { marker.remove(); markers.current.delete(id); }
+      });
       vehiclesWithGPS.forEach((v: Vehicle) => {
-        if (v.lat && v.lng) placeVehicleMarker(v);
+        if (!v.lat || !v.lng) return;
+        const existing = markers.current.get(v.id);
+        if (existing) { existing.setLngLat([v.lng, v.lat]); }
+        else { placeVehicleMarker(v); }
       });
 
     } catch (err) {

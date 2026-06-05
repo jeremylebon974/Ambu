@@ -12,10 +12,13 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const MONTANT: Record<number, number> = { 1: 150, 2: 110, 3: 85, 4: 65 };
 
+const TWO_HOURS = 2 * 60 * 60 * 1000;
+
 export default function MapDirectionPage() {
   const router = useRouter();
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
+  const map          = useRef<mapboxgl.Map | null>(null);
+  const markersMap   = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const [vehicles, setVehicles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -60,29 +63,29 @@ export default function MapDirectionPage() {
       const vArray = Array.isArray(vehiclesData) ? vehiclesData : [];
       const mArray = Array.isArray(missionsData) ? missionsData : [];
 
-      const DEPOT: [number, number] = [55.6182, -21.3647];
-      const vehiclesWithGPS = vArray.map((v: any, i: number) => {
+      // Seulement les véhicules avec GPS frais (< 2h)
+      const vehiclesWithGPS = vArray.filter((v: any) => {
         const meta = v.metadata ?? {};
-        if (meta.lastLat && meta.lastLng) {
-          console.log(`[Direction GPS réel] ${v.plate} → ${meta.lastLat}, ${meta.lastLng}`);
-          return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng) };
-        }
-        const angle  = (i / Math.max(vArray.length, 1)) * 2 * Math.PI;
-        const radius = 0.01 + Math.random() * 0.05;
-        return { ...v, lat: DEPOT[1] + radius * Math.sin(angle), lng: DEPOT[0] + radius * Math.cos(angle) };
+        return meta.lastLat && meta.lastLng && meta.lastGpsAt
+          && (Date.now() - new Date(meta.lastGpsAt).getTime() < TWO_HOURS);
+      }).map((v: any) => {
+        const meta = v.metadata ?? {};
+        console.log(`[Direction GPS réel] ${v.plate} → ${meta.lastLat}, ${meta.lastLng} (maj: ${meta.lastGpsAt})`);
+        return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng) };
       });
+      console.log(`[Direction] ${vArray.length} véhicules total — ${vehiclesWithGPS.length} avec GPS frais affichés`);
 
       setVehicles(vehiclesWithGPS);
 
-      const available = vehiclesWithGPS.filter((v: any) => v.status === 'AVAILABLE').length;
-      const onMission = vehiclesWithGPS.filter((v: any) => v.status === 'ON_MISSION').length;
-      const maintenance = vehiclesWithGPS.filter((v: any) => v.status === 'MAINTENANCE').length;
+      const available   = vArray.filter((v: any) => v.status === 'AVAILABLE').length;
+      const onMission   = vArray.filter((v: any) => v.status === 'ON_MISSION').length;
+      const maintenance = vArray.filter((v: any) => v.status === 'MAINTENANCE').length;
 
       setStats({
         available,
         onMission,
         maintenance,
-        total: vehiclesWithGPS.length,
+        total: vArray.length,
         saturation: Math.round((onMission / Math.max(vehiclesWithGPS.length, 1)) * 100),
         caJour: `${mArray
           .filter((m: any) => m.status === 'COMPLETED' || m.status === 'VALIDATED')
@@ -91,29 +94,26 @@ export default function MapDirectionPage() {
         missions: mArray.length,
       });
 
-      // Ajouter markers
+      // Mise à jour markers — sans doublons
+      const freshIds = new Set(vehiclesWithGPS.map((v: any) => v.id));
+      // Supprimer markers obsolètes
+      markersMap.current.forEach((marker, id) => {
+        if (!freshIds.has(id)) { marker.remove(); markersMap.current.delete(id); }
+      });
+      // Ajouter ou mettre à jour
       vehiclesWithGPS.forEach((v: any) => {
         const color = v.status === 'AVAILABLE' ? '#14B8A6' :
           v.status === 'ON_MISSION' ? '#3B82F6' :
           v.status === 'MAINTENANCE' ? '#F59E0B' : '#6B7A99';
-
+        const existing = markersMap.current.get(v.id);
+        if (existing) {
+          existing.setLngLat([v.lng, v.lat]);
+          return;
+        }
         const el = document.createElement('div');
-        el.style.cssText = `
-          background: #07090F;
-          border: 2px solid ${color};
-          border-radius: 6px;
-          padding: 3px 7px;
-          color: ${color};
-          font-size: 10px;
-          font-weight: 700;
-          font-family: DM Mono, monospace;
-          cursor: pointer;
-          box-shadow: 0 0 10px ${color}40;
-          white-space: nowrap;
-        `;
+        el.style.cssText = `background:#07090F;border:2px solid ${color};border-radius:6px;padding:3px 7px;color:${color};font-size:10px;font-weight:700;font-family:DM Mono,monospace;cursor:pointer;box-shadow:0 0 10px ${color}40;white-space:nowrap;`;
         el.textContent = `${v.type === 'AMBULANCE' ? '🚑' : '🚗'} ${v.plate}`;
-
-        new mapboxgl.Marker({ element: el })
+        const marker = new mapboxgl.Marker({ element: el })
           .setLngLat([v.lng, v.lat])
           .setPopup(new mapboxgl.Popup({ offset: 20 }).setHTML(`
             <div style="background:#0D1017;color:#E8ECF5;padding:10px;border-radius:8px;font-family:DM Sans,sans-serif;min-width:150px">
@@ -123,6 +123,7 @@ export default function MapDirectionPage() {
             </div>
           `))
           .addTo(map.current!);
+        markersMap.current.set(v.id, marker);
       });
 
       // Heatmap zones d'activité
