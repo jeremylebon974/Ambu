@@ -41,3 +41,8 @@ export const auth = {
     return !!localStorage.getItem(TOKEN_KEY);
   },
 };
+
+export function handleUnauthorized(router: any): void {
+  auth.logout();
+  router.push('/');
+}

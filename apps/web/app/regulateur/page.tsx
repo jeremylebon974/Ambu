@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '../../lib/auth';
+import { auth, handleUnauthorized } from '../../lib/auth';
 import { DirectionBadge } from '../../components/DirectionBadge';
 import mapboxgl from 'mapbox-gl';
 
@@ -132,6 +132,7 @@ export default function RegulateurPage() {
         fetch(`${API_URL}/missions`, { headers }),
         fetch(`${API_URL}/vehicles`, { headers }),
       ]);
+      if (mRes.status === 401 || vRes.status === 401) { handleUnauthorized(router); return; }
       const mArray: Mission[] = mRes.ok ? await mRes.json() : [];
       const vArray: Vehicle[] = vRes.ok ? await vRes.json() : [];
 

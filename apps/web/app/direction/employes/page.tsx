@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { auth } from '../../../lib/auth';
+import { auth, handleUnauthorized } from '../../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -277,7 +277,7 @@ export default function EmployesPage() {
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
     fetch(`${API_URL}/auth/users`, { headers: { Authorization: `Bearer ${auth.getToken()}` } })
-      .then(r => r.ok ? r.json() : [])
+      .then(r => { if (r.status === 401) { handleUnauthorized(router); return []; } return r.ok ? r.json() : []; })
       .then(data => setUsers(Array.isArray(data) ? data : []))
       .finally(() => setLoading(false));
   }, []);

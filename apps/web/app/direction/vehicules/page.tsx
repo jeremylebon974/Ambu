@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { auth } from '../../../lib/auth';
+import { auth, handleUnauthorized } from '../../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
@@ -64,14 +64,19 @@ export default function VehiculesDirectionPage() {
   useEffect(() => {
     if (!auth.isAuthenticated()) { router.push('/login?role=direction'); return; }
 
-    const load = () => {
-      Promise.all([
-        fetch(`${API_URL}/vehicles`, { headers: headers() }).then(r => r.ok ? r.json() : []),
-        fetch(`${API_URL}/vehicles/entretiens`, { headers: headers() }).then(r => r.ok ? r.json() : []),
-      ]).then(([v, e]) => {
+    const load = async () => {
+      try {
+        const h = headers();
+        const [vRes, eRes] = await Promise.all([
+          fetch(`${API_URL}/vehicles`, { headers: h }),
+          fetch(`${API_URL}/vehicles/entretiens`, { headers: h }),
+        ]);
+        if (vRes.status === 401 || eRes.status === 401) { handleUnauthorized(router); return; }
+        const v = vRes.ok ? await vRes.json() : [];
+        const e = eRes.ok ? await eRes.json() : [];
         setVehicles(Array.isArray(v) ? v : []);
         setEntretiens(Array.isArray(e) ? e : []);
-      }).finally(() => setLoading(false));
+      } finally { setLoading(false); }
     };
 
     load();

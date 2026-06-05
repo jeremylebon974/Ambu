@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { auth } from '../../lib/auth';
+import { auth, handleUnauthorized } from '../../lib/auth';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 const MONTANT: Record<number, number> = { 1: 150, 2: 110, 3: 85, 4: 65 };
@@ -57,6 +57,7 @@ export default function DirectionPage() {
         fetch(`${API_URL}/missions`, { headers }),
         fetch(`${API_URL}/auth/users`, { headers }),
       ]);
+      if (vRes.status === 401 || mRes.status === 401 || uRes.status === 401) { handleUnauthorized(router); return; }
       const v = vRes.ok ? await vRes.json() : [];
       const m = mRes.ok ? await mRes.json() : [];
       const u = uRes.ok ? await uRes.json() : [];
