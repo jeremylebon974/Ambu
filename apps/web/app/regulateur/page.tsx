@@ -11,6 +11,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN || '';
 
+const TWO_HOURS = 2 * 60 * 60 * 1000;
+
 function LogoViesionnaire({ height = 32, onClick }: { height?: number; onClick?: () => void }) {
   return (
     <div onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -67,7 +69,8 @@ const STATUS_COLORS: Record<string, string> = {
 export default function RegulateurPage() {
   const router = useRouter();
   const mapContainer = useRef<HTMLDivElement>(null);
-  const map = useRef<mapboxgl.Map | null>(null);
+  const map          = useRef<mapboxgl.Map | null>(null);
+  const markersRef   = useRef<Map<string, mapboxgl.Marker>>(new Map());
   const [missions, setMissions] = useState<Mission[]>([]);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [stats, setStats] = useState<FleetStats>({ total: 0, available: 0, onMission: 0, activeMissions: 0 });
@@ -83,10 +86,9 @@ export default function RegulateurPage() {
       router.push('/login');
       return;
     }
-    loadData();
-    initMap();
+    initMap(); // loadData appelé dans map.on('load')
 
-    const timer = setInterval(() => setTime(new Date()), 1000);
+    const timer   = setInterval(() => setTime(new Date()), 1000);
     const refresh = setInterval(loadData, 30000);
 
     return () => {
@@ -105,16 +107,57 @@ export default function RegulateurPage() {
         fetch(`${API_URL}/missions`, { headers }),
         fetch(`${API_URL}/vehicles`, { headers }),
       ]);
-      const mArray: Mission[]  = mRes.ok ? await mRes.json() : [];
-      const vArray: Vehicle[]  = vRes.ok ? await vRes.json() : [];
+      const mArray: Mission[] = mRes.ok ? await mRes.json() : [];
+      const vArray: Vehicle[] = vRes.ok ? await vRes.json() : [];
+
       setMissions(Array.isArray(mArray) ? mArray : []);
-      setVehicles(Array.isArray(vArray) ? vArray : []);
       setStats({
         total:          vArray.length,
         available:      vArray.filter(v => v.status === 'AVAILABLE').length,
         onMission:      vArray.filter(v => v.status === 'ON_MISSION').length,
         activeMissions: mArray.filter(m => !['COMPLETED', 'CANCELLED'].includes(m.status)).length,
       });
+
+      // Seulement les véhicules avec GPS frais (< 2h)
+      const vehiclesWithGPS = vArray.filter(v => {
+        const meta = (v as any).metadata ?? {};
+        return meta.lastLat && meta.lastLng && meta.lastGpsAt
+          && (Date.now() - new Date(meta.lastGpsAt).getTime() < TWO_HOURS);
+      }).map(v => {
+        const meta = (v as any).metadata ?? {};
+        return { ...v, lat: Number(meta.lastLat), lng: Number(meta.lastLng) };
+      });
+      setVehicles(vehiclesWithGPS);
+      console.log(`[Regulateur] ${vArray.length} véhicules total — ${vehiclesWithGPS.length} avec GPS frais`);
+
+      // Mise à jour markers — sans doublons
+      if (map.current?.loaded()) {
+        const freshIds = new Set(vehiclesWithGPS.map(v => v.id));
+        markersRef.current.forEach((marker, id) => {
+          if (!freshIds.has(id)) { marker.remove(); markersRef.current.delete(id); }
+        });
+        vehiclesWithGPS.forEach((v: any) => {
+          const color = v.status === 'AVAILABLE' ? '#14B8A6' :
+            v.status === 'ON_MISSION' ? '#3B82F6' :
+            v.status === 'MAINTENANCE' ? '#F59E0B' : '#6B7A99';
+          const existing = markersRef.current.get(v.id);
+          if (existing) { existing.setLngLat([v.lng, v.lat]); return; }
+          const el = document.createElement('div');
+          el.style.cssText = `background:#0D1017;border:2px solid ${color};border-radius:6px;padding:4px 8px;color:${color};font-size:11px;font-weight:700;font-family:DM Mono,monospace;cursor:pointer;white-space:nowrap;box-shadow:0 0 8px ${color}40;`;
+          el.textContent = v.plate;
+          const marker = new mapboxgl.Marker({ element: el })
+            .setLngLat([v.lng, v.lat])
+            .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(
+              `<div style="color:#E8ECF5;background:#0D1017;padding:8px;border-radius:6px;font-family:DM Sans,sans-serif">
+                <div style="font-weight:700;margin-bottom:4px">${v.plate}</div>
+                <div style="font-size:12px;color:${color}">${v.status}</div>
+                <div style="font-size:11px;color:#6B7A99">${v.type}</div>
+              </div>`
+            ))
+            .addTo(map.current!);
+          markersRef.current.set(v.id, marker);
+        });
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -131,47 +174,7 @@ export default function RegulateurPage() {
       zoom: 11,
     });
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
-
-    map.current.on('load', async () => {
-      try {
-        const token = auth.getToken();
-        const res = await fetch(`${API_URL}/vehicles`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
-        const data = await res.json();
-        const DEPOT: [number, number] = [55.6182, -21.3647];
-
-        data.forEach((v: any, i: number) => {
-          const angle = (i / Math.max(data.length, 1)) * 2 * Math.PI;
-          const lng = DEPOT[0] + 0.005 * Math.cos(angle);
-          const lat = DEPOT[1] + 0.005 * Math.sin(angle);
-
-          const color = v.status === 'AVAILABLE' ? '#14B8A6'
-            : v.status === 'ON_MISSION' ? '#3B82F6'
-            : v.status === 'MAINTENANCE' ? '#F59E0B'
-            : '#6B7A99';
-
-          const el = document.createElement('div');
-          el.style.cssText = `background:#0D1017;border:2px solid ${color};border-radius:6px;padding:4px 8px;color:${color};font-size:11px;font-weight:700;font-family:DM Mono,monospace;cursor:pointer;white-space:nowrap;box-shadow:0 0 8px ${color}40;`;
-          el.textContent = v.plate;
-
-          new mapboxgl.Marker({ element: el })
-            .setLngLat([lng, lat])
-            .setPopup(
-              new mapboxgl.Popup({ offset: 25 }).setHTML(
-                `<div style="color:#E8ECF5;background:#0D1017;padding:8px;border-radius:6px;font-family:DM Sans,sans-serif">
-                  <div style="font-weight:700;margin-bottom:4px">${v.plate}</div>
-                  <div style="font-size:12px;color:${color}">${v.status}</div>
-                  <div style="font-size:11px;color:#6B7A99">${v.type}</div>
-                </div>`
-              )
-            )
-            .addTo(map.current!);
-        });
-      } catch (err) {
-        console.error('Erreur chargement véhicules carte:', err);
-      }
-    });
+    map.current.on('load', () => { loadData(); });
   };
 
   const handleAIDispatch = async () => {
