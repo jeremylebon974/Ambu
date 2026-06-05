@@ -104,14 +104,15 @@ export default function AmbulanciePage() {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           setGpsPermission('granted');
-          const lat          = pos.coords.latitude;
-          const lng          = pos.coords.longitude;
-          const timestamp    = new Date().toISOString();
-          const vehiclePlate = localStorage.getItem('vehicleActuel');
+          const lat           = pos.coords.latitude;
+          const lng           = pos.coords.longitude;
+          const timestamp     = Date.now();
+          const timestampISO  = new Date(timestamp).toISOString();
+          const vehiclePlate  = localStorage.getItem('vehicleActuel');
           console.log('[GPS] Position obtenue :', lat, lng, vehiclePlate ? `véhicule: ${vehiclePlate}` : '(pas de véhicule)', '— envoi /pda/gps');
           try {
             const token      = auth.getToken() ?? '';
-            const body: any  = { lat, lng, timestamp };
+            const body: any  = { lat, lng, timestamp: timestampISO };
             if (vehiclePlate) body.vehiclePlate = vehiclePlate;
             const res = await fetch(`${API_URL}/pda/gps`, {
               method: 'POST',
